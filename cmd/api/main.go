@@ -6,6 +6,7 @@ import (
 
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/lib/logs"
+	"glintfed.org/internal/server"
 )
 
 // Name is the name of the application.
@@ -28,7 +29,13 @@ func main() {
 	cfg, err := data.NewConfig(flagCfgPath)
 	if err != nil {
 		slog.Error("failed to load config", logs.ErrAttr(err))
+		return
 	}
 
-	_ = cfg
+	srv := server.NewAPIServer(cfg)
+
+	if err := srv.ListenAndServe(); err != nil {
+		slog.Error("failed to start api server", logs.ErrAttr(err))
+		return
+	}
 }
