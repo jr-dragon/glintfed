@@ -1,0 +1,3 @@
+server:
+  api:
+    bind: ":8000"
