@@ -34,17 +34,25 @@ func main() {
 		return
 	}
 
-	cleanup, err := setupOTelSDK(context.Background(), cfg)
+	otelCleanup, err := setupOTelSDK(context.Background(), cfg)
 	if err != nil {
 		slog.Error("failed to init open telemetry sdk", logs.ErrAttr(err))
+		return
 	}
 	defer func() {
-		if err := errors.Join(err, cleanup(context.Background())); err != nil {
+		if err := errors.Join(err, otelCleanup(context.Background())); err != nil {
 			slog.Error("failed to cleanup open telemetry sdk", logs.ErrAttr(err))
 		}
 	}()
 
-	srv := server.NewAPIServer(cfg)
+	client, clientCleanup, err := data.NewClient(cfg)
+	if err != nil {
+		slog.Error("failed to init clients", logs.ErrAttr(err))
+		return
+	}
+	defer clientCleanup()
+
+	srv := server.NewAPIServer(cfg, client)
 
 	if err := srv.ListenAndServe(); err != nil {
 		slog.Error("failed to start api server", logs.ErrAttr(err))
