@@ -6,7 +6,14 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig `mapstructure:"server"`
+	App     AppConfig     `mapstructure:"app"`
+	Server  ServerConfig  `mapstructure:"server"`
+	Service ServiceConfig `mapstructure:"service"`
+}
+
+type AppConfig struct {
+	Name string `mapstructure:"name" env:"APP_NAME"`
+	Env  string `mapstruct:"env" env:"APP_ENV"`
 }
 
 type ServerConfig struct {
@@ -15,6 +22,15 @@ type ServerConfig struct {
 
 type APIServerConfig struct {
 	Bind string `mapstrcuture:"bind"`
+}
+
+type ServiceConfig struct {
+	OpenTelemetry OpenTelemetryConfig `mapstructure:"open_telemetry"`
+}
+
+type OpenTelemetryConfig struct {
+	TracingEnabled  bool   `mapstructure:"tracing_enabled"`
+	TracingEndpoint string `mapstructure:"tracing_endpoint"`
 }
 
 func NewConfig(paths ...string) (cfg Config, err error) {

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"log/slog"
 
@@ -31,6 +33,16 @@ func main() {
 		slog.Error("failed to load config", logs.ErrAttr(err))
 		return
 	}
+
+	cleanup, err := setupOTelSDK(context.Background(), cfg)
+	if err != nil {
+		slog.Error("failed to init open telemetry sdk", logs.ErrAttr(err))
+	}
+	defer func() {
+		if err := errors.Join(err, cleanup(context.Background())); err != nil {
+			slog.Error("failed to cleanup open telemetry sdk", logs.ErrAttr(err))
+		}
+	}()
 
 	srv := server.NewAPIServer(cfg)
 
