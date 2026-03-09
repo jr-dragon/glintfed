@@ -1,4 +1,4 @@
-package storyapi
+package storyapiv1
 
 import (
 	"net/http"

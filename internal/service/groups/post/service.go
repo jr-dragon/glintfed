@@ -12,6 +12,7 @@ type Service interface {
 	LikePost(w http.ResponseWriter, r *http.Request)
 	UnlikePost(w http.ResponseWriter, r *http.Request)
 	GetGroupMedia(w http.ResponseWriter, r *http.Request)
+	GetStatus(w http.ResponseWriter, r *http.Request)
 }
 
 func New() Service {
@@ -45,7 +46,13 @@ func (s *svc) UnlikePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *svc) GetGroupMedia(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "GroupsPost.GetGroupMedia")
+	_, span := internal.T.Start(r.Context(), "GroupPost.GetGroupMedia")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) GetStatus(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "GroupsPost.GetStatus")
 	defer span.End()
 	// TODO: Implement
 }

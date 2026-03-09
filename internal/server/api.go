@@ -10,20 +10,21 @@ import (
 	"golang.org/x/net/http2/h2c"
 
 	"glintfed.org/internal/data"
-	admindomainblocks "glintfed.org/internal/service/admin/domainblocks"
-	"glintfed.org/internal/service/adminapi"
 	"glintfed.org/internal/service/admininvite"
 	"glintfed.org/internal/service/api"
-	"glintfed.org/internal/service/apiv1"
-	"glintfed.org/internal/service/apiv1dot1"
-	"glintfed.org/internal/service/apiv2"
+	"glintfed.org/internal/service/api/adminapi"
+	"glintfed.org/internal/service/api/apiv1"
+	admindomainblocks "glintfed.org/internal/service/api/apiv1/admin/domainblocks"
+	"glintfed.org/internal/service/api/apiv1/domainblock"
+	"glintfed.org/internal/service/api/apiv1/tags"
+	"glintfed.org/internal/service/api/apiv1dot1"
+	"glintfed.org/internal/service/api/apiv2"
 	"glintfed.org/internal/service/appregister"
 	"glintfed.org/internal/service/collection"
 	"glintfed.org/internal/service/compose"
 	"glintfed.org/internal/service/customfilter"
 	"glintfed.org/internal/service/directmessage"
 	"glintfed.org/internal/service/discover"
-	"glintfed.org/internal/service/domainblock"
 	"glintfed.org/internal/service/federation"
 	"glintfed.org/internal/service/group"
 	groupsadminapi "glintfed.org/internal/service/groups/admin"
@@ -44,9 +45,8 @@ import (
 	"glintfed.org/internal/service/media"
 	"glintfed.org/internal/service/pixelfeddirectory"
 	"glintfed.org/internal/service/statusedit"
+	"glintfed.org/internal/service/stories/storyapiv1"
 	"glintfed.org/internal/service/story"
-	"glintfed.org/internal/service/storyapi"
-	"glintfed.org/internal/service/tags"
 	"glintfed.org/internal/service/userappsettings"
 )
 
@@ -79,7 +79,7 @@ func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
 	customFilterSvc := customfilter.New()
 	discoverSvc := discover.New()
 	pixelfedDirectorySvc := pixelfeddirectory.New()
-	storyApiSvc := storyapi.New()
+	storyApiSvc := storyapiv1.New()
 	composeSvc := compose.New()
 	dmSvc := directmessage.New()
 	collectionSvc := collection.New()
@@ -170,7 +170,7 @@ func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
 			r.Get("/members/get", groupsMemberSvc.GetGroupMember)
 			r.Get("/member/intersect/common", groupsMemberSvc.GetGroupMemberCommonIntersections)
 
-			r.Get("/status", groupsPostSvc.GetGroupMedia) // Placeholder
+			r.Get("/status", groupsPostSvc.GetStatus)
 
 			r.Post("/like", groupSvc.LikePost)
 			r.Post("/comment/like", groupsCommentSvc.LikePost)
