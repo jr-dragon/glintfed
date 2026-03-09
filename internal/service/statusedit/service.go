@@ -17,10 +17,14 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "StatusEdit."+name)
+func (s *svc) Store(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "StatusEdit.Store")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) Store(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "Store") }
-func (s *svc) History(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "History") }
+func (s *svc) History(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "StatusEdit.History")
+	defer span.End()
+	// TODO: Implement
+}

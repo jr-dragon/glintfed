@@ -24,23 +24,56 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "Api."+name)
+func (s *svc) AvatarUpdate(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.AvatarUpdate")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) AvatarUpdate(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "AvatarUpdate") }
-func (s *svc) Notifications(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Notifications") }
+func (s *svc) Notifications(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.Notifications")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) VerifyCredentials(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "VerifyCredentials")
+	_, span := internal.T.Start(r.Context(), "Api.VerifyCredentials")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) AccountLikes(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "AccountLikes") }
-func (s *svc) Archive(w http.ResponseWriter, r *http.Request)       { s.stub(w, r, "Archive") }
-func (s *svc) Unarchive(w http.ResponseWriter, r *http.Request)     { s.stub(w, r, "Unarchive") }
-func (s *svc) ArchivedPosts(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "ArchivedPosts") }
+
+func (s *svc) AccountLikes(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.AccountLikes")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Archive(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.Archive")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Unarchive(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.Unarchive")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) ArchivedPosts(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ArchivedPosts")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) SiteConfiguration(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "SiteConfiguration")
+	_, span := internal.T.Start(r.Context(), "Api.SiteConfiguration")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) UserRecommendations(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "UserRecommendations")
+	_, span := internal.T.Start(r.Context(), "Api.UserRecommendations")
+	defer span.End()
+	// TODO: Implement
 }

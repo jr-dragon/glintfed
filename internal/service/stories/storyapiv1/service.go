@@ -26,21 +26,68 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "StoryApi."+name)
+func (s *svc) Carousel(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.Carousel")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) Carousel(w http.ResponseWriter, r *http.Request)     { s.stub(w, r, "Carousel") }
-func (s *svc) SelfCarousel(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "SelfCarousel") }
-func (s *svc) Add(w http.ResponseWriter, r *http.Request)          { s.stub(w, r, "Add") }
-func (s *svc) Publish(w http.ResponseWriter, r *http.Request)      { s.stub(w, r, "Publish") }
-func (s *svc) CarouselNext(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "CarouselNext") }
-func (s *svc) PublishNext(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "PublishNext") }
-func (s *svc) MentionAutocomplete(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "MentionAutocomplete")
+func (s *svc) SelfCarousel(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.SelfCarousel")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) Delete(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "Delete") }
-func (s *svc) Viewed(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "Viewed") }
-func (s *svc) Comment(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Comment") }
-func (s *svc) Viewers(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Viewers") }
+
+func (s *svc) Add(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.Add")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Publish(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.Publish")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) CarouselNext(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.CarouselNext")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) PublishNext(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.PublishNext")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) MentionAutocomplete(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.MentionAutocomplete")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Delete(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.Delete")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Viewed(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.Viewed")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Comment(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.Comment")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Viewers(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Stories.ApiV1.Viewers")
+	defer span.End()
+	// TODO: Implement
+}

@@ -19,12 +19,21 @@ func New() Service {
 type svc struct{}
 
 func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "AdminInvite."+name)
-	defer span.End()
+
 }
 
-func (s *svc) ApiVerifyCheck(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "ApiVerifyCheck") }
-func (s *svc) ApiUsernameCheck(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "ApiUsernameCheck")
+func (s *svc) ApiVerifyCheck(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "AdminInvite.ApiVerifyCheck")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) ApiEmailCheck(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "ApiEmailCheck") }
+func (s *svc) ApiUsernameCheck(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "AdminInvite.ApiUsernameCheck")
+	defer span.End()
+	// TODO: Implement
+}
+func (s *svc) ApiEmailCheck(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "AdminInvite.ApiEmailCheck")
+	defer span.End()
+	// TODO: Implement
+}

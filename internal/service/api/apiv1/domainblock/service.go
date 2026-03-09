@@ -18,11 +18,20 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "DomainBlock."+name)
+func (s *svc) Index(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.DomainBlocks.Index")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) Index(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "Index") }
-func (s *svc) Store(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "Store") }
-func (s *svc) Delete(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Delete") }
+func (s *svc) Store(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.DomainBlocks.Store")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Delete(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.DomainBlocks.Delete")
+	defer span.End()
+	// TODO: Implement
+}

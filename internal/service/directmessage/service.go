@@ -24,17 +24,56 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "DirectMessage."+name)
+func (s *svc) Thread(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.Thread")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) Thread(w http.ResponseWriter, r *http.Request)         { s.stub(w, r, "Thread") }
-func (s *svc) Create(w http.ResponseWriter, r *http.Request)         { s.stub(w, r, "Create") }
-func (s *svc) Delete(w http.ResponseWriter, r *http.Request)         { s.stub(w, r, "Delete") }
-func (s *svc) Mute(w http.ResponseWriter, r *http.Request)           { s.stub(w, r, "Mute") }
-func (s *svc) Unmute(w http.ResponseWriter, r *http.Request)         { s.stub(w, r, "Unmute") }
-func (s *svc) MediaUpload(w http.ResponseWriter, r *http.Request)    { s.stub(w, r, "MediaUpload") }
-func (s *svc) Read(w http.ResponseWriter, r *http.Request)           { s.stub(w, r, "Read") }
-func (s *svc) ComposeLookup(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "ComposeLookup") }
-func (s *svc) ComposeMutuals(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "ComposeMutuals") }
+func (s *svc) Create(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.Create")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Delete(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.Delete")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Mute(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.Mute")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Unmute(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.Unmute")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) MediaUpload(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.MediaUpload")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Read(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.Read")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) ComposeLookup(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.ComposeLookup")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) ComposeMutuals(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "DirectMessage.ComposeMutuals")
+	defer span.End()
+	// TODO: Implement
+}

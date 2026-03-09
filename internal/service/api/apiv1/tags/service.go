@@ -20,17 +20,32 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "Tags."+name)
+func (s *svc) RelatedTags(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Tags.RelatedTags")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) RelatedTags(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "RelatedTags") }
-func (s *svc) FollowHashtag(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "FollowHashtag") }
-func (s *svc) UnfollowHashtag(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "UnfollowHashtag")
+func (s *svc) FollowHashtag(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Tags.FollowHashtag")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) GetHashtag(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "GetHashtag") }
+
+func (s *svc) UnfollowHashtag(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Tags.UnfollowHashtag")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) GetHashtag(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Tags.GetHashtag")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) GetFollowedTags(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "GetFollowedTags")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Tags.GetFollowedTags")
+	defer span.End()
+	// TODO: Implement
 }

@@ -18,15 +18,19 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "Discover."+name)
+func (s *svc) TrendingApi(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Discover.TrendingApi")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) TrendingApi(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "TrendingApi") }
 func (s *svc) TrendingHashtags(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "TrendingHashtags")
+	_, span := internal.T.Start(r.Context(), "Discover.TrendingHashtags")
+	defer span.End()
+	// TODO: Implement
 }
 func (s *svc) DiscoverNetworkTrending(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "DiscoverNetworkTrending")
+	_, span := internal.T.Start(r.Context(), "Discover.DiscoverNetworkTrending")
+	defer span.End()
+	// TODO: Implement
 }

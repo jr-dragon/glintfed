@@ -17,12 +17,14 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "Compose."+name)
+func (s *svc) SearchLocation(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Compose.SearchLocation")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) SearchLocation(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "SearchLocation") }
 func (s *svc) ComposeSettings(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "ComposeSettings")
+	_, span := internal.T.Start(r.Context(), "Compose.ComposeSettings")
+	defer span.End()
+	// TODO: Implement
 }

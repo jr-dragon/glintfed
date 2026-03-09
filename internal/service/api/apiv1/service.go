@@ -78,133 +78,380 @@ func New() Service {
 
 type svc struct{}
 
-// Helper to avoid repeating the same code for every stub
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "ApiV1."+name)
+func (s *svc) Apps(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Apps")
 	defer span.End()
 	// TODO: Implement
 }
 
-func (s *svc) Apps(w http.ResponseWriter, r *http.Request)          { s.stub(w, r, "Apps") }
-func (s *svc) GetApp(w http.ResponseWriter, r *http.Request)        { s.stub(w, r, "GetApp") }
-func (s *svc) Instance(w http.ResponseWriter, r *http.Request)      { s.stub(w, r, "Instance") }
-func (s *svc) InstancePeers(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "InstancePeers") }
-func (s *svc) Bookmarks(w http.ResponseWriter, r *http.Request)     { s.stub(w, r, "Bookmarks") }
+func (s *svc) GetApp(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.GetApp")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Instance(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Instance")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) InstancePeers(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.InstancePeers")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Bookmarks(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Bookmarks")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) VerifyCredentials(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "VerifyCredentials")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.VerifyCredentials")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountUpdateCredentials(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountUpdateCredentials")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountUpdateCredentials")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountRelationshipsById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountRelationshipsById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountRelationshipsById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountLookupById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountLookupById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountLookupById")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) AccountSearch(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "AccountSearch") }
+
+func (s *svc) AccountSearch(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountSearch")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) AccountStatusesById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountStatusesById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountStatusesById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountFollowingById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountFollowingById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFollowingById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountFollowersById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountFollowersById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFollowersById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountFollowById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountFollowById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFollowById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountUnfollowById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountUnfollowById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountUnfollowById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountBlockById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountBlockById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountBlockById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountUnblockById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountUnblockById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountUnblockById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountRemoveFollowById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountRemoveFollowById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountRemoveFollowById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountEndorsements(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountEndorsements")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountEndorsements")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountMuteById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountMuteById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountMutesById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountUnmuteById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountUnmuteById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountUnmutedById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountListsById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountListsById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountListsById")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) AccountById(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "AccountById") }
-func (s *svc) AccountBlocks(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "AccountBlocks") }
-func (s *svc) Conversations(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Conversations") }
-func (s *svc) CustomEmojis(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "CustomEmojis") }
+
+func (s *svc) AccountById(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountById")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) AccountBlocks(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountBlocks")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Conversations(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Conversations")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) CustomEmojis(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.CustomEmojis")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) AccountFavourites(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountFavourites")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFavourites")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) AccountFilters(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "AccountFilters") }
+
+func (s *svc) AccountFilters(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFilters")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) AccountFollowRequests(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountFollowRequests")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFollowRequest")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountFollowRequestAccept(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountFollowRequestAccept")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFollowRequestAccept")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountFollowRequestReject(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountFollowRequestReject")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountFollowRequestReject")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) AccountLists(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "AccountLists") }
-func (s *svc) MediaUpload(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "MediaUpload") }
-func (s *svc) MediaGet(w http.ResponseWriter, r *http.Request)     { s.stub(w, r, "MediaGet") }
-func (s *svc) MediaUpdate(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "MediaUpdate") }
-func (s *svc) AccountMutes(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "AccountMutes") }
+
+func (s *svc) AccountLists(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountLists")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) MediaUpload(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.MediaUpload")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) MediaGet(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.MediaGet")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) MediaUpdate(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.MediaUpdate")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) AccountMutes(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountMutes")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) AccountNotifications(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountNotifications")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountNotifications")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) AccountSuggestions(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "AccountSuggestions")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.AccountSuggestions")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) StatusFavouriteById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "StatusFavouriteById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusFavouriteById")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) StatusUnfavouriteById(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "StatusUnfavouriteById")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusUnfavouriteById")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) StatusContext(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "StatusContext") }
-func (s *svc) StatusCard(w http.ResponseWriter, r *http.Request)    { s.stub(w, r, "StatusCard") }
+
+func (s *svc) StatusContext(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusContext")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) StatusCard(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusCard")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) StatusRebloggedBy(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "StatusRebloggedBy")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusRebloggedBy")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) StatusFavouritedBy(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "StatusFavouritedBy")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusFavouritedBy")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) StatusShare(w http.ResponseWriter, r *http.Request)    { s.stub(w, r, "StatusShare") }
-func (s *svc) StatusUnshare(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "StatusUnshare") }
-func (s *svc) BookmarkStatus(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "BookmarkStatus") }
+
+func (s *svc) StatusShare(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusShare")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) StatusUnshare(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusUnshare")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) BookmarkStatus(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.BookmarkStatus")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) UnbookmarkStatus(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "UnbookmarkStatus")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.UnbookmarkStatus")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) StatusPin(w http.ResponseWriter, r *http.Request)      { s.stub(w, r, "StatusPin") }
-func (s *svc) StatusUnpin(w http.ResponseWriter, r *http.Request)    { s.stub(w, r, "StatusUnpin") }
-func (s *svc) StatusDelete(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "StatusDelete") }
-func (s *svc) StatusById(w http.ResponseWriter, r *http.Request)     { s.stub(w, r, "StatusById") }
-func (s *svc) StatusCreate(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "StatusCreate") }
-func (s *svc) TimelineHome(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "TimelineHome") }
-func (s *svc) TimelinePublic(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "TimelinePublic") }
+
+func (s *svc) StatusPin(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusPin")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) StatusUnpin(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusUnpin")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) StatusDelete(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusDelete")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) StatusById(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusById")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) StatusCreate(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.StatusCreate")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) TimelineHome(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.TimelineHome")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) TimelinePublic(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.TimelinePublic")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) TimelineHashtag(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "TimelineHashtag")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.TimelineHashtag")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) DiscoverPosts(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "DiscoverPosts") }
-func (s *svc) GetPreferences(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "GetPreferences") }
-func (s *svc) GetTrends(w http.ResponseWriter, r *http.Request)      { s.stub(w, r, "GetTrends") }
+
+func (s *svc) DiscoverPosts(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.DiscoverPosts")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) GetPreferences(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.GetPreferences")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) GetTrends(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.GetTrends")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) GetAnnouncements(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "GetAnnouncements")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.GetAnnouncements")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) GetMarkers(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "GetMarkers") }
-func (s *svc) SetMarkers(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "SetMarkers") }
+
+func (s *svc) GetMarkers(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.GetMarkers")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) SetMarkers(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.SetMarkers")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) DiscoverAccountsPopular(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "DiscoverAccountsPopular")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.DiscoverAccountsPopular")
+	defer span.End()
+	// TODO: Implement
 }

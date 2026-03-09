@@ -20,13 +20,32 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "AdminDomainBlocks."+name)
+func (s *svc) Index(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Admin.DomainBlocks.Index")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) Index(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "Index") }
-func (s *svc) Show(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "Show") }
-func (s *svc) Create(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Create") }
-func (s *svc) Update(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Update") }
-func (s *svc) Delete(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Delete") }
+func (s *svc) Show(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Admin.DomainBlocks.Show")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Create(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Admin.DomainBlocks.Create")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Update(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Admin.DomainBlocks.Update")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Delete(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV1.Admin.DomainBlocks.Delete")
+	defer span.End()
+	// TODO: Implement
+}

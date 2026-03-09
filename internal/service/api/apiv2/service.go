@@ -22,23 +22,44 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "ApiV2."+name)
+func (s *svc) Instance(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV2.Instance")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) Instance(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Instance") }
-func (s *svc) Search(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "Search") }
+func (s *svc) Search(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV2.Search")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) GetWebsocketConfig(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "GetWebsocketConfig")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV2.GetWebsocketConfig")
+	defer span.End()
+	// TODO: Implement
 }
-func (s *svc) MediaUploadV2(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "MediaUploadV2") }
+
+func (s *svc) MediaUploadV2(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Api.ApiV2.MediaUploadV2")
+	defer span.End()
+	// TODO: Implement
+}
+
 func (s *svc) StatusContextV2(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "StatusContextV2")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV2.StatusContextV2")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) StatusDescendants(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "StatusDescendants")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV2.StatusDescendants")
+	defer span.End()
+	// TODO: Implement
 }
+
 func (s *svc) StatusAncestors(w http.ResponseWriter, r *http.Request) {
-	s.stub(w, r, "StatusAncestors")
+	_, span := internal.T.Start(r.Context(), "Api.ApiV2.StatusAncestors")
+	defer span.End()
+	// TODO: Implement
 }

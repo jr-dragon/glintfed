@@ -20,13 +20,32 @@ func New() Service {
 
 type svc struct{}
 
-func (s *svc) stub(w http.ResponseWriter, r *http.Request, name string) {
-	_, span := internal.T.Start(r.Context(), "CustomFilter."+name)
+func (s *svc) Index(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "CustomFilter.Index")
 	defer span.End()
+	// TODO: Implement
 }
 
-func (s *svc) Index(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "Index") }
-func (s *svc) Show(w http.ResponseWriter, r *http.Request)   { s.stub(w, r, "Show") }
-func (s *svc) Store(w http.ResponseWriter, r *http.Request)  { s.stub(w, r, "Store") }
-func (s *svc) Update(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Update") }
-func (s *svc) Delete(w http.ResponseWriter, r *http.Request) { s.stub(w, r, "Delete") }
+func (s *svc) Show(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "CustomFilter.Show")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Store(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "CustomFilter.Store")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Update(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "CustomFilter.Update")
+	defer span.End()
+	// TODO: Implement
+}
+
+func (s *svc) Delete(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "CustomFilter.Delete")
+	defer span.End()
+	// TODO: Implement
+}
