@@ -1,4 +1,4 @@
-package healthcheck
+package pixelfeddirectory
 
 import (
 	"net/http"
@@ -17,10 +17,7 @@ func New() Service {
 type svc struct{}
 
 func (s *svc) Get(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "HealthCheck.Get")
+	_, span := internal.T.Start(r.Context(), "PixelfedDirectory.Get")
 	defer span.End()
-
-	w.Header().Set("Content-Type", "text/plain")
-	w.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache, no-store")
-	w.Write([]byte("OK"))
+	// TODO: Implement
 }
