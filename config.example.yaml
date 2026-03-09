@@ -8,5 +8,5 @@ server:
 
 service:
   open_telemetry:
-    tracing_enabled: true
+    tracing_enabled: false
     tracing_endpoint: localhost:4317
