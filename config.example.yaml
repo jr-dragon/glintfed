@@ -1,0 +1,12 @@
+app:
+  name: glintfed
+  env: local
+
+server:
+  api:
+    bind: ":8000"
+
+service:
+  open_telemetry:
+    tracing_enabled: false
+    tracing_endpoint: localhost:4317

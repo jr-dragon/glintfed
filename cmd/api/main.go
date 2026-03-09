@@ -1,0 +1,53 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"flag"
+	"log/slog"
+
+	"glintfed.org/internal/data"
+	"glintfed.org/internal/lib/logs"
+	"glintfed.org/internal/server"
+)
+
+// Name is the name of the application.
+var Name string
+
+// Version is the version of the application.
+var Version string
+
+var (
+	flagCfgPath string
+)
+
+func init() {
+	flag.StringVar(&flagCfgPath, "config", "config.yaml", "config file path")
+}
+
+func main() {
+	flag.Parse()
+
+	cfg, err := data.NewConfig(flagCfgPath)
+	if err != nil {
+		slog.Error("failed to load config", logs.ErrAttr(err))
+		return
+	}
+
+	cleanup, err := setupOTelSDK(context.Background(), cfg)
+	if err != nil {
+		slog.Error("failed to init open telemetry sdk", logs.ErrAttr(err))
+	}
+	defer func() {
+		if err := errors.Join(err, cleanup(context.Background())); err != nil {
+			slog.Error("failed to cleanup open telemetry sdk", logs.ErrAttr(err))
+		}
+	}()
+
+	srv := server.NewAPIServer(cfg)
+
+	if err := srv.ListenAndServe(); err != nil {
+		slog.Error("failed to start api server", logs.ErrAttr(err))
+		return
+	}
+}
