@@ -114,6 +114,7 @@ func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
 	mux.Get("/.well-known/webfinger", fedSvc.Webfinger)
 	mux.Get("/.well-known/nodeinfo", fedSvc.NodeinfoWellKnown)
 	mux.Get("/.well-known/host-meta", fedSvc.HostMeta)
+	mux.Handle("GET /.well-known/change-password", http.RedirectHandler("/settings/password", http.StatusFound))
 
 	mux.Get("/api/nodeinfo/2.0.json", fedSvc.Nodeinfo)
 	mux.Get("/api/service/health-check", healthSvc.Get)

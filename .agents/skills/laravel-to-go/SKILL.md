@@ -7,91 +7,86 @@ description: 將 Laravel 應用程式遷移到 Go
 
 本技能旨在將 Laravel 應用程式遷移到 Go 應用程式。
 
-## API 路由
+## 目錄與檔案規範
 
-Laravel 的 API 路由位於 `routes/api.php` 中
+- **目錄結構**：Go 的 package 結構應對應 Laravel 的 Namespace。
+    - 例如：`App\Http\Controllers\Api\V1` 應遷移至 `internal/service/api/v1/`。
+- **檔案命名**：主要的 Handler 實作檔案應統一命名為 `service.go`。
+- **Package 命名**：使用簡短且具代表性的 package 名稱（例如 `v1`, `federation`, `healthcheck`）。
 
-### HTTP Methods 路由
+## API 路由映射
 
-根據 `Route::get` 或 `Route::post` 等代表的是不同的 HTTP 方法：
+使用 `go-chi/chi` 作為路由框架。
 
-在遷移時應該在 go-chi 中定義相應的路由：
+### 1. 基礎 HTTP 方法
+- `Route::get` -> `mux.Get`
+- `Route::post` -> `mux.Post`
+- `Route::put` -> `mux.Put`
+- `Route::delete` -> `mux.Delete`
 
-```go
-// Route::get('/hello-world', 'GreetController@hello');
-// Route::post('/login', 'AuthController@login');
-
-mux.Get("/hello-world", greet.Hello())
-mux.Post("/login", auth.Login())
-```
-
-### Redirect 路由
-
-`Route::redirect` 代表的是使用 HTTP 302 Found 將用戶重定向到指定的路由
-
-```go
-// Rotue::redirect("here", "there")
-
-mux.Get("/here", http.RedirectHandler("/there", http.StatusFound))
-```
-
-### 多重匹配
-
-`Route::match` 可以指定多個不同的 HTTP Method 對應相同的路由與 Handler。
-
-```go
-// Route::match(['PUT', 'PATCH'], 'account', 'AccountController@update')
-
-mux.Put("/account", account.Update())
-mux.Patch("/account", account.Update())
-```
-
-## Controller
-
-在 Laravel 中會在 `app/Http/Controllers` 中定義控制器，用於處理 HTTP 路由的請求（等價於 Go 中的 Handler）。
-
-```go
-// internal/service/account/service.go
-type Service interface {
-  Update(w http.ResponseWriter, r *http.Request)
-}
-
-type service struct {
-  clients *data.Clients
-}
-
-func NewService(clients *data.Clients) Service {
-  return &service{clients: clients}
-}
-
-func (s *service) Update(w http.ResponseWriter, r *http.Request) {
-  ctx, span := otel.Tracer("service").Start(r.Context(), "account.Update")
-  defer span.End()
-
-  if err := s.DB.UpdateUser(ctx, ...); err != nil {
-  }
-}
-```
-
-### 巢狀結構
-
-部份 Controller 可能位於 `app/Http/Controllers` 底下的其它 namespaces，這時需要維持相同的結構。
+### 2. 路由群組與前綴 (Groups & Prefixes)
+Laravel 的 `Route::group` 或 `Route::prefix` 應映射至 chi 的 `r.Route` 或 `r.Group`。
 
 ```php
-// app/Http/Controllers/Api/AdminController.php
-class adminApiController extends Controller {
-  public function supported(Request $request) {
-    // ...
-  }
-}
+// Laravel
+Route::prefix('api/v1')->group(function () {
+    Route::get('status', 'StatusController@show');
+});
 ```
 
 ```go
-// internal/service/api/admin/service.go
-func (s *service) Supported(w http.ResponseWriter, r *http.Request) {
-  ctx, span := otel.Tracer("service").Start(r.Context(), "api.admin.Supported")
-  defer span.End()
+// Go (chi)
+mux.Route("/api/v1", func(r chi.Router) {
+    r.Get("/status", v1.StatusShow)
+})
+```
 
-  // ...
+### 3. 路徑參數 (Route Parameters)
+Laravel 使用 `{param}`，chi 同樣使用 `{param}`。
+
+```php
+// Route::get('users/{id}', 'UserController@show')
+mux.Get("/users/{id}", user.Show)
+```
+
+### 4. 重定向 (Redirects)
+```php
+// Route::redirect(".well-known/change-password", "/settings/password");
+mux.Get("/.well-known/change-password", func(w http.ResponseWriter, r *http.Request) {
+    http.Redirect(w, r, "/settings/password", http.StatusFound)
+})
+```
+
+## Service Handler 實作規範
+
+每個 Handler 必須包含 OpenTelemetry 追蹤與 Todo 註釋。
+
+### 標準範本
+使用 `internal.T` (otel.Tracer) 進行追蹤，並維持與 Laravel 方法名一致的 Go 函數名。
+
+```go
+package v1
+
+import (
+	"net/http"
+	"glintfed.org/internal/service/internal"
+)
+
+//對應 Laravel 的 UserController@show
+func UserShow(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "ApiV1.UserShow")
+	defer span.End()
+
+	// TODO: Implement UserShow
 }
 ```
+
+## 轉換清單 (Cheat Sheet)
+
+| Laravel | Go (chi/internal) |
+| :--- | :--- |
+| `Route::prefix('...')` | `r.Route("...", func(r chi.Router) { ... })` |
+| `{id}` | `{id}` (透過 `chi.URLParam(r, "id")` 取得) |
+| `middleware('auth')` | `r.Use(middleware.Auth)` |
+| `Controller@method` | `pkg.Method` |
+| `Log::info()` | `logs.Info()` |
