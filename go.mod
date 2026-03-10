@@ -15,6 +15,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
+	entgo.io/ent v0.14.5 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect

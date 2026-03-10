@@ -1,6 +1,13 @@
 package schema
 
-import "entgo.io/ent"
+import (
+	"time"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
+)
 
 // StatusArchived holds the schema definition for the StatusArchived entity.
 type StatusArchived struct {
@@ -9,10 +16,25 @@ type StatusArchived struct {
 
 // Fields of the StatusArchived.
 func (StatusArchived) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.Uint64("id").Unique(),
+		field.Uint64("status_id"),
+		field.Uint64("profile_id"),
+		field.String("original_scope").Optional(),
+		field.JSON("metadata", map[string]any{}).Optional(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
 }
 
 // Edges of the StatusArchived.
 func (StatusArchived) Edges() []ent.Edge {
 	return nil
+}
+
+// Annotations of the StatusArchived.
+func (StatusArchived) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "status_archiveds"},
+	}
 }
