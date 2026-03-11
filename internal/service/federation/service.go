@@ -6,7 +6,6 @@ import (
 
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/service/internal"
-	"glintfed.org/internal/usecase/instance"
 )
 
 type Service interface {
@@ -25,11 +24,11 @@ type InstanceUsecase interface {
 	GetHalfYearActiveUsers(ctx context.Context) (int, error)
 }
 
-func New(cfg data.Config, client *data.Client) Service {
+func New(cfg data.Config, iuc InstanceUsecase) Service {
 	return &svc{
 		cfg: cfg,
 
-		iuc: instance.NewUsecase(client),
+		iuc: iuc,
 	}
 }
 
