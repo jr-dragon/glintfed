@@ -14,6 +14,7 @@ import (
 
 	"glintfed.org/ent"
 	"glintfed.org/ent/enttest"
+	"glintfed.org/pkg/cache"
 )
 
 type Client struct {
@@ -71,6 +72,8 @@ func (c *Client) initRedisClient(_ context.Context, cfg Config) (err error) {
 		Addr:     cfg.Service.Database.Redis.Addr,
 		Password: cfg.Service.Database.Redis.Password,
 	})
+
+	cache.Register(cache.NewRedisDriver(c.RDB))
 
 	return redisotel.InstrumentTracing(c.RDB)
 }
