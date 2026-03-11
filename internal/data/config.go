@@ -25,7 +25,17 @@ type APIServerConfig struct {
 }
 
 type ServiceConfig struct {
+	Database      DatabaseConfig      `mapstructure:"database"`
 	OpenTelemetry OpenTelemetryConfig `mapstructure:"open_telemetry"`
+}
+
+type DatabaseConfig struct {
+	SQL SQLDBConfig `mapstructure:"sql"`
+}
+
+type SQLDBConfig struct {
+	Driver string `mapstructure:"driver" env:"DB_DRIVER"`
+	DSN    string `mapstructure:"dsn"`
 }
 
 type OpenTelemetryConfig struct {
