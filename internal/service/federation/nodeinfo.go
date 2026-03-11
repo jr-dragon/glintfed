@@ -2,11 +2,10 @@ package federation
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
-	"time"
 
-	"glintfed.org/ent/status"
-	"glintfed.org/ent/user"
+	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
 )
 
@@ -102,26 +101,35 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	totalUsers, _ := s.client.Ent.User.Query().Count(r.Context())
-	activeMonth, _ := s.client.Ent.User.Query().
-		Where(
-			user.Or(
-				user.UpdatedAtGT(time.Now().Add(-5 * 7 * 24 * time.Hour)),
-				user.LastActiveAtGT(time.Now().Add(-5 * 7 * 24 * time.Hour)),
-			),
-		).Count(r.Context())
-	activeHalfyear, _ := s.client.Ent.User.Query().
-		Where(
-			user.Or(
-				user.LastActiveAtGT(time.Now().AddDate(0, -6, 0)),
-				user.UpdatedAtGT(time.Now().AddDate(0, -6, 0)),
-			),
-		).Count(r.Context())
+	totalUsers, err := s.iuc.GetTotalUsers(r.Context())
+	if err != nil {
+		const msg = "failed to get total users"
+		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
+		http.Error(w, msg, http.StatusInternalServerError)
+	}
 
-	localPosts, _ := s.client.Ent.Status.Query().
-		Where(
-			status.LocalEQ(true),
-		).Count(r.Context())
+	activeMonth, err := s.iuc.GetMonthActiveUsers(r.Context())
+	if err != nil {
+		const msg = "failed to get month active users"
+		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
+		http.Error(w, msg, http.StatusInternalServerError)
+	}
+
+	activeHalfyear, err := s.iuc.GetHalfYearActiveUsers(r.Context())
+	if err != nil {
+		const msg = "failed to get half year active users"
+		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	localPosts, err := s.iuc.GetLocalPostsCount(r.Context())
+	if err != nil {
+		const msg = "failed to get local posts count"
+		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
 
 	resp := NodeInfoResponse{
 		Metadata: NodeInfoMetadata{
