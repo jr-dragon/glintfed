@@ -12,10 +12,17 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name       string           `mapstructure:"name" env:"APP_NAME"`
-	Env        string           `mapstructure:"env" env:"APP_ENV"`
-	URL        string           `mapstructure:"url" env:"APP_URL"`
+	Name    string     `mapstructure:"name" env:"APP_NAME"`
+	Version string     `mapstructure:"version" env:"APP_VERSION"`
+	Env     string     `mapstructure:"env" env:"APP_ENV"`
+	URL     string     `mapstructure:"url" env:"APP_URL"`
+	Auth    AuthConfig `mapstructure:"auth"`
+
 	Federation FederationConfig `mapstructure:"federation"`
+}
+
+type AuthConfig struct {
+	EnableRegistration bool `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
 }
 
 type ServerConfig struct {

@@ -50,7 +50,7 @@ import (
 	"glintfed.org/internal/service/userappsettings"
 )
 
-func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
+func NewAPIServer(cfg data.Config, client *data.Client) *http.Server {
 	mux := chi.NewRouter()
 
 	mux.Use(
@@ -61,7 +61,7 @@ func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
 
 	// Services
 	healthSvc := healthcheck.New()
-	fedSvc := federation.New(cfg)
+	fedSvc := federation.New(cfg, client)
 	iaSvc := instanceactor.New()
 	storySvc := story.New()
 	mediaSvc := media.New()

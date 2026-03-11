@@ -1,7 +1,12 @@
 app:
   name: glintfed
+  version: 0.0.0
   env: local
   url: http://localhost:8000
+
+  auth:
+    enable_registration: true
+
   federation:
     nodeinfo:
       enabled: true
