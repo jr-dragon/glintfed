@@ -51,6 +51,8 @@ func NewTestClient(t *testing.T) (c *Client, cleanup func(), err error) {
 
 	c.RDB, c.RDBMock = redismock.NewClientMock()
 
+	cleanup = func() {}
+
 	return
 }
 
