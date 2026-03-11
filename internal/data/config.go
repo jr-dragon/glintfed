@@ -32,12 +32,18 @@ type ServiceConfig struct {
 }
 
 type DatabaseConfig struct {
-	SQL SQLDBConfig `mapstructure:"sql"`
+	SQL   SQLDBConfig `mapstructure:"sql"`
+	Redis RedisConfig `mapstructure:"redis"`
 }
 
 type SQLDBConfig struct {
 	Driver string `mapstructure:"driver" env:"DB_DRIVER"`
 	DSN    string `mapstructure:"dsn"`
+}
+
+type RedisConfig struct {
+	Addr     string `mapstructure:"addr" env:"REDIS_HOST"`
+	Password string `mapstructure:"password" env:"REDIS_PASSWORD"`
 }
 
 type OpenTelemetryConfig struct {
