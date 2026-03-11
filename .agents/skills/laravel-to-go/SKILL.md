@@ -90,3 +90,97 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
 | `middleware('auth')` | `r.Use(middleware.Auth)` |
 | `Controller@method` | `pkg.Method` |
 | `Log::info()` | `logs.Info()` |
+
+## Eloquent Model 遷移至 ent
+
+將 Laravel 的 Eloquent Model 遷移至 Go 的 `ent` schema 時，應遵循以下模式與規範。
+
+### 0. 快速生成 Schema
+
+可以使用專案提供的腳本，根據 Laravel 的 Model 自動批量生成空白的 `ent` schema 檔案。
+
+```bash
+# 在專案根目錄執行
+./.agents/skills/laravel-to-go/scripts/gen-ent-schema.sh <LARAVEL_APP_ROOT>
+```
+
+該腳本會掃描 Laravel 中的 `app/*.php` 與 `app/Models/*.php`，找出所有繼承自 `Model` 或 `Authenticatable` 的類別，並執行 `ent new`。
+
+### 0.1 透過資料庫取得屬性映射資訊
+
+若已經有既有的資料庫（如本地端的 MySQL 或開發環境中的 Docker 容器），可以使用以下腳本來取得資料表的欄位定義，協助進行屬性映射。
+
+**使用本地 MySQL CLI：**
+```bash
+./.agents/skills/laravel-to-go/scripts/get-columns-from-mysql-cli.sh <LARAVEL_APP_ROOT> [specific_table]
+```
+
+**使用 Docker 容器中的 MySQL：**
+```bash
+./.agents/skills/laravel-to-go/scripts/get-columns-from-mysql-container.sh <LARAVEL_APP_ROOT> [specific_table]
+```
+
+這些腳本會列出每個資料表的 `DESCRIBE` 結果，幫助你快速確認每個欄位的型別、長度及是否可為空（NULL）。
+
+### 1. 型別映射 (Field Types)
+
+| Laravel (Migration) | ent (Go Type) | 範例 |
+| :--- | :--- | :--- |
+| `id()`, `bigIncrements('id')` | `field.Uint64("id")` | `field.Uint64("id").Unique()` |
+| `unsignedBigInteger('xxx_id')` | `field.Uint64("xxx_id")` | `field.Uint64("profile_id").Optional()` |
+| `string('...')` | `field.String("...")` | `field.String("username").Unique()` |
+| `text('...')` | `field.Text("...")` | `field.Text("bio").Optional()` |
+| `boolean('...')` | `field.Bool("...")` | `field.Bool("is_private").Default(false)` |
+| `timestamp()`, `datetime()` | `field.Time("...")` | `field.Time("last_active_at").Optional()` |
+| `json('...')` | `field.JSON("...", T{})` | `field.JSON("media_ids", []uint64{})` |
+| `enum('...', [...])` | `field.Enum("...").Values(...)` | `field.Enum("visibility").Values("public", "private")` |
+
+### 2. Eloquent 屬性映射
+
+- **`$fillable`**: 所有出現在 `$fillable` 的欄位都應定義在 `Fields()` 中。
+- **`$hidden`**: 敏感資訊（如 `password`, `email`, `2fa_secret`）應加上 `.Sensitive()`。
+- **`$casts`**: 
+    - `datetime`, `timestamp` -> `field.Time`
+    - `array`, `json` -> `field.JSON`
+- **軟刪除 (`SoftDeletes`)**: 必須包含 `field.Time("deleted_at").Optional()`。
+
+### 3. 命名規範與特殊處理
+
+- **CamelCase**: Go 的欄位名稱使用 CamelCase，`ent` 會自動將其轉換為資料庫的 snake_case。
+- **數字開頭欄位**: Go 的欄位名稱不能以數字開頭。若 Laravel 欄位為 `2fa_enabled`，應定義為 `TwoFaEnabled` 並使用 `StorageKey`。
+  ```go
+  field.Bool("two_fa_enabled").StorageKey("2fa_enabled").Default(false)
+  ```
+- **資料表名稱**: 使用 `Annotations` 明確指定與 Laravel 一致的複數表名。
+  ```go
+  func (User) Annotations() []schema.Annotation {
+      return []schema.Annotation{
+          entsql.Annotation{Table: "users"},
+      }
+  }
+  ```
+
+### 4. 關聯處理 (Relationships)
+
+目前專案傾向使用 **基礎欄位關聯** (Field-based Relations) 而非 `ent.Edge`，以簡化初期遷移過程。
+
+- **`belongsTo`**: 在 schema 中新增一個 `Uint64` 欄位並加上 `_id` 後綴。
+  - Laravel: `Status -> belongsTo(Profile)`
+  - Go: `field.Uint64("profile_id").Optional()`
+- **`hasOne` / `hasMany`**: 通常不直接在 schema 中定義，而是透過查詢對方 table 的 `xxx_id` 來實現。
+
+### 5. 標準元數據欄位 (Standard Metadata)
+
+每個 Schema 通常都應包含以下標準欄位：
+
+```go
+func (X) Fields() []ent.Field {
+    return []ent.Field{
+        field.Uint64("id").Unique(),
+        // ... 其他欄位
+        field.Time("created_at").Default(time.Now).Immutable(),
+        field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+        field.Time("deleted_at").Optional(),
+    }
+}
+```
