@@ -40,26 +40,6 @@ func TestMemoryDrv_Basic(t *testing.T) {
 	}
 }
 
-func TestMemoryDrv_FuncValue(t *testing.T) {
-	ctx := context.Background()
-	drv := NewMemoryDriver()
-
-	// Test Set with a function
-	fn := func() any {
-		return "dynamic_value"
-	}
-
-	err := drv.Set(ctx, "func_key", fn, 0)
-	if err != nil {
-		t.Fatalf("failed to set func_key: %v", err)
-	}
-
-	val := drv.Get(ctx, "func_key")
-	if val != "dynamic_value" {
-		t.Errorf("expected dynamic_value, got %v", val)
-	}
-}
-
 func TestMemoryDrv_Clear(t *testing.T) {
 	ctx := context.Background()
 	drv := NewMemoryDriver()

@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"reflect"
 	"time"
 )
 
@@ -20,6 +21,15 @@ func Get(ctx context.Context, key string) any {
 }
 
 func Set(ctx context.Context, key string, val any, ttl time.Duration) error {
+	v := reflect.ValueOf(val)
+	if v.Kind() == reflect.Func {
+		t := v.Type()
+		if t.NumIn() == 0 && t.NumOut() == 1 {
+			results := v.Call(nil)
+			val = results[0].Interface()
+		}
+	}
+	
 	return drv.Set(ctx, key, val, ttl)
 }
 

@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"reflect"
 	"sync"
 	"time"
 )
@@ -32,15 +31,6 @@ func (d *memoryDrv) Get(_ context.Context, key string) any {
 }
 
 func (d *memoryDrv) Set(_ context.Context, key string, val any, _ time.Duration) (err error) {
-	v := reflect.ValueOf(val)
-	if v.Kind() == reflect.Func {
-		t := v.Type()
-		if t.NumIn() == 0 && t.NumOut() == 1 {
-			results := v.Call(nil)
-			val = results[0].Interface()
-		}
-	}
-
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.storage[key] = val
