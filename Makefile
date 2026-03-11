@@ -17,6 +17,7 @@ init:
 	@echo "Installing dependencies..."
 	@go install golang.org/x/tools/cmd/goimports@latest
 	@go install entgo.io/ent/cmd/ent@latest
+	@go install github.com/matryer/moq@latest
 
 # Generate code
 gen:

@@ -17,6 +17,7 @@ type Service interface {
 	Nodeinfo(w http.ResponseWriter, r *http.Request)
 }
 
+//go:generate moq -out instance_usecase_mock.go . InstanceUsecase
 type InstanceUsecase interface {
 	GetLocalPostsCount(ctx context.Context) (int, error)
 	GetTotalUsers(ctx context.Context) (int, error)
