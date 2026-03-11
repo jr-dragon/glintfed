@@ -12,8 +12,10 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name string `mapstructure:"name" env:"APP_NAME"`
-	Env  string `mapstruct:"env" env:"APP_ENV"`
+	Name       string           `mapstructure:"name" env:"APP_NAME"`
+	Env        string           `mapstructure:"env" env:"APP_ENV"`
+	URL        string           `mapstructure:"url" env:"APP_URL"`
+	Federation FederationConfig `mapstructure:"federation"`
 }
 
 type ServerConfig struct {
@@ -41,6 +43,14 @@ type SQLDBConfig struct {
 type OpenTelemetryConfig struct {
 	TracingEnabled  bool   `mapstructure:"tracing_enabled"`
 	TracingEndpoint string `mapstructure:"tracing_endpoint"`
+}
+
+type FederationConfig struct {
+	NodeInfo NodeInfoConfig `mapstructure:"nodeinfo"`
+}
+
+type NodeInfoConfig struct {
+	Enabled bool `mapstructure:"enabled"`
 }
 
 func NewConfig(paths ...string) (cfg Config, err error) {

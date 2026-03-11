@@ -61,7 +61,7 @@ func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
 
 	// Services
 	healthSvc := healthcheck.New()
-	fedSvc := federation.New()
+	fedSvc := federation.New(cfg)
 	iaSvc := instanceactor.New()
 	storySvc := story.New()
 	mediaSvc := media.New()

@@ -1,6 +1,10 @@
 app:
   name: glintfed
   env: local
+  url: http://localhost:8000
+  federation:
+    nodeinfo:
+      enabled: true
 
 server:
   api:
