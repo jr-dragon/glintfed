@@ -160,16 +160,7 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
   }
   ```
 
-### 4. 關聯處理 (Relationships)
-
-目前專案傾向使用 **基礎欄位關聯** (Field-based Relations) 而非 `ent.Edge`，以簡化初期遷移過程。
-
-- **`belongsTo`**: 在 schema 中新增一個 `Uint64` 欄位並加上 `_id` 後綴。
-  - Laravel: `Status -> belongsTo(Profile)`
-  - Go: `field.Uint64("profile_id").Optional()`
-- **`hasOne` / `hasMany`**: 通常不直接在 schema 中定義，而是透過查詢對方 table 的 `xxx_id` 來實現。
-
-### 5. 標準元數據欄位 (Standard Metadata)
+### 4. 標準元數據欄位 (Standard Metadata)
 
 每個 Schema 通常都應包含以下標準欄位：
 
