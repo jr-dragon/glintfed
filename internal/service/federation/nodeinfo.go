@@ -64,7 +64,102 @@ type MetadataSoftware struct {
 }
 
 type MetadataConfig struct {
-	Features map[string]any `json:"features"`
+	Features Features `json:"features"`
+}
+
+type Features struct {
+	Version             string             `json:"version"`
+	EnableRegistration  bool               `json:"open_registration"`
+	ShowLegalNoticeLink bool               `json:"show_legal_notice_link"`
+	Uploader            UploaderFeature      `json:"uploader"`
+	Activitypub         ActivitypubFeature `json:"activitypub"`
+	AB                  map[string]bool    `json:"ab"`
+	Site                SiteFeature        `json:"site"`
+	Account             AccountFeature     `json:"account"`
+	Username            UsernameFeature    `json:"username"`
+	Features            FeaturesFeature    `json:"features"`
+}
+
+type UploaderFeature struct {
+	MaxPhotoSize        int      `json:"max_photo_size"`
+	MaxCaptionLength    int      `json:"max_caption_length"`
+	MaxAltextLength     int      `json:"max_altext_length"`
+	AlbumLimit          int      `json:"album_limit"`
+	ImageQuality        int      `json:"image_quality"`
+	MaxCollectionLength int      `json:"max_collection_length"`
+	OptimizeImage       bool     `json:"optimize_image"`
+	OptimizeVideo       bool     `json:"optimize_video"`
+	MediaTypes          string   `json:"media_types"`
+	MimeTypes           []string `json:"mime_types"`
+	EnforceAcountLimit  bool     `json:"enforce_account_limit"`
+}
+
+type ActivitypubFeature struct {
+	Enabled      bool `json:"enabled"`
+	RemoteFollow bool `json:"remote_follow"`
+}
+
+type SiteFeature struct {
+	Name        string `json:"name"`
+	Domain      string `json:"domain"`
+	Url         string `json:"url"`
+	Description string `json:"description"`
+}
+
+type AccountFeature struct {
+	MaxAvatarSize     int `json:"max_avatar_size"`
+	MaxBioLength      int `json:"max_bio_length"`
+	MaxNameLength     int `json:"max_name_legth"`
+	MinPasswordLength int `json:"min_password_length"`
+	MaxAccountSize    int `json:"max_account_size"`
+}
+
+type UsernameFeature struct {
+	Remote RemoteUsernameFeature `json:"remote"`
+}
+
+type FeaturesFeature struct {
+	Timelines          TimelineFeature  `json:"timelines"`
+	MobileAPIs         bool             `json:"mobile_apis"`
+	MobileRegistration bool             `json:"mobile_registration"`
+	Stories            bool             `json:"stories"`
+	Video              bool             `json:"video"`
+	Import             ImportFeature    `json:"import"`
+	Label              map[string]Label `json:"label"`
+	HLS                HLSFeature       `json:"hls"`
+	Groups             bool             `json:"groups"`
+}
+
+type TimelineFeature struct {
+	Local   bool `json:"local"`
+	Network bool `json:"network"`
+}
+
+type ImportFeature struct {
+	Instagram bool `json:"instagram"`
+	Mastodon  bool `json:"mastodon"`
+	Pixelfed  bool `json:"pixelfed"`
+}
+
+type Label struct {
+	Enabled bool   `json:"enabled"`
+	Org     string `json:"org"`
+	Url     string `json:"url"`
+}
+
+type HLSFeature struct {
+	Enabled  bool   `json:"enabled"`
+	Debug    bool   `json:"debug"`
+	P2P      bool   `json:"p2p"`
+	P2PDebug bool   `json:"p2p_debug"`
+	Tracker  string `json:"tracker"`
+	Ice      string `json:"ice"`
+}
+
+type RemoteUsernameFeature struct {
+	Formats []string `json:"formats"`
+	Format  bool     `json:"format"`
+	Custom  string   `json:"custom"`
 }
 
 type NodeInfoServices struct {
@@ -139,7 +234,7 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 				Repo:     "https://github.com/glintfed/glintfed",
 			},
 			Config: MetadataConfig{
-				Features: map[string]any{},
+				Features: s.getFeatures(),
 			},
 		},
 		Protocols: []string{"activitypub"},
@@ -165,4 +260,11 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(resp)
+}
+
+func (s *svc) getFeatures() Features {
+	return Features{
+		Version:            s.cfg.App.Version,
+		EnableRegistration: s.cfg.App.Auth.EnableRegistration,
+	}
 }

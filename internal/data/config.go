@@ -12,17 +12,104 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name    string     `mapstructure:"name" env:"APP_NAME"`
-	Version string     `mapstructure:"version" env:"APP_VERSION"`
-	Env     string     `mapstructure:"env" env:"APP_ENV"`
-	URL     string     `mapstructure:"url" env:"APP_URL"`
-	Auth    AuthConfig `mapstructure:"auth"`
+	Name        string `mapstructure:"name" env:"APP_NAME"`
+	Version     string `mapstructure:"version" env:"APP_VERSION"`
+	Env         string `mapstructure:"env" env:"APP_ENV"`
+	URL         string `mapstructure:"url" env:"APP_URL"`
+	Description string `mapstructure:"description" env:"PF_DESCRIPTION"`
 
+	MediaTypes          string `mapstrucure:"media_types" env:"MEDIA_TYPES"`
+	MaxPhotoSize        int    `json:"max_photo_size" env:"MAX_PHOTO_SIZE"`
+	MaxCaptionLength    int    `json:"max_caption_length" env:"MAX_CAPTION_LENGTH"`
+	MaxAltextLength     int    `json:"max_altext_length" env:"PF_MEDIA_MAX_ALTTEXT_LENGTH"`
+	MaxAlbumLength      int    `json:"max_album_length" env:"MAX_ALBUM_LENGTH"`
+	ImageQuality        int    `json:"image_quality" env:"IMAGE_QUALITY"`
+	MaxCollectionLength int    `json:"max_collection_length" env:"PF_MAX_COLLECTION_LENGTH"`
+	OptimizeImage       bool   `json:"optimize_image" env:"PF_OPTIMIZE_IMAGES"`
+	OptimizeVideo       bool   `json:"optimize_video" env:"PF_OPTIMIZE_VIDEOS"`
+	EnforceAcountLimit  bool   `json:"enforce_account_limit" env:"LIMIT_ACCOUNT_SIZE"`
+
+	MaxAvatarSize     int `json:"max_avatar_size" env:"MAX_AVATAR_SIZE"`
+	MaxBioLength      int `json:"max_bio_length" env:"MAX_BIO_LENGTH"`
+	MaxNameLength     int `json:"max_name_length" env:"MAX_NAME_LENGTH"`
+	MinPasswordLength int `json:"min_password_length" env:"MIN_PASSWORD_LENGTH"`
+	MaxAccountSize    int `json:"max_account_size" env:"MAX_ACCOUNT_SIZE"`
+
+	Auth       AuthConfig       `mapstructure:"auth"`
+	Instance   InstanceConfig   `mapstructure:"instance"`
 	Federation FederationConfig `mapstructure:"federation"`
+	Import     ImportConfig     `mapstructure:"import"`
+	Media      MediaConfig      `mapstructure:"media"`
+	Groups     GroupsConfig     `mapstructure:"groups"`
 }
 
 type AuthConfig struct {
 	EnableRegistration bool `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
+	EnableOAuth        bool `mapstructure:"enable_oauth" env:"OAUTH_ENABLED"`
+	InAppRegistration  bool `mapstructure:"in_app_registration" env:"APP_REGISTER"`
+}
+
+type UploaderConfig struct {
+}
+
+type ActivitypubConfig struct {
+	Enabled      bool `json:"enabled"`
+	RemoteFollow bool `json:"remote_follow"`
+}
+
+type InstanceConfig struct {
+	Username UsernameConfig `mapstructure:"username"`
+	Stories  StoriesConfig  `mapstructure:"stories"`
+	Label    LabelConfig    `mapstructure:"label"`
+}
+
+type UsernameConfig struct {
+	Remote RemoteConfig `mapstructure:"remote"`
+}
+
+type StoriesConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+}
+
+type RemoteConfig struct {
+	Formats []string `json:"formats"`
+	Format  string   `json:"format"`
+	Custom  string   `json:"custom" env:"USERNAME_REMOTE_CUSTOM_TEXT"`
+}
+
+type ImportConfig struct {
+	Instagram InstagramConfig `mapstructure:"instagram"`
+}
+
+type InstagramConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+}
+
+type MediaConfig struct {
+	HLS HLSConfig `mapstructure:"hls"`
+}
+
+type HLSConfig struct {
+	Enabled  bool   `mapstructure:"enabled" env:"MEDIA_HLS_ENABLED"`
+	Debug    bool   `mapstructure:"debug" env:"MEDIA_HLS_DEBUG"`
+	P2P      bool   `mapstructure:"p2p" env:"MEDIA_HLS_P2P"`
+	P2PDebug bool   `mapstructure:"p2p_debug" env:"MEDIA_HLS_P2P_DEBUG"`
+	Tracker  string `mapstructure:"tracker" env:"MEDIA_HLS_P2P_TRACKER"`
+	Ice      string `mapstructure:"ice" env:"MEDIA_HLS_P2P_ICE_SERVER"`
+}
+
+type LabelConfig struct {
+	Covid LabelContentConfig `mapstructure:"covid"`
+}
+
+type LabelContentConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Org     string `mapstructure:"org"`
+	Url     string `mapstructure:"url"`
+}
+
+type GroupsConfig struct {
+	Enabled bool `mapstructure:"enabled" env:"GROUPS_ENABLED"`
 }
 
 type ServerConfig struct {
@@ -59,7 +146,9 @@ type OpenTelemetryConfig struct {
 }
 
 type FederationConfig struct {
-	NodeInfo NodeInfoConfig `mapstructure:"nodeinfo"`
+	NodeInfo        NodeInfoConfig    `mapstructure:"nodeinfo"`
+	NetworkTimeline bool              `mapstructure:"network_timeline" env:"PF_NETWORK_TIMELINE"`
+	Activitypub     ActivitypubConfig `mapstructure:"activitypub"`
 }
 
 type NodeInfoConfig struct {
