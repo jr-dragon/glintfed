@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
@@ -33,7 +35,7 @@ func (s *svc) NodeinfoWellKnown(w http.ResponseWriter, r *http.Request) {
 	resp := NodeInfoWellKnownResponse{
 		Links: []NodeInfoLink{
 			{
-				Href: s.cfg.App.URL + "/api/nodeinfo/2.0.json",
+				Href: s.cfg.App.Url + "/api/nodeinfo/2.0.json",
 				Rel:  "http://nodeinfo.diaspora.software/ns/schema/2.0",
 			},
 		},
@@ -71,7 +73,7 @@ type Features struct {
 	Version             string             `json:"version"`
 	EnableRegistration  bool               `json:"open_registration"`
 	ShowLegalNoticeLink bool               `json:"show_legal_notice_link"`
-	Uploader            UploaderFeature      `json:"uploader"`
+	Uploader            UploaderFeature    `json:"uploader"`
 	Activitypub         ActivitypubFeature `json:"activitypub"`
 	AB                  map[string]bool    `json:"ab"`
 	Site                SiteFeature        `json:"site"`
@@ -158,7 +160,7 @@ type HLSFeature struct {
 
 type RemoteUsernameFeature struct {
 	Formats []string `json:"formats"`
-	Format  bool     `json:"format"`
+	Format  string   `json:"format"`
 	Custom  string   `json:"custom"`
 }
 
@@ -263,8 +265,87 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *svc) getFeatures() Features {
+	u, err := url.Parse(s.cfg.App.Url)
+	if err != nil {
+		slog.Warn("failed to parse app url", logs.ErrAttr(err))
+	}
+
+	var domain string
+	if u != nil {
+		domain = u.Host
+	}
+
 	return Features{
-		Version:            s.cfg.App.Version,
-		EnableRegistration: s.cfg.App.Auth.EnableRegistration,
+		Version:             s.cfg.App.Version,
+		EnableRegistration:  s.cfg.App.Auth.EnableRegistration,
+		ShowLegalNoticeLink: s.cfg.App.Instance.HasLegalNotice,
+		Uploader: UploaderFeature{
+			MaxPhotoSize:        s.cfg.App.MaxPhotoSize,
+			MaxCaptionLength:    s.cfg.App.MaxCaptionLength,
+			MaxAltextLength:     s.cfg.App.MaxAltextLength,
+			AlbumLimit:          s.cfg.App.MaxAlbumLength,
+			ImageQuality:        s.cfg.App.ImageQuality,
+			MaxCollectionLength: s.cfg.App.MaxCollectionLength,
+			OptimizeImage:       s.cfg.App.OptimizeImage,
+			OptimizeVideo:       s.cfg.App.OptimizeVideo,
+			MediaTypes:          s.cfg.App.MediaTypes,
+			MimeTypes:           strings.Split(s.cfg.App.MediaTypes, ","),
+			EnforceAcountLimit:  s.cfg.App.EnforceAcountLimit,
+		},
+		Activitypub: ActivitypubFeature{
+			Enabled:      s.cfg.App.Federation.Activitypub.Enabled,
+			RemoteFollow: s.cfg.App.Federation.Activitypub.RemoteFollow,
+		},
+		Site: SiteFeature{
+			Name:        s.cfg.App.Name,
+			Domain:      domain,
+			Url:         s.cfg.App.Url,
+			Description: s.cfg.App.Description,
+		},
+		Account: AccountFeature{
+			MaxAvatarSize:     s.cfg.App.MaxAvatarSize,
+			MaxBioLength:      s.cfg.App.MaxBioLength,
+			MaxNameLength:     s.cfg.App.MaxNameLength,
+			MinPasswordLength: s.cfg.App.MinPasswordLength,
+			MaxAccountSize:    s.cfg.App.MaxAccountSize,
+		},
+		Username: UsernameFeature{
+			Remote: RemoteUsernameFeature{
+				Formats: s.cfg.App.Instance.Username.Remote.Formats,
+				Format:  s.cfg.App.Instance.Username.Remote.Format,
+				Custom:  s.cfg.App.Instance.Username.Remote.Custom,
+			},
+		},
+		Features: FeaturesFeature{
+			Timelines: TimelineFeature{
+				Local:   true,
+				Network: s.cfg.App.Federation.NetworkTimeline,
+			},
+			MobileAPIs:         s.cfg.App.Auth.EnableOAuth,
+			MobileRegistration: s.cfg.App.Auth.InAppRegistration,
+			Stories:            s.cfg.App.Instance.Stories.Enabled,
+			Video:              strings.Contains(s.cfg.App.MediaTypes, "video/mp4"),
+			Import: ImportFeature{
+				Instagram: s.cfg.App.Import.Instagram.Enabled,
+				Mastodon:  false,
+				Pixelfed:  false,
+			},
+			Label: map[string]Label{
+				"covid": Label{
+					Enabled: s.cfg.App.Instance.Label.Covid.Enabled,
+					Org:     s.cfg.App.Instance.Label.Covid.Org,
+					Url:     s.cfg.App.Instance.Label.Covid.Url,
+				},
+			},
+			HLS: HLSFeature{
+				Enabled:  s.cfg.App.Media.HLS.Enabled,
+				Debug:    s.cfg.App.Media.HLS.Debug,
+				P2P:      s.cfg.App.Media.HLS.P2P,
+				P2PDebug: s.cfg.App.Media.HLS.P2PDebug,
+				Tracker:  s.cfg.App.Media.HLS.Tracker,
+				Ice:      s.cfg.App.Media.HLS.Ice,
+			},
+			Groups: s.cfg.App.Groups.Enabled,
+		},
 	}
 }

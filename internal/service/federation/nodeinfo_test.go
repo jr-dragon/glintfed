@@ -29,7 +29,7 @@ func TestSvc_NodeinfoWellKnown(t *testing.T) {
 	t.Run("Enabled", func(t *testing.T) {
 		cfg := data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = true
-		cfg.App.URL = "https://example.com"
+		cfg.App.Url = "https://example.com"
 		s := New(cfg, &InstanceUsecaseMock{})
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/nodeinfo", nil)

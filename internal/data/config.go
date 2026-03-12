@@ -15,7 +15,7 @@ type AppConfig struct {
 	Name        string `mapstructure:"name" env:"APP_NAME"`
 	Version     string `mapstructure:"version" env:"APP_VERSION"`
 	Env         string `mapstructure:"env" env:"APP_ENV"`
-	URL         string `mapstructure:"url" env:"APP_URL"`
+	Url         string `mapstructure:"url" env:"APP_URL"`
 	Description string `mapstructure:"description" env:"PF_DESCRIPTION"`
 
 	MediaTypes          string `mapstrucure:"media_types" env:"MEDIA_TYPES"`
@@ -58,9 +58,10 @@ type ActivitypubConfig struct {
 }
 
 type InstanceConfig struct {
-	Username UsernameConfig `mapstructure:"username"`
-	Stories  StoriesConfig  `mapstructure:"stories"`
-	Label    LabelConfig    `mapstructure:"label"`
+	HasLegalNotice bool           `mapstructure:"has_legal_notice" env:"INSTANCE_LEGAL_NOTICE"`
+	Username       UsernameConfig `mapstructure:"username"`
+	Stories        StoriesConfig  `mapstructure:"stories"`
+	Label          LabelConfig    `mapstructure:"label"`
 }
 
 type UsernameConfig struct {
