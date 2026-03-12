@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/service/internal"
 )
@@ -25,11 +26,18 @@ type InstanceUsecase interface {
 	GetHalfYearActiveUsers(ctx context.Context) (int, error)
 }
 
-func New(cfg data.Config, iuc InstanceUsecase) Service {
+type ProfileUsecase interface {
+	GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
+	Url(profile *ent.Profile, surfixes ...string) string
+	Permalink(profile *ent.Profile, surfixes ...string) string
+}
+
+func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase) Service {
 	return &svc{
 		cfg: cfg,
 
 		iuc: iuc,
+		puc: puc,
 	}
 }
 
@@ -37,6 +45,7 @@ type svc struct {
 	cfg data.Config
 
 	iuc InstanceUsecase
+	puc ProfileUsecase
 }
 
 func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {

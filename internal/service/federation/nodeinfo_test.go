@@ -14,7 +14,7 @@ func TestSvc_NodeinfoWellKnown(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
 		cfg := data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = false
-		s := New(cfg, &InstanceUsecaseMock{})
+		s := New(cfg, &InstanceUsecaseMock{}, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/nodeinfo", nil)
 		w := httptest.NewRecorder()
@@ -30,7 +30,7 @@ func TestSvc_NodeinfoWellKnown(t *testing.T) {
 		cfg := data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = true
 		cfg.App.Url = "https://example.com"
-		s := New(cfg, &InstanceUsecaseMock{})
+		s := New(cfg, &InstanceUsecaseMock{}, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/nodeinfo", nil)
 		w := httptest.NewRecorder()
@@ -61,7 +61,7 @@ func TestSvc_Nodeinfo(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
 		cfg := data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = false
-		s := New(cfg, &InstanceUsecaseMock{})
+		s := New(cfg, &InstanceUsecaseMock{}, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/nodeinfo/2.0.json", nil)
 		w := httptest.NewRecorder()
@@ -103,7 +103,7 @@ func TestSvc_Nodeinfo(t *testing.T) {
 				return 1, nil
 			},
 		}
-		s := New(cfg, mockIUC)
+		s := New(cfg, mockIUC, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/nodeinfo/2.0.json", nil)
 		w := httptest.NewRecorder()
