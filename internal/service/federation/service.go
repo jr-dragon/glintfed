@@ -18,7 +18,7 @@ type Service interface {
 	Nodeinfo(w http.ResponseWriter, r *http.Request)
 }
 
-//go:generate moq -out instance_usecase_mock.go . InstanceUsecase
+//go:generate moq -rm -out mock_instance_usecase.go . InstanceUsecase
 type InstanceUsecase interface {
 	GetLocalPostsCount(ctx context.Context) (int, error)
 	GetTotalUsers(ctx context.Context) (int, error)
@@ -26,6 +26,7 @@ type InstanceUsecase interface {
 	GetHalfYearActiveUsers(ctx context.Context) (int, error)
 }
 
+//go:generate moq -rm -out mock_profile_usecase.go . ProfileUsecase
 type ProfileUsecase interface {
 	GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
 	Url(profile *ent.Profile, surfixes ...string) string
