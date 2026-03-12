@@ -78,7 +78,16 @@ func TestSvc_Nodeinfo(t *testing.T) {
 		cfg.App.Federation.NodeInfo.Enabled = true
 		cfg.App.Name = "TestNode"
 		cfg.App.Version = "1.0.0"
+		cfg.App.Url = "https://example.com"
+		cfg.App.Description = "A test node"
 		cfg.App.Auth.EnableRegistration = true
+		cfg.App.Instance.HasLegalNotice = true
+		cfg.App.MaxPhotoSize = 1024
+		cfg.App.MaxCaptionLength = 500
+		cfg.App.Federation.Activitypub.Enabled = true
+		cfg.App.MaxAvatarSize = 2048
+		cfg.App.MaxBioLength = 150
+		cfg.App.Groups.Enabled = true
 
 		mockIUC := &InstanceUsecaseMock{
 			GetTotalUsersFunc: func(ctx context.Context) (int, error) {
@@ -128,6 +137,45 @@ func TestSvc_Nodeinfo(t *testing.T) {
 
 		if resp.OpenRegistrations != true {
 			t.Errorf("expected openRegistrations true, got %v", resp.OpenRegistrations)
+		}
+
+		// Test Features
+		features := resp.Metadata.Config.Features
+		if features.Version != "1.0.0" {
+			t.Errorf("expected features version 1.0.0, got %s", features.Version)
+		}
+		if features.EnableRegistration != true {
+			t.Errorf("expected features open_registration true, got %v", features.EnableRegistration)
+		}
+		if features.ShowLegalNoticeLink != true {
+			t.Errorf("expected show_legal_notice_link true, got %v", features.ShowLegalNoticeLink)
+		}
+		if features.Uploader.MaxPhotoSize != 1024 {
+			t.Errorf("expected max_photo_size 1024, got %d", features.Uploader.MaxPhotoSize)
+		}
+		if features.Uploader.MaxCaptionLength != 500 {
+			t.Errorf("expected max_caption_length 500, got %d", features.Uploader.MaxCaptionLength)
+		}
+		if features.Activitypub.Enabled != true {
+			t.Errorf("expected activitypub enabled true, got %v", features.Activitypub.Enabled)
+		}
+		if features.Site.Name != "TestNode" {
+			t.Errorf("expected site name TestNode, got %s", features.Site.Name)
+		}
+		if features.Site.Url != "https://example.com" {
+			t.Errorf("expected site url https://example.com, got %s", features.Site.Url)
+		}
+		if features.Site.Description != "A test node" {
+			t.Errorf("expected site description A test node, got %s", features.Site.Description)
+		}
+		if features.Account.MaxAvatarSize != 2048 {
+			t.Errorf("expected max_avatar_size 2048, got %d", features.Account.MaxAvatarSize)
+		}
+		if features.Account.MaxBioLength != 150 {
+			t.Errorf("expected max_bio_length 150, got %d", features.Account.MaxBioLength)
+		}
+		if features.Features.Groups != true {
+			t.Errorf("expected groups enabled true, got %v", features.Features.Groups)
 		}
 	})
 }
