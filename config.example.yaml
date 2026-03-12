@@ -39,7 +39,13 @@ app:
   federation:
     nodeinfo:
       enabled: true
+    webfinger:
+      enabled: true
     network_timeline: true
+    activitypub:
+      enabled: false
+      remote_follow: true
+      shared_inbox: true
   
   import:
     instagram:

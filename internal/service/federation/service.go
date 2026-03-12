@@ -51,12 +51,6 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement
 }
 
-func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.Webfinger")
-	defer span.End()
-	// TODO: Implement
-}
-
 func (s *svc) HostMeta(w http.ResponseWriter, r *http.Request) {
 	_, span := internal.T.Start(r.Context(), "Federation.HostMeta")
 	defer span.End()

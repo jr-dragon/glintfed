@@ -53,8 +53,9 @@ type UploaderConfig struct {
 }
 
 type ActivitypubConfig struct {
-	Enabled      bool `json:"enabled"`
-	RemoteFollow bool `json:"remote_follow"`
+	Enabled      bool `json:"enabled" env:"ACTIVITY_PUB"`
+	RemoteFollow bool `json:"remote_follow" env:"AP_REMOTE_FOLLOW"`
+	SharedInbox  bool `json:"shared_inbox" env:"AP_SHAREDINBOX"`
 }
 
 type InstanceConfig struct {
@@ -148,12 +149,17 @@ type OpenTelemetryConfig struct {
 
 type FederationConfig struct {
 	NodeInfo        NodeInfoConfig    `mapstructure:"nodeinfo"`
+	Webfinger       WebfingerConfig   `mapstructure:"webfinger"`
 	NetworkTimeline bool              `mapstructure:"network_timeline" env:"PF_NETWORK_TIMELINE"`
 	Activitypub     ActivitypubConfig `mapstructure:"activitypub"`
 }
 
 type NodeInfoConfig struct {
-	Enabled bool `mapstructure:"enabled"`
+	Enabled bool `mapstructure:"enabled" env:"NODEINFO"`
+}
+
+type WebfingerConfig struct {
+	Enabled bool `mapstructure:"enabled" env:"WEBFINGER"`
 }
 
 func NewConfig(paths ...string) (cfg Config, err error) {
