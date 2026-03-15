@@ -4,3 +4,8 @@ services:
     ports:
       - 4317:4317 # gRPC
       - 16686:16686 # WebUI 
+  
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379

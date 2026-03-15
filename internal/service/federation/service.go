@@ -1,8 +1,11 @@
 package federation
 
 import (
+	"context"
 	"net/http"
 
+	"glintfed.org/ent"
+	"glintfed.org/internal/data"
 	"glintfed.org/internal/service/internal"
 )
 
@@ -15,44 +18,58 @@ type Service interface {
 	Nodeinfo(w http.ResponseWriter, r *http.Request)
 }
 
-func New() Service {
-	return &svc{}
+//go:generate moq -rm -out mock_instance_usecase.go . InstanceUsecase
+type InstanceUsecase interface {
+	GetLocalPostsCount(ctx context.Context) (int, error)
+	GetTotalUsers(ctx context.Context) (int, error)
+	GetMonthActiveUsers(ctx context.Context) (int, error)
+	GetHalfYearActiveUsers(ctx context.Context) (int, error)
+	GetBlockedDomains(ctx context.Context) (map[string]struct{}, error)
 }
 
-type svc struct{}
+//go:generate moq -rm -out mock_profile_usecase.go . ProfileUsecase
+type ProfileUsecase interface {
+	GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
+	RemoteUrlExists(ctx context.Context, url string) (bool, error)
 
-func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.SharedInbox")
-	defer span.End()
-	// TODO: Implement
+	Url(profile *ent.Profile, surfixes ...string) string
+	Permalink(profile *ent.Profile, surfixes ...string) string
 }
 
-func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.UserInbox")
-	defer span.End()
-	// TODO: Implement
+//go:generate moq -rm -out mock_status_usecase.go . StatusUsecase
+type StatusUsecase interface {
+	ObjectUrlExists(ctx context.Context, url string) (bool, error)
 }
 
-func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.Webfinger")
-	defer span.End()
-	// TODO: Implement
+//go:generate moq -rm -out mock_worker_usecase.go . WorkerUsecase
+type WorkerUsecase interface {
+	Delete(ctx context.Context, header http.Header, payload any)
+	Inbox(ctx context.Context, header http.Header, payload any)
+	Validate(ctx context.Context, username string, header http.Header, payload any)
 }
 
-func (s *svc) NodeinfoWellKnown(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.NodeinfoWellKnown")
-	defer span.End()
-	// TODO: Implement
+func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase) Service {
+	return &svc{
+		cfg: cfg,
+
+		iuc: iuc,
+		puc: puc,
+		suc: suc,
+		// TODO: add wuc
+	}
+}
+
+type svc struct {
+	cfg data.Config
+
+	iuc InstanceUsecase
+	puc ProfileUsecase
+	suc StatusUsecase
+	wuc WorkerUsecase
 }
 
 func (s *svc) HostMeta(w http.ResponseWriter, r *http.Request) {
 	_, span := internal.T.Start(r.Context(), "Federation.HostMeta")
-	defer span.End()
-	// TODO: Implement
-}
-
-func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.Nodeinfo")
 	defer span.End()
 	// TODO: Implement
 }

@@ -1,6 +1,67 @@
 app:
   name: glintfed
+  version: 0.0.0
   env: local
+  url: http://localhost:8000
+  description: ""
+
+  media_types: image/jpeg,image/jpg,image/png,image/gif
+  max_photo_size: 15000
+  max_caption_length: 500
+  max_altext_length: 1000
+  max_album_length: 4
+  image_quality: 80
+  max_collection_length: 100
+  optimize_image: true
+  optimize_video: true
+  enforce_account_limit: true
+
+  max_avatar_size: 2000
+  max_bio_length: 125
+  max_name_length: 30
+  min_password_length: 8
+  max_account_size: 1000000
+
+  auth:
+    enable_registration: true
+    enable_oauth: true
+    in_app_registration: true
+  
+  instance:
+    username:
+      remote:
+        formats: [ "@", "from", "custom" ]
+        format: "@"
+        custom: ""
+    stories:
+      enabled: true
+
+  federation:
+    nodeinfo:
+      enabled: true
+    webfinger:
+      enabled: true
+    network_timeline: true
+    activitypub:
+      enabled: false
+      remote_follow: true
+      shared_inbox: true
+  
+  import:
+    instagram:
+      enabled: true
+
+  media:
+    hls:
+      enabled: false
+      debug: false
+      p2p: false
+      p2p_debug: false
+      tracker: wss://tracker.webtorrent.dev
+      ice: stun:stun.l.google.com:19302
+  
+  groups:
+    enable: false
 
 server:
   api:

@@ -1,0 +1,184 @@
+package federation
+
+import (
+	"encoding/json"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"net/url"
+	"strings"
+
+	"glintfed.org/ent"
+	"glintfed.org/internal/data"
+	"glintfed.org/internal/lib/logs"
+	"glintfed.org/internal/service/internal"
+)
+
+type SharedInboxResponse struct {
+	Subject string            `json:"subject"`
+	Aliases []string          `json:"aliases"`
+	Links   []SharedInboxLink `json:"links"`
+}
+
+type SharedInboxLink struct {
+	Rel      string  `json:"rel"`
+	Type     *string `json:"type,omitempty"`
+	Href     *string `json:"href,omitempty"`
+	Template *string `json:"template,omitempty"`
+}
+
+func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
+	_, span := internal.T.Start(r.Context(), "Federation.Webfinger")
+	defer span.End()
+
+	resource := r.URL.Query().Get("resource")
+	if !s.cfg.App.Federation.Webfinger.Enabled || resource == "" {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	u, err := url.Parse(s.cfg.App.Url)
+	if err != nil || u == nil {
+		const msg = "failed to parse app url"
+		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	if isShareboxResource(s.cfg, u, resource) {
+		resp := SharedInboxResponse{
+			Subject: resource,
+			Aliases: []string{"https://" + u.Host + "/i/actor"},
+			Links: []SharedInboxLink{
+				{
+					Rel:  "http://webfinger.net/rel/profile-page",
+					Type: new("text/html"),
+					Href: new("https://" + u.Host + "/site/kb/instance-actor"),
+				},
+				{
+					Rel:  "self",
+					Type: new("application/activity+json"),
+					Href: new("https://" + u.Host + "/i/actor"),
+				},
+				{
+					Rel:      "http://ostatus.org/schema/1.0/subscribe",
+					Template: new("https://" + u.Host + "/authorize_interaction?uri={uri}"),
+				},
+			},
+		}
+
+		json.NewEncoder(w).Encode(resp)
+		return
+	}
+
+	if u.Scheme == "https" {
+		if strings.HasPrefix(resource, "https://"+u.Host+"/users/") {
+			username := strings.TrimLeft(resource, "https://"+u.Host+"/users/")
+			if len(username) > s.cfg.App.MaxNameLength {
+				slog.ErrorContext(r.Context(), "username too long", slog.String("username", username))
+				http.Error(w, "", http.StatusBadRequest)
+				return
+			}
+
+			if !isValidUsername(username) {
+				slog.ErrorContext(r.Context(), "invalid username", slog.String("username", username))
+				http.Error(w, "", http.StatusBadRequest)
+				return
+			}
+
+			profile, err := s.puc.GetByUsername(r.Context(), username)
+			if err != nil {
+				slog.ErrorContext(r.Context(), "failed to get profile by username", logs.ErrAttr(err))
+				http.Error(w, "", http.StatusBadRequest)
+				return
+			}
+
+			webfinger, err := s.newWebfinger(profile)
+			if err != nil {
+				slog.ErrorContext(r.Context(), "failed to create webfinger struct", logs.ErrAttr(err))
+				http.Error(w, "", http.StatusInternalServerError)
+				return
+			}
+
+			json.NewEncoder(w).Encode(webfinger)
+		} else {
+			slog.ErrorContext(r.Context(), "resource starts with 'https://', but invalid domain or path")
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+	}
+}
+
+func isShareboxResource(cfg data.Config, u *url.URL, resource string) bool {
+	var sb strings.Builder
+	sb.WriteString("acct:")
+	sb.WriteString(u.Host)
+	sb.WriteRune('@')
+	sb.WriteString(u.Host)
+
+	return cfg.App.Federation.Activitypub.SharedInbox &&
+		resource == sb.String()
+}
+
+func isValidUsername(username string) bool {
+	for _, c := range username {
+		if c == '_' || c == '.' || c == '-' {
+			continue
+		}
+		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') {
+			continue
+		}
+
+		return false
+	}
+
+	return true
+}
+
+type webfinger struct {
+	Subject string            `json:"subject"`
+	Aliases []string          `json:"aliases"`
+	Links   []SharedInboxLink `json:"links"`
+}
+
+func (s *svc) newWebfinger(profile *ent.Profile) (webfinger, error) {
+	u, err := url.Parse(s.cfg.App.Url)
+	if err != nil || u == nil {
+		slog.Error("failed to parse app url", logs.ErrAttr(err), slog.Any("parsed", u))
+		return webfinger{}, err
+	}
+
+	return webfinger{
+		Subject: fmt.Sprintf("acct:%s@%s", profile.Username, u.Host),
+		Aliases: []string{
+			s.puc.Url(profile),
+			s.puc.Permalink(profile),
+		},
+		Links: []SharedInboxLink{
+			{
+				Rel:  "http://webfinger.net/rel/profile-page",
+				Type: new("text/html"),
+				Href: new(s.puc.Url(profile)),
+			},
+			{
+				Rel:  "http://schemas.google.com/g/2010#updates-from",
+				Type: new("application/atom+xml"),
+				Href: new(s.puc.Permalink(profile, ".atom")),
+			},
+			{
+				Rel:  "self",
+				Type: new("application/activity+json"),
+				Href: new(s.puc.Permalink(profile)),
+			},
+			{
+				Rel:  "http://webfinger.net/rel/avatar",
+				Type: new("image/webp"),
+				Href: &profile.AvatarURL,
+			},
+			{
+				Rel:      "http://ostatus.org/schema/1.0/subscribe",
+				Template: new("https://" + u.Host + "/authorize_interaction?uri={uri}"),
+			},
+		},
+	}, nil
+}
