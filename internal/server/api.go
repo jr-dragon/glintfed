@@ -51,6 +51,7 @@ import (
 	"glintfed.org/internal/usecase/instance"
 	"glintfed.org/internal/usecase/profile"
 	"glintfed.org/internal/usecase/status"
+	"glintfed.org/internal/usecase/worker"
 )
 
 func NewAPIServer(cfg data.Config, client *data.Client) *http.Server {
@@ -64,7 +65,7 @@ func NewAPIServer(cfg data.Config, client *data.Client) *http.Server {
 
 	// Services
 	healthSvc := healthcheck.New()
-	fedSvc := federation.New(cfg, instance.NewUsecase(client), profile.NewUsecase(client, cfg), status.NewUsecase(client))
+	fedSvc := federation.New(cfg, instance.NewUsecase(client), profile.NewUsecase(client, cfg), status.NewUsecase(client), worker.NewInboxUsecase(client))
 	iaSvc := instanceactor.New()
 	storySvc := story.New()
 	mediaSvc := media.New()

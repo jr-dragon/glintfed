@@ -48,14 +48,14 @@ type WorkerUsecase interface {
 	Validate(ctx context.Context, username string, header http.Header, payload any)
 }
 
-func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase) Service {
+func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase, wuc WorkerUsecase) Service {
 	return &svc{
 		cfg: cfg,
 
 		iuc: iuc,
 		puc: puc,
 		suc: suc,
-		// TODO: add wuc
+		wuc: wuc,
 	}
 }
 
