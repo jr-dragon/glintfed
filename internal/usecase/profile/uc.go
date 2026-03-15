@@ -31,3 +31,14 @@ func (uc *Usecase) GetByUsername(ctx context.Context, username string) (*ent.Pro
 		Where(profile.UsernameEQ(username)).
 		Only(ctx)
 }
+
+// RemoteUrlExists
+//
+//	SELECT exists(*)
+//	FROM profiles
+//	WHERE remote_url = ?
+func (uc *Usecase) RemoteUrlExists(ctx context.Context, url string) (bool, error) {
+	return uc.client.Ent.Profile.Query().
+		Where(profile.RemoteURL(url)).
+		Exist(ctx)
+}

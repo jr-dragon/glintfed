@@ -18,6 +18,9 @@ var _ InstanceUsecase = &InstanceUsecaseMock{}
 //
 //		// make and configure a mocked InstanceUsecase
 //		mockedInstanceUsecase := &InstanceUsecaseMock{
+//			GetBlockedDomainsFunc: func(ctx context.Context) (map[string]struct{}, error) {
+//				panic("mock out the GetBlockedDomains method")
+//			},
 //			GetHalfYearActiveUsersFunc: func(ctx context.Context) (int, error) {
 //				panic("mock out the GetHalfYearActiveUsers method")
 //			},
@@ -37,6 +40,9 @@ var _ InstanceUsecase = &InstanceUsecaseMock{}
 //
 //	}
 type InstanceUsecaseMock struct {
+	// GetBlockedDomainsFunc mocks the GetBlockedDomains method.
+	GetBlockedDomainsFunc func(ctx context.Context) (map[string]struct{}, error)
+
 	// GetHalfYearActiveUsersFunc mocks the GetHalfYearActiveUsers method.
 	GetHalfYearActiveUsersFunc func(ctx context.Context) (int, error)
 
@@ -51,6 +57,11 @@ type InstanceUsecaseMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// GetBlockedDomains holds details about calls to the GetBlockedDomains method.
+		GetBlockedDomains []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
 		// GetHalfYearActiveUsers holds details about calls to the GetHalfYearActiveUsers method.
 		GetHalfYearActiveUsers []struct {
 			// Ctx is the ctx argument value.
@@ -72,10 +83,43 @@ type InstanceUsecaseMock struct {
 			Ctx context.Context
 		}
 	}
+	lockGetBlockedDomains      sync.RWMutex
 	lockGetHalfYearActiveUsers sync.RWMutex
 	lockGetLocalPostsCount     sync.RWMutex
 	lockGetMonthActiveUsers    sync.RWMutex
 	lockGetTotalUsers          sync.RWMutex
+}
+
+// GetBlockedDomains calls GetBlockedDomainsFunc.
+func (mock *InstanceUsecaseMock) GetBlockedDomains(ctx context.Context) (map[string]struct{}, error) {
+	if mock.GetBlockedDomainsFunc == nil {
+		panic("InstanceUsecaseMock.GetBlockedDomainsFunc: method is nil but InstanceUsecase.GetBlockedDomains was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockGetBlockedDomains.Lock()
+	mock.calls.GetBlockedDomains = append(mock.calls.GetBlockedDomains, callInfo)
+	mock.lockGetBlockedDomains.Unlock()
+	return mock.GetBlockedDomainsFunc(ctx)
+}
+
+// GetBlockedDomainsCalls gets all the calls that were made to GetBlockedDomains.
+// Check the length with:
+//
+//	len(mockedInstanceUsecase.GetBlockedDomainsCalls())
+func (mock *InstanceUsecaseMock) GetBlockedDomainsCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockGetBlockedDomains.RLock()
+	calls = mock.calls.GetBlockedDomains
+	mock.lockGetBlockedDomains.RUnlock()
+	return calls
 }
 
 // GetHalfYearActiveUsers calls GetHalfYearActiveUsersFunc.

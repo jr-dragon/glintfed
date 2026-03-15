@@ -33,7 +33,7 @@ func TestWebfinger(t *testing.T) {
 	t.Run("bad_request_if_disabled", func(t *testing.T) {
 		disabledCfg := cfg
 		disabledCfg.App.Federation.Webfinger.Enabled = false
-		s := New(disabledCfg, nil, nil)
+		s := New(disabledCfg, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource=acct:alice@glintfed.test", nil)
 		w := httptest.NewRecorder()
@@ -44,7 +44,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("bad_request_if_missing_resource", func(t *testing.T) {
-		s := New(cfg, nil, nil)
+		s := New(cfg, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger", nil)
 		w := httptest.NewRecorder()
@@ -55,7 +55,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("shared_inbox_resource", func(t *testing.T) {
-		s := New(cfg, nil, nil)
+		s := New(cfg, nil, nil, nil)
 
 		resource := "acct:glintfed.test@glintfed.test"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -87,7 +87,7 @@ func TestWebfinger(t *testing.T) {
 				return "https://glintfed.test/users/" + profile.Username + strings.Join(surfixes, "")
 			},
 		}
-		s := New(cfg, nil, puc)
+		s := New(cfg, nil, puc, nil)
 
 		resource := "https://glintfed.test/users/alice"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -110,7 +110,7 @@ func TestWebfinger(t *testing.T) {
 				return nil, fmt.Errorf("not found")
 			},
 		}
-		s := New(cfg, nil, puc)
+		s := New(cfg, nil, puc, nil)
 
 		resource := "https://glintfed.test/users/bob"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -122,7 +122,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("username_too_long", func(t *testing.T) {
-		s := New(cfg, nil, nil)
+		s := New(cfg, nil, nil, nil)
 
 		resource := "https://glintfed.test/users/thisusernameiswaytoolongtobevalid"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -134,7 +134,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("invalid_username_characters", func(t *testing.T) {
-		s := New(cfg, nil, nil)
+		s := New(cfg, nil, nil, nil)
 
 		resource := "https://glintfed.test/users/alice!"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -146,7 +146,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("invalid_resource_domain", func(t *testing.T) {
-		s := New(cfg, nil, nil)
+		s := New(cfg, nil, nil, nil)
 
 		resource := "https://otherdomain.test/users/alice"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)

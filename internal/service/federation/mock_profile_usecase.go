@@ -25,6 +25,9 @@ var _ ProfileUsecase = &ProfileUsecaseMock{}
 //			PermalinkFunc: func(profile *ent.Profile, surfixes ...string) string {
 //				panic("mock out the Permalink method")
 //			},
+//			RemoteUrlExistsFunc: func(ctx context.Context, url string) (bool, error) {
+//				panic("mock out the RemoteUrlExists method")
+//			},
 //			UrlFunc: func(profile *ent.Profile, surfixes ...string) string {
 //				panic("mock out the Url method")
 //			},
@@ -40,6 +43,9 @@ type ProfileUsecaseMock struct {
 
 	// PermalinkFunc mocks the Permalink method.
 	PermalinkFunc func(profile *ent.Profile, surfixes ...string) string
+
+	// RemoteUrlExistsFunc mocks the RemoteUrlExists method.
+	RemoteUrlExistsFunc func(ctx context.Context, url string) (bool, error)
 
 	// UrlFunc mocks the Url method.
 	UrlFunc func(profile *ent.Profile, surfixes ...string) string
@@ -60,6 +66,13 @@ type ProfileUsecaseMock struct {
 			// Surfixes is the surfixes argument value.
 			Surfixes []string
 		}
+		// RemoteUrlExists holds details about calls to the RemoteUrlExists method.
+		RemoteUrlExists []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// URL is the url argument value.
+			URL string
+		}
 		// Url holds details about calls to the Url method.
 		Url []struct {
 			// Profile is the profile argument value.
@@ -68,9 +81,10 @@ type ProfileUsecaseMock struct {
 			Surfixes []string
 		}
 	}
-	lockGetByUsername sync.RWMutex
-	lockPermalink     sync.RWMutex
-	lockUrl           sync.RWMutex
+	lockGetByUsername   sync.RWMutex
+	lockPermalink       sync.RWMutex
+	lockRemoteUrlExists sync.RWMutex
+	lockUrl             sync.RWMutex
 }
 
 // GetByUsername calls GetByUsernameFunc.
@@ -142,6 +156,42 @@ func (mock *ProfileUsecaseMock) PermalinkCalls() []struct {
 	mock.lockPermalink.RLock()
 	calls = mock.calls.Permalink
 	mock.lockPermalink.RUnlock()
+	return calls
+}
+
+// RemoteUrlExists calls RemoteUrlExistsFunc.
+func (mock *ProfileUsecaseMock) RemoteUrlExists(ctx context.Context, url string) (bool, error) {
+	if mock.RemoteUrlExistsFunc == nil {
+		panic("ProfileUsecaseMock.RemoteUrlExistsFunc: method is nil but ProfileUsecase.RemoteUrlExists was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		URL string
+	}{
+		Ctx: ctx,
+		URL: url,
+	}
+	mock.lockRemoteUrlExists.Lock()
+	mock.calls.RemoteUrlExists = append(mock.calls.RemoteUrlExists, callInfo)
+	mock.lockRemoteUrlExists.Unlock()
+	return mock.RemoteUrlExistsFunc(ctx, url)
+}
+
+// RemoteUrlExistsCalls gets all the calls that were made to RemoteUrlExists.
+// Check the length with:
+//
+//	len(mockedProfileUsecase.RemoteUrlExistsCalls())
+func (mock *ProfileUsecaseMock) RemoteUrlExistsCalls() []struct {
+	Ctx context.Context
+	URL string
+} {
+	var calls []struct {
+		Ctx context.Context
+		URL string
+	}
+	mock.lockRemoteUrlExists.RLock()
+	calls = mock.calls.RemoteUrlExists
+	mock.lockRemoteUrlExists.RUnlock()
 	return calls
 }
 
