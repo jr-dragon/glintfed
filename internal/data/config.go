@@ -56,6 +56,7 @@ type ActivitypubConfig struct {
 	Enabled      bool `json:"enabled" env:"ACTIVITY_PUB"`
 	RemoteFollow bool `json:"remote_follow" env:"AP_REMOTE_FOLLOW"`
 	SharedInbox  bool `json:"shared_inbox" env:"AP_SHAREDINBOX"`
+	Inbox        bool `json:"inbox" env:"AP_INBOX"`
 }
 
 type InstanceConfig struct {

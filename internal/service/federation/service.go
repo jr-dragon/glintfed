@@ -41,6 +41,13 @@ type StatusUsecase interface {
 	ObjectUrlExists(ctx context.Context, url string) (bool, error)
 }
 
+//go:generate moq -rm -out mock_worker_usecase.go . WorkerUsecase
+type WorkerUsecase interface {
+	Delete(ctx context.Context, header http.Header, payload any)
+	Inbox(ctx context.Context, header http.Header, payload any)
+	Validate(ctx context.Context, username string, header http.Header, payload any)
+}
+
 func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase) Service {
 	return &svc{
 		cfg: cfg,
@@ -48,6 +55,7 @@ func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUse
 		iuc: iuc,
 		puc: puc,
 		suc: suc,
+		// TODO: add wuc
 	}
 }
 
@@ -57,12 +65,7 @@ type svc struct {
 	iuc InstanceUsecase
 	puc ProfileUsecase
 	suc StatusUsecase
-}
-
-func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.UserInbox")
-	defer span.End()
-	// TODO: Implement
+	wuc WorkerUsecase
 }
 
 func (s *svc) HostMeta(w http.ResponseWriter, r *http.Request) {
