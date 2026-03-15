@@ -3,6 +3,7 @@ package federation
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,6 +11,11 @@ import (
 
 	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
+)
+
+var (
+	ErrMissingUrl  = errors.New("missing url")
+	ErrInvalidType = errors.New("invalid type")
 )
 
 type inboxPayload struct {
@@ -47,39 +53,34 @@ func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if payload.Type != nil {
-		if *payload.Type == "Delete" && payload.Object != nil {
-			switch payload.Object.Type {
-			case "Person":
-				if exists, err := s.puc.RemoteUrlExists(r.Context(), payload.Object.ID); err == nil && exists {
-					// TODO: s.wuc.Delete(r.Context(), r.Header, payload)
-				} else if err != nil {
-					const msg = "failed to check remote url exists"
-					slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
-					http.Error(w, msg, http.StatusInternalServerError)
-					return
+		switch *payload.Type {
+		case "Follow", "Accept":
+			s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
+		case "Delete":
+			if payload.Object != nil {
+				if err := s.handleDelete(r.Context(), r.Header, payload); err != nil {
+					slog.ErrorContext(r.Context(), "failed to handle delete", logs.ErrAttr(err), slog.Any("payload", payload))
+					switch {
+					case errors.Is(err, ErrMissingUrl):
+						w.WriteHeader(http.StatusNoContent)
+					case errors.Is(err, ErrInvalidType):
+						w.WriteHeader(http.StatusBadRequest)
+					default:
+						w.WriteHeader(http.StatusInternalServerError)
+					}
+				} else {
+					w.WriteHeader(http.StatusNoContent)
 				}
-			case "Tombstone":
-				if exists, err := s.suc.ObjectUrlExists(r.Context(), payload.Object.ID); err == nil && exists {
-					// TODO: s.wuc.Delete(r.Context(), r.Header, payload)
-				} else if err != nil {
-					const msg = "failed to check object url exists"
-					slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
-					http.Error(w, msg, http.StatusInternalServerError)
-					return
-				}
-			case "Story":
-				// TODO: s.wuc.Delete(r.Context(), r.Header, payload)
+				return
 			}
-		} else if *payload.Type == "Follow" || *payload.Type == "Accept" {
-			// TODO: s.wuc.Inbox(r.Context(), r.Header, payload)
-		} else {
-			const msg = "invalid payload"
-			slog.ErrorContext(r.Context(), msg, slog.Any("type", payload))
+			fallthrough
+		default:
+			slog.ErrorContext(r.Context(), "invalid payload", slog.Any("type", payload))
 			http.Error(w, "", http.StatusBadRequest)
 			return
 		}
 	} else {
-		// TODO: s.wuc.Inbox(r.Context(), r.Header, payload)
+		s.wuc.Inbox(r.Context(), r.Header, payload)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -109,39 +110,34 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if payload.Type != nil {
-		if *payload.Type == "Delete" && payload.Object != nil {
-			switch payload.Object.Type {
-			case "Person":
-				if exists, err := s.puc.RemoteUrlExists(r.Context(), payload.Object.ID); err == nil && exists {
-					// TODO: go s.wuc.Delete(r.Context(), r.Header, payload)
-				} else if err != nil {
-					const msg = "failed to check remote url exists"
-					slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
-					http.Error(w, msg, http.StatusInternalServerError)
-					return
+		switch *payload.Type {
+		case "Follow", "Accept":
+			s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
+		case "Delete":
+			if payload.Object != nil {
+				if err := s.handleDelete(r.Context(), r.Header, payload); err != nil {
+					slog.ErrorContext(r.Context(), "failed to handle delete", logs.ErrAttr(err), slog.Any("payload", payload))
+					switch {
+					case errors.Is(err, ErrMissingUrl):
+						w.WriteHeader(http.StatusNoContent)
+					case errors.Is(err, ErrInvalidType):
+						w.WriteHeader(http.StatusBadRequest)
+					default:
+						w.WriteHeader(http.StatusInternalServerError)
+					}
+				} else {
+					w.WriteHeader(http.StatusNoContent)
 				}
-			case "Tombstone":
-				if exists, err := s.suc.ObjectUrlExists(r.Context(), payload.Object.ID); err == nil && exists {
-					// TODO: go s.wuc.Delete(r.Context(), r.Header, payload)
-				} else if err != nil {
-					const msg = "failed to check object url exists"
-					slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
-					http.Error(w, msg, http.StatusInternalServerError)
-					return
-				}
-			case "Story":
-				// TODO: go s.wuc.Delete(r.Context(), r.Header, payload)
+				return
 			}
-		} else if *payload.Type == "Follow" || *payload.Type == "Accept" {
-			// TODO: go s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
-		} else {
-			const msg = "invalid payload"
-			slog.ErrorContext(r.Context(), msg, slog.Any("type", payload))
+			fallthrough
+		default:
+			slog.ErrorContext(r.Context(), "invalid payload", slog.Any("type", payload))
 			http.Error(w, "", http.StatusBadRequest)
 			return
 		}
 	} else {
-		// TODO: go s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
+		s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -162,5 +158,29 @@ func (s *svc) validInboxDomain(ctx context.Context, domain string) error {
 		return fmt.Errorf("host %s has been blocked", parsed.Host)
 	}
 
+	return nil
+}
+
+func (s *svc) handleDelete(ctx context.Context, header http.Header, payload inboxPayload) error {
+	switch payload.Object.Type {
+	case "Person":
+		if exists, err := s.puc.RemoteUrlExists(ctx, payload.Object.ID); err != nil {
+			return err
+		} else if !exists {
+			return ErrMissingUrl
+		}
+	case "Tombstone":
+		if exists, err := s.suc.ObjectUrlExists(ctx, payload.Object.ID); err != nil {
+			return err
+		} else if !exists {
+			return ErrMissingUrl
+		}
+	case "Story":
+		break
+	default:
+		return ErrInvalidType
+	}
+
+	s.wuc.Delete(ctx, header, payload)
 	return nil
 }
