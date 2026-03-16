@@ -50,14 +50,27 @@ func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, paylo
 	}
 
 	if err := inbox.verifySignature(ctx, header, payload); err != nil {
-		slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
+		if !ent.IsNotFound(err) {
+			slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
+		} else {
+			slog.WarnContext(ctx, "ignored missing profile", logs.ErrAttr(err))
+		}
 		return
 	}
 
 	if payload.Object.Type == "Person" && payload.Actor != nil && *payload.Actor == payload.Object.ID {
-		// todo
+		profile, err := inbox.client.Ent.Profile.Query().
+			Where(profile.DomainNotNil(), profile.StatusIsNil(), profile.RemoteURL(payload.Object.ID)).
+			First(ctx)
+		if err != nil {
+			slog.ErrorContext(ctx, "failed to get profile", logs.ErrAttr(err))
+			return
+		}
+
+		_ = profile
+		// TODO: DeleteRemoteProfilePipeline::dispatch(profile)
 	} else {
-		// todo
+		// TODO: ActivityHandler::dispatch(header, nil, payload)
 	}
 }
 
@@ -100,9 +113,7 @@ func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Head
 	}
 
 	actor, err := inbox.client.Ent.Profile.Query().Where(profile.KeyIDEQ(signature.Raw["keyId"])).First(ctx)
-	if ent.IsNotFound(err) {
-		// todo: first or create if remote url, failed if local url
-	} else if err != nil {
+	if err != nil {
 		return fmt.Errorf("failed to get profile: %w", err)
 	}
 
