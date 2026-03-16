@@ -7,6 +7,7 @@ import (
 	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/service/internal"
+	"glintfed.org/internal/usecase/worker"
 )
 
 type Service interface {
@@ -43,9 +44,9 @@ type StatusUsecase interface {
 
 //go:generate moq -rm -out mock_worker_usecase.go . WorkerUsecase
 type WorkerUsecase interface {
-	Delete(ctx context.Context, header http.Header, payload any)
-	Inbox(ctx context.Context, header http.Header, payload any)
-	Validate(ctx context.Context, username string, header http.Header, payload any)
+	Delete(ctx context.Context, header http.Header, payload worker.InboxPayload)
+	Inbox(ctx context.Context, header http.Header, payload worker.InboxPayload)
+	Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload)
 }
 
 func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase, wuc WorkerUsecase) Service {

@@ -1,33 +1,25 @@
 package federation
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
 
 	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
+	"glintfed.org/internal/usecase/worker"
 )
 
 var (
 	ErrMissingUrl  = errors.New("missing url")
 	ErrInvalidType = errors.New("invalid type")
 )
-
-type inboxPayload struct {
-	ID     string              `json:"id"`
-	Type   *string             `json:"type,omitempty"`
-	Object *inboxPayloadObject `json:"object,omitempty"`
-}
-
-type inboxPayloadObject struct {
-	ID   string `json:"id"`
-	Type string `json:"type"`
-}
 
 func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
 	_, span := internal.T.Start(r.Context(), "Federation.SharedInbox")
@@ -39,8 +31,16 @@ func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload inboxPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	var payload worker.InboxPayload
+	raw, err := io.ReadAll(r.Body)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "failed to read request body", logs.ErrAttr(err))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+	payload.Raw = string(raw)
+
+	if err := json.NewDecoder(bytes.NewBuffer(raw)).Decode(&payload); err != nil {
 		slog.ErrorContext(r.Context(), "failed to decode json payload", logs.ErrAttr(err))
 		http.Error(w, "", http.StatusBadRequest)
 		return
@@ -96,7 +96,7 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload inboxPayload
+	var payload worker.InboxPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		slog.ErrorContext(r.Context(), "failed to decode json payload", logs.ErrAttr(err))
 		http.Error(w, "", http.StatusBadRequest)
@@ -161,7 +161,7 @@ func (s *svc) validInboxDomain(ctx context.Context, domain string) error {
 	return nil
 }
 
-func (s *svc) handleDelete(ctx context.Context, header http.Header, payload inboxPayload) error {
+func (s *svc) handleDelete(ctx context.Context, header http.Header, payload worker.InboxPayload) error {
 	switch payload.Object.Type {
 	case "Person":
 		if exists, err := s.puc.RemoteUrlExists(ctx, payload.Object.ID); err != nil {
