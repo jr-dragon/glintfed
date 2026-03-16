@@ -1,7 +1,6 @@
 package federation
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/go-chi/chi/v5"
 	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
 	"glintfed.org/internal/usecase/worker"
@@ -40,7 +40,7 @@ func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
 	}
 	payload.Raw = string(raw)
 
-	if err := json.NewDecoder(bytes.NewBuffer(raw)).Decode(&payload); err != nil {
+	if err := json.Unmarshal(raw, &payload); err != nil {
 		slog.ErrorContext(r.Context(), "failed to decode json payload", logs.ErrAttr(err))
 		http.Error(w, "", http.StatusBadRequest)
 		return
@@ -54,8 +54,6 @@ func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
 
 	if payload.Type != nil {
 		switch *payload.Type {
-		case "Follow", "Accept":
-			s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
 		case "Delete":
 			if payload.Object != nil {
 				if err := s.handleDelete(r.Context(), r.Header, payload); err != nil {
@@ -73,11 +71,13 @@ func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			fallthrough
-		default:
-			slog.ErrorContext(r.Context(), "invalid payload", slog.Any("type", payload))
+			slog.ErrorContext(r.Context(), "invalid payload", slog.Any("payload", payload))
 			http.Error(w, "", http.StatusBadRequest)
 			return
+		case "Follow", "Accept":
+			s.wuc.Inbox(r.Context(), r.Header, payload)
+		default:
+			s.wuc.Inbox(r.Context(), r.Header, payload)
 		}
 	} else {
 		s.wuc.Inbox(r.Context(), r.Header, payload)
@@ -97,7 +97,15 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload worker.InboxPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	raw, err := io.ReadAll(r.Body)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "failed to read request body", logs.ErrAttr(err))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+	payload.Raw = string(raw)
+
+	if err := json.Unmarshal(raw, &payload); err != nil {
 		slog.ErrorContext(r.Context(), "failed to decode json payload", logs.ErrAttr(err))
 		http.Error(w, "", http.StatusBadRequest)
 		return
@@ -111,8 +119,6 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 
 	if payload.Type != nil {
 		switch *payload.Type {
-		case "Follow", "Accept":
-			s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
 		case "Delete":
 			if payload.Object != nil {
 				if err := s.handleDelete(r.Context(), r.Header, payload); err != nil {
@@ -130,14 +136,16 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			fallthrough
-		default:
 			slog.ErrorContext(r.Context(), "invalid payload", slog.Any("type", payload))
 			http.Error(w, "", http.StatusBadRequest)
 			return
+		case "Follow", "Accept":
+			s.wuc.Validate(r.Context(), chi.URLParam(r, "username"), r.Header, payload)
+		default:
+			s.wuc.Validate(r.Context(), chi.URLParam(r, "username"), r.Header, payload)
 		}
 	} else {
-		s.wuc.Validate(r.Context(), r.URL.Query().Get("username"), r.Header, payload)
+		s.wuc.Validate(r.Context(), chi.URLParam(r, "username"), r.Header, payload)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -154,7 +162,7 @@ func (s *svc) validInboxDomain(ctx context.Context, domain string) error {
 		return err
 	}
 
-	if _, ok := blocked[parsed.Host]; !ok {
+	if _, ok := blocked[parsed.Host]; ok {
 		return fmt.Errorf("host %s has been blocked", parsed.Host)
 	}
 
@@ -176,7 +184,6 @@ func (s *svc) handleDelete(ctx context.Context, header http.Header, payload work
 			return ErrMissingUrl
 		}
 	case "Story":
-		break
 	default:
 		return ErrInvalidType
 	}
