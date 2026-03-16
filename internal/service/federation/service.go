@@ -32,9 +32,6 @@ type InstanceUsecase interface {
 type ProfileUsecase interface {
 	GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
 	RemoteUrlExists(ctx context.Context, url string) (bool, error)
-
-	Url(profile *ent.Profile, surfixes ...string) string
-	Permalink(profile *ent.Profile, surfixes ...string) string
 }
 
 //go:generate moq -rm -out mock_status_usecase.go . StatusUsecase

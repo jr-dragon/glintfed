@@ -1,6 +1,8 @@
 package data
 
 import (
+	"strings"
+
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yaml"
 )
@@ -172,6 +174,10 @@ func NewConfig(paths ...string) (cfg Config, err error) {
 	}
 	if err = config.BindStruct("", &cfg); err != nil {
 		return
+	}
+
+	if strings.HasSuffix(cfg.App.Url, "/") {
+		strings.TrimSuffix(cfg.App.Url, "/")
 	}
 
 	return

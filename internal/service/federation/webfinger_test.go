@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -80,12 +79,6 @@ func TestWebfinger(t *testing.T) {
 				}
 				return nil, fmt.Errorf("not found")
 			},
-			UrlFunc: func(profile *ent.Profile, surfixes ...string) string {
-				return "https://glintfed.test/@" + profile.Username + strings.Join(surfixes, "")
-			},
-			PermalinkFunc: func(profile *ent.Profile, surfixes ...string) string {
-				return "https://glintfed.test/users/" + profile.Username + strings.Join(surfixes, "")
-			},
 		}
 		s := New(cfg, nil, puc, nil, nil)
 
@@ -101,7 +94,7 @@ func TestWebfinger(t *testing.T) {
 		err := json.NewDecoder(w.Body).Decode(&resp)
 		assert.NoError(t, err)
 		assert.Equal(t, "acct:alice@glintfed.test", resp.Subject)
-		assert.Contains(t, resp.Aliases, "https://glintfed.test/@alice")
+		assert.Contains(t, resp.Aliases, "https://glintfed.test/alice")
 	})
 
 	t.Run("user_resource_not_found", func(t *testing.T) {

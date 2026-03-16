@@ -151,24 +151,24 @@ func (s *svc) newWebfinger(profile *ent.Profile) (webfinger, error) {
 	return webfinger{
 		Subject: fmt.Sprintf("acct:%s@%s", profile.Username, u.Host),
 		Aliases: []string{
-			s.puc.Url(profile),
-			s.puc.Permalink(profile),
+			profile.Url(s.cfg.App.Url),
+			profile.Permalink(s.cfg.App.Url),
 		},
 		Links: []SharedInboxLink{
 			{
 				Rel:  "http://webfinger.net/rel/profile-page",
 				Type: new("text/html"),
-				Href: new(s.puc.Url(profile)),
+				Href: new(profile.Url(s.cfg.App.Url)),
 			},
 			{
 				Rel:  "http://schemas.google.com/g/2010#updates-from",
 				Type: new("application/atom+xml"),
-				Href: new(s.puc.Permalink(profile, ".atom")),
+				Href: new(profile.Permalink(s.cfg.App.Url, ".atom")),
 			},
 			{
 				Rel:  "self",
 				Type: new("application/activity+json"),
-				Href: new(s.puc.Permalink(profile)),
+				Href: new(profile.Permalink(s.cfg.App.Url)),
 			},
 			{
 				Rel:  "http://webfinger.net/rel/avatar",
