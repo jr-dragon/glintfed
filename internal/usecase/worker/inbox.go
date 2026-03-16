@@ -2,7 +2,13 @@ package worker
 
 import (
 	"context"
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -170,14 +176,15 @@ func parseSignature(h http.Header) (s signature, err error) {
 			continue
 		}
 
-		s.Raw[key] = value
+		s.Raw[key] = strings.Trim(value, "\"")
 	}
 
 	if keystr, ok := s.Raw["keyId"]; !ok {
 		return s, fmt.Errorf("missing keyId in signature header")
 	} else if key, err := url.Parse(keystr); err != nil {
-		s.KeyId = key
 		return s, fmt.Errorf("invalid keyId format: %w", err)
+	} else {
+		s.KeyId = key
 	}
 
 	if _, ok := s.Raw["headers"]; !ok {
@@ -191,6 +198,47 @@ func parseSignature(h http.Header) (s signature, err error) {
 }
 
 func (s *signature) Verify(pkey any, header http.Header, payload InboxPayload, path string) error {
-	// TODO
-	return nil
+	h := sha256.New()
+	h.Write([]byte(payload.Raw))
+	digest := "SHA-256=" + base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+	signedHeaders := strings.Split(s.Raw["headers"], " ")
+	var lines []string
+	for _, h := range signedHeaders {
+		var value string
+		switch h {
+		case "(request-target)":
+			value = "post " + path
+		case "digest":
+			value = digest
+		default:
+			value = header.Get(h)
+		}
+		lines = append(lines, h+": "+value)
+	}
+	signingString := strings.Join(lines, "\n")
+
+	sigBytes, err := base64.StdEncoding.DecodeString(s.Raw["signature"])
+	if err != nil {
+		return fmt.Errorf("failed to decode signature: %w", err)
+	}
+
+	switch pub := pkey.(type) {
+	case *rsa.PublicKey:
+		hashed := sha256.Sum256([]byte(signingString))
+		return rsa.VerifyPKCS1v15(pub, crypto.SHA256, hashed[:], sigBytes)
+	case *ecdsa.PublicKey:
+		hashed := sha256.Sum256([]byte(signingString))
+		if !ecdsa.VerifyASN1(pub, hashed[:], sigBytes) {
+			return errors.New("invalid ecdsa signature")
+		}
+		return nil
+	case ed25519.PublicKey:
+		if !ed25519.Verify(pub, []byte(signingString), sigBytes) {
+			return errors.New("invalid ed25519 signature")
+		}
+		return nil
+	default:
+		return fmt.Errorf("unsupported public key type: %T", pkey)
+	}
 }
