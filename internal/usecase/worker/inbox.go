@@ -28,15 +28,11 @@ type ProfileRemover interface {
 	RemoteProfile(ctx context.Context, profile *ent.Profile)
 }
 
-type ActivityDeleter interface {
-	Delete(ctx context.Context, header http.Header, payload InboxPayload)
-}
-
 type InboxUsecase struct {
 	client *data.Client
 
 	pr ProfileRemover
-	ad ActivityDeleter
+	ah *ActivityHandler
 }
 
 type InboxPayload struct {
@@ -58,7 +54,7 @@ func NewInboxUsecase(client *data.Client) *InboxUsecase {
 	return &InboxUsecase{
 		client: client,
 		pr:     NewDeletePipeline(client),
-		ad:     NewActivityHandler(client),
+		ah:     NewActivityHandler(client),
 	}
 }
 
@@ -88,16 +84,47 @@ func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, paylo
 
 		inbox.pr.RemoteProfile(ctx, profile)
 	} else {
-		inbox.ad.Delete(ctx, header, payload)
+		inbox.ah.Delete(ctx, header, payload)
 	}
 }
 
 func (inbox *InboxUsecase) Inbox(ctx context.Context, header http.Header, payload InboxPayload) {
+	if header.Get("signature") == "" || header.Get("date") == "" {
+		slog.ErrorContext(ctx, "missing required field in header", slog.Any("header", header))
+		return
+	}
 
+	if err := inbox.verifySignature(ctx, header, payload); err != nil {
+		slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
+		return
+	}
+
+	// TODO: ActivityHandler::dispatch($headers, $profile, $payload)->onQueue('shared');
 }
 
 func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header http.Header, payload InboxPayload) {
+	if header.Get("signature") == "" || header.Get("date") == "" {
+		slog.ErrorContext(ctx, "missing required field in header", slog.Any("header", header))
+		return
+	}
 
+	p, err := inbox.client.Ent.Profile.Query().
+		Where(profile.UsernameEQ(username), profile.DomainIsNil(), profile.StatusIsNil()).
+		First(ctx)
+	if err != nil {
+		if !ent.IsNotFound(err) {
+			slog.ErrorContext(ctx, "failed to get profile for validation", logs.ErrAttr(err), slog.String("username", username))
+		}
+		return
+	}
+
+	if err := inbox.verifySignature(ctx, header, payload); err != nil {
+		slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
+		return
+	}
+
+	// TODO: ActivityHandler::dispatch($headers, $profile, $payload);
+	_ = p
 }
 
 func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Header, payload InboxPayload) error {
