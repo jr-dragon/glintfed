@@ -28,10 +28,15 @@ type ProfileRemover interface {
 	RemoteProfile(ctx context.Context, profile *ent.Profile)
 }
 
+type ActivityDeleter interface {
+	Delete(ctx context.Context, header http.Header, payload InboxPayload)
+}
+
 type InboxUsecase struct {
 	client *data.Client
 
 	pr ProfileRemover
+	ad ActivityDeleter
 }
 
 type InboxPayload struct {
@@ -53,6 +58,7 @@ func NewInboxUsecase(client *data.Client) *InboxUsecase {
 	return &InboxUsecase{
 		client: client,
 		pr:     NewDeletePipeline(client),
+		ad:     NewActivityHandler(client),
 	}
 }
 
@@ -82,7 +88,7 @@ func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, paylo
 
 		inbox.pr.RemoteProfile(ctx, profile)
 	} else {
-		// TODO: ActivityHandler::dispatch(header, nil, payload)
+		inbox.ad.Delete(ctx, header, payload)
 	}
 }
 
