@@ -24,8 +24,14 @@ import (
 	"glintfed.org/internal/lib/logs"
 )
 
+type ProfileRemover interface {
+	RemoteProfile(ctx context.Context, profile *ent.Profile)
+}
+
 type InboxUsecase struct {
 	client *data.Client
+
+	pr ProfileRemover
 }
 
 type InboxPayload struct {
@@ -46,6 +52,7 @@ type InboxPayloadObject struct {
 func NewInboxUsecase(client *data.Client) *InboxUsecase {
 	return &InboxUsecase{
 		client: client,
+		pr:     NewDeletePipeline(client),
 	}
 }
 
@@ -73,8 +80,7 @@ func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, paylo
 			return
 		}
 
-		_ = profile
-		// TODO: DeleteRemoteProfilePipeline::dispatch(profile)
+		inbox.pr.RemoteProfile(ctx, profile)
 	} else {
 		// TODO: ActivityHandler::dispatch(header, nil, payload)
 	}
