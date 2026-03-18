@@ -29,7 +29,59 @@ func NewActivityHandler(client *data.Client) *ActivityHandler {
 }
 
 func (ah *ActivityHandler) Dispatch(ctx context.Context, header http.Header, payload InboxPayload) {
-	
+	if payload.Type == nil {
+		slog.ErrorContext(ctx, "missing payload type", slog.Any("payload", payload))
+		return
+	}
+
+	switch *payload.Type {
+	case "Add":
+		ah.Add(ctx, header, payload)
+	case "Create":
+		ah.Create(ctx, header, payload)
+	case "Announce":
+		ah.Announce(ctx, header, payload)
+	case "Accept":
+		ah.Accept(ctx, header, payload)
+	case "Delete":
+		ah.Delete(ctx, header, payload)
+	case "Like":
+		ah.Like(ctx, header, payload)
+	case "Reject":
+		ah.Reject(ctx, header, payload)
+	case "Undo":
+		ah.Undo(ctx, header, payload)
+	case "View":
+		ah.View(ctx, header, payload)
+	case "Story:Reaction":
+		ah.StoryReaction(ctx, header, payload)
+	case "Story:Reply":
+		ah.StoryReply(ctx, header, payload)
+	case "Flag":
+		ah.Flag(ctx, header, payload)
+	case "Update":
+		ah.Update(ctx, header, payload)
+	case "Move":
+		ah.Move(ctx, header, payload)
+	default:
+		slog.ErrorContext(ctx, "unknown type", slog.Any("payload", payload))
+	}
+}
+
+func (ah *ActivityHandler) Add(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Create(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Announce(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Accept(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
 }
 
 func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, payload InboxPayload) {
@@ -135,4 +187,40 @@ func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, paylo
 	default:
 		return
 	}
+}
+
+func (ah *ActivityHandler) Like(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Reject(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Undo(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) View(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) StoryReaction(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) StoryReply(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Flag(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Update(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
+}
+
+func (ah *ActivityHandler) Move(ctx context.Context, header http.Header, paylaod InboxPayload) {
+	// TODO: implement
 }
