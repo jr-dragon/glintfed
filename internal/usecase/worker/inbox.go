@@ -25,7 +25,7 @@ import (
 )
 
 type ProfileRemover interface {
-	RemoteProfile(ctx context.Context, profile *ent.Profile)
+	RemoteProfile(ctx context.Context, profile *ent.Profile) error
 }
 
 type InboxUsecase struct {
@@ -58,19 +58,18 @@ func NewInboxUsecase(client *data.Client) *InboxUsecase {
 	}
 }
 
-func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, payload InboxPayload) {
+func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, payload InboxPayload) error {
 	if header.Get("signature") == "" || header.Get("date") == "" {
-		slog.ErrorContext(ctx, "missing required field in header", slog.Any("header", header))
-		return
+		return errors.New("missing required field in header")
 	}
 
 	if err := inbox.verifySignature(ctx, header, payload, "/f/inbox"); err != nil {
 		if !ent.IsNotFound(err) {
-			slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
+			return fmt.Errorf("failed to verify signature: %w", err)
 		} else {
 			slog.WarnContext(ctx, "ignored missing profile", logs.ErrAttr(err))
 		}
-		return
+		return nil
 	}
 
 	if payload.Object.Type == "Person" && payload.Actor != nil && *payload.Actor == payload.Object.ID {
@@ -78,34 +77,30 @@ func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, paylo
 			Where(profile.DomainNotNil(), profile.StatusIsNil(), profile.RemoteURL(payload.Object.ID)).
 			First(ctx)
 		if err != nil {
-			slog.ErrorContext(ctx, "failed to get profile", logs.ErrAttr(err))
-			return
+			return fmt.Errorf("failed to get profile: %w", err)
 		}
 
-		inbox.pr.RemoteProfile(ctx, profile)
+		return inbox.pr.RemoteProfile(ctx, profile)
 	} else {
-		inbox.ah.Delete(ctx, header, payload)
+		return inbox.ah.Delete(ctx, header, payload)
 	}
 }
 
-func (inbox *InboxUsecase) Inbox(ctx context.Context, header http.Header, payload InboxPayload) {
+func (inbox *InboxUsecase) Inbox(ctx context.Context, header http.Header, payload InboxPayload) error {
 	if header.Get("signature") == "" || header.Get("date") == "" {
-		slog.ErrorContext(ctx, "missing required field in header", slog.Any("header", header))
-		return
+		return errors.New("missing required field in header")
 	}
 
 	if err := inbox.verifySignature(ctx, header, payload, "/f/inbox"); err != nil {
-		slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
-		return
+		return fmt.Errorf("failed to verify signature: %w", err)
 	}
 
-	inbox.ah.Dispatch(ctx, header, payload)
+	return inbox.ah.Dispatch(ctx, header, payload)
 }
 
-func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header http.Header, payload InboxPayload) {
+func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header http.Header, payload InboxPayload) error {
 	if header.Get("signature") == "" || header.Get("date") == "" {
-		slog.ErrorContext(ctx, "missing required field in header", slog.Any("header", header))
-		return
+		return errors.New("missing required field in header")
 	}
 
 	p, err := inbox.client.Ent.Profile.Query().
@@ -113,17 +108,16 @@ func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header
 		First(ctx)
 	if err != nil {
 		if !ent.IsNotFound(err) {
-			slog.ErrorContext(ctx, "failed to get profile for validation", logs.ErrAttr(err), slog.String("username", username))
+			return fmt.Errorf("failed to get profile for validation: %w", err)
 		}
-		return
+		return nil
 	}
 
 	if err := inbox.verifySignature(ctx, header, payload, "/users/"+p.Username+"/inbox"); err != nil {
-		slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
-		return
+		return fmt.Errorf("failed to verify signature: %w", err)
 	}
 
-	inbox.ah.Dispatch(ctx, header, payload)
+	return inbox.ah.Dispatch(ctx, header, payload)
 }
 
 func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Header, payload InboxPayload, path string) error {

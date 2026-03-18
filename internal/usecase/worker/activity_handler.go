@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -12,7 +13,7 @@ import (
 	"glintfed.org/ent/status"
 	"glintfed.org/ent/story"
 	"glintfed.org/internal/data"
-	"glintfed.org/internal/lib/logs"
+	"glintfed.org/internal/lib/errs"
 )
 
 type ActivityHandler struct {
@@ -28,65 +29,64 @@ func NewActivityHandler(client *data.Client) *ActivityHandler {
 	}
 }
 
-func (ah *ActivityHandler) Dispatch(ctx context.Context, header http.Header, payload InboxPayload) {
+func (ah *ActivityHandler) Dispatch(ctx context.Context, header http.Header, payload InboxPayload) error {
 	if payload.Type == nil {
-		slog.ErrorContext(ctx, "missing payload type", slog.Any("payload", payload))
-		return
+		return fmt.Errorf("missing payload type")
 	}
 
 	switch *payload.Type {
 	case "Add":
-		ah.Add(ctx, header, payload)
+		return ah.Add(ctx, header, payload)
 	case "Create":
-		ah.Create(ctx, header, payload)
+		return ah.Create(ctx, header, payload)
 	case "Announce":
-		ah.Announce(ctx, header, payload)
+		return ah.Announce(ctx, header, payload)
 	case "Accept":
-		ah.Accept(ctx, header, payload)
+		return ah.Accept(ctx, header, payload)
 	case "Delete":
-		ah.Delete(ctx, header, payload)
+		return ah.Delete(ctx, header, payload)
 	case "Like":
-		ah.Like(ctx, header, payload)
+		return ah.Like(ctx, header, payload)
 	case "Reject":
-		ah.Reject(ctx, header, payload)
+		return ah.Reject(ctx, header, payload)
 	case "Undo":
-		ah.Undo(ctx, header, payload)
+		return ah.Undo(ctx, header, payload)
 	case "View":
-		ah.View(ctx, header, payload)
+		return ah.View(ctx, header, payload)
 	case "Story:Reaction":
-		ah.StoryReaction(ctx, header, payload)
+		return ah.StoryReaction(ctx, header, payload)
 	case "Story:Reply":
-		ah.StoryReply(ctx, header, payload)
+		return ah.StoryReply(ctx, header, payload)
 	case "Flag":
-		ah.Flag(ctx, header, payload)
+		return ah.Flag(ctx, header, payload)
 	case "Update":
-		ah.Update(ctx, header, payload)
+		return ah.Update(ctx, header, payload)
 	case "Move":
-		ah.Move(ctx, header, payload)
+		return ah.Move(ctx, header, payload)
 	default:
-		slog.ErrorContext(ctx, "unknown type", slog.Any("payload", payload))
+		return fmt.Errorf("unknown type: %s", *payload.Type)
 	}
 }
 
-func (ah *ActivityHandler) Add(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Add(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Create(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Create(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Announce(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Announce(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Accept(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Accept(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, payload InboxPayload) {
+func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, payload InboxPayload) error {
 	if payload.Actor == nil || payload.Object == nil {
-		return
+		return nil
 	}
 
 	actor := *payload.Actor
@@ -96,16 +96,16 @@ func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, paylo
 	// Validate actor and object ID are valid URLs and from the same host
 	actorURL, err := url.Parse(actor)
 	if err != nil {
-		return
+		return err
 	}
 	objectURL, err := url.Parse(objID)
 	if err != nil {
-		return
+		return err
 	}
 
 	if actorURL.Host != objectURL.Host {
 		slog.WarnContext(ctx, "actor host mismatch with object host", slog.String("actor", actor), slog.String("object_id", objID))
-		return
+		return nil
 	}
 
 	switch objType {
@@ -113,33 +113,33 @@ func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, paylo
 		p, err := ah.client.Ent.Profile.Query().Where(profile.RemoteURL(actor)).First(ctx)
 		if err != nil {
 			if !ent.IsNotFound(err) {
-				slog.ErrorContext(ctx, "failed to get profile for delete", logs.ErrAttr(err), slog.String("actor", actor))
+				return err
 			}
-			return
+			return nil
 		}
 
 		if p.PrivateKey != "" {
-			return
+			return nil
 		}
 
 		// Delete notifications where this actor is the actor
 		if _, err := ah.client.Ent.Notification.Delete().Where(notification.ActorID(p.ID)).Exec(ctx); err != nil {
-			slog.ErrorContext(ctx, "failed to delete notifications for actor", logs.ErrAttr(err), slog.Uint64("profile_id", p.ID))
+			return err
 		}
 
-		ah.pr.RemoteProfile(ctx, p)
+		return ah.pr.RemoteProfile(ctx, p)
 
 	case "Tombstone":
 		p, err := ah.client.Ent.Profile.Query().Where(profile.RemoteURL(actor)).First(ctx)
 		if err != nil {
 			if !ent.IsNotFound(err) {
-				slog.ErrorContext(ctx, "failed to get profile for tombstone", logs.ErrAttr(err), slog.String("actor", actor))
+				return err
 			}
-			return
+			return nil
 		}
 
 		if p.PrivateKey != "" {
-			return
+			return nil
 		}
 
 		s, err := ah.client.Ent.Status.Query().
@@ -147,13 +147,13 @@ func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, paylo
 			First(ctx)
 		if err != nil {
 			if !ent.IsNotFound(err) {
-				slog.ErrorContext(ctx, "failed to get status for tombstone", logs.ErrAttr(err), slog.String("object_id", objID))
+				return err
 			}
-			return
+			return nil
 		}
 
 		if s.ProfileID != p.ID {
-			return
+			return nil
 		}
 
 		// Delete notifications related to this status
@@ -163,7 +163,7 @@ func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, paylo
 				notification.ItemID(s.ID),
 				notification.ItemType("App\\Status"),
 			).Exec(ctx); err != nil {
-			slog.ErrorContext(ctx, "failed to delete notifications for status tombstone", logs.ErrAttr(err), slog.Uint64("status_id", s.ID))
+			return err
 		}
 
 		if (s.Scope == "public" || s.Scope == "unlisted" || s.Scope == "private") &&
@@ -172,55 +172,57 @@ func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, paylo
 		}
 
 		// TODO: RemoteStatusDelete::dispatch($status)->onQueue('high');
+		return nil
 
 	case "Story":
 		st, err := ah.client.Ent.Story.Query().Where(story.ObjectID(objID)).First(ctx)
 		if err != nil {
 			if !ent.IsNotFound(err) {
-				slog.ErrorContext(ctx, "failed to get story for delete", logs.ErrAttr(err), slog.String("object_id", objID))
+				return err
 			}
-			return
+			return nil
 		}
 
 		_ = st
 		// TODO: StoryExpire::dispatch($story)->onQueue('story');
+		return nil
 	default:
-		return
+		return nil
 	}
 }
 
-func (ah *ActivityHandler) Like(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Like(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Reject(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Reject(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Undo(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Undo(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) View(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) View(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) StoryReaction(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) StoryReaction(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) StoryReply(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) StoryReply(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Flag(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Flag(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Update(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Update(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }
 
-func (ah *ActivityHandler) Move(ctx context.Context, header http.Header, paylaod InboxPayload) {
-	// TODO: implement
+func (ah *ActivityHandler) Move(ctx context.Context, header http.Header, payload InboxPayload) error {
+	return errs.Todo
 }

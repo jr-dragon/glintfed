@@ -20,13 +20,13 @@ var _ WorkerUsecase = &WorkerUsecaseMock{}
 //
 //		// make and configure a mocked WorkerUsecase
 //		mockedWorkerUsecase := &WorkerUsecaseMock{
-//			DeleteFunc: func(ctx context.Context, header http.Header, payload worker.InboxPayload)  {
+//			DeleteFunc: func(ctx context.Context, header http.Header, payload worker.InboxPayload) error {
 //				panic("mock out the Delete method")
 //			},
-//			InboxFunc: func(ctx context.Context, header http.Header, payload worker.InboxPayload)  {
+//			InboxFunc: func(ctx context.Context, header http.Header, payload worker.InboxPayload) error {
 //				panic("mock out the Inbox method")
 //			},
-//			ValidateFunc: func(ctx context.Context, username string, header http.Header, payload worker.InboxPayload)  {
+//			ValidateFunc: func(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) error {
 //				panic("mock out the Validate method")
 //			},
 //		}
@@ -37,13 +37,13 @@ var _ WorkerUsecase = &WorkerUsecaseMock{}
 //	}
 type WorkerUsecaseMock struct {
 	// DeleteFunc mocks the Delete method.
-	DeleteFunc func(ctx context.Context, header http.Header, payload worker.InboxPayload)
+	DeleteFunc func(ctx context.Context, header http.Header, payload worker.InboxPayload) error
 
 	// InboxFunc mocks the Inbox method.
-	InboxFunc func(ctx context.Context, header http.Header, payload worker.InboxPayload)
+	InboxFunc func(ctx context.Context, header http.Header, payload worker.InboxPayload) error
 
 	// ValidateFunc mocks the Validate method.
-	ValidateFunc func(ctx context.Context, username string, header http.Header, payload worker.InboxPayload)
+	ValidateFunc func(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -83,7 +83,7 @@ type WorkerUsecaseMock struct {
 }
 
 // Delete calls DeleteFunc.
-func (mock *WorkerUsecaseMock) Delete(ctx context.Context, header http.Header, payload worker.InboxPayload) {
+func (mock *WorkerUsecaseMock) Delete(ctx context.Context, header http.Header, payload worker.InboxPayload) error {
 	if mock.DeleteFunc == nil {
 		panic("WorkerUsecaseMock.DeleteFunc: method is nil but WorkerUsecase.Delete was just called")
 	}
@@ -99,7 +99,7 @@ func (mock *WorkerUsecaseMock) Delete(ctx context.Context, header http.Header, p
 	mock.lockDelete.Lock()
 	mock.calls.Delete = append(mock.calls.Delete, callInfo)
 	mock.lockDelete.Unlock()
-	mock.DeleteFunc(ctx, header, payload)
+	return mock.DeleteFunc(ctx, header, payload)
 }
 
 // DeleteCalls gets all the calls that were made to Delete.
@@ -123,7 +123,7 @@ func (mock *WorkerUsecaseMock) DeleteCalls() []struct {
 }
 
 // Inbox calls InboxFunc.
-func (mock *WorkerUsecaseMock) Inbox(ctx context.Context, header http.Header, payload worker.InboxPayload) {
+func (mock *WorkerUsecaseMock) Inbox(ctx context.Context, header http.Header, payload worker.InboxPayload) error {
 	if mock.InboxFunc == nil {
 		panic("WorkerUsecaseMock.InboxFunc: method is nil but WorkerUsecase.Inbox was just called")
 	}
@@ -139,7 +139,7 @@ func (mock *WorkerUsecaseMock) Inbox(ctx context.Context, header http.Header, pa
 	mock.lockInbox.Lock()
 	mock.calls.Inbox = append(mock.calls.Inbox, callInfo)
 	mock.lockInbox.Unlock()
-	mock.InboxFunc(ctx, header, payload)
+	return mock.InboxFunc(ctx, header, payload)
 }
 
 // InboxCalls gets all the calls that were made to Inbox.
@@ -163,7 +163,7 @@ func (mock *WorkerUsecaseMock) InboxCalls() []struct {
 }
 
 // Validate calls ValidateFunc.
-func (mock *WorkerUsecaseMock) Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) {
+func (mock *WorkerUsecaseMock) Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) error {
 	if mock.ValidateFunc == nil {
 		panic("WorkerUsecaseMock.ValidateFunc: method is nil but WorkerUsecase.Validate was just called")
 	}
@@ -181,7 +181,7 @@ func (mock *WorkerUsecaseMock) Validate(ctx context.Context, username string, he
 	mock.lockValidate.Lock()
 	mock.calls.Validate = append(mock.calls.Validate, callInfo)
 	mock.lockValidate.Unlock()
-	mock.ValidateFunc(ctx, username, header, payload)
+	return mock.ValidateFunc(ctx, username, header, payload)
 }
 
 // ValidateCalls gets all the calls that were made to Validate.

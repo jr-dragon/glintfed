@@ -40,9 +40,9 @@ type StatusUsecase interface {
 
 //go:generate moq -rm -out mock_worker_usecase.go . WorkerUsecase
 type WorkerUsecase interface {
-	Delete(ctx context.Context, header http.Header, payload worker.InboxPayload)
-	Inbox(ctx context.Context, header http.Header, payload worker.InboxPayload)
-	Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload)
+	Delete(ctx context.Context, header http.Header, payload worker.InboxPayload) error
+	Inbox(ctx context.Context, header http.Header, payload worker.InboxPayload) error
+	Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) error
 }
 
 func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase, wuc WorkerUsecase) Service {

@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"log/slog"
 
 	"glintfed.org/ent"
 	"glintfed.org/ent/avatar"
@@ -21,7 +20,6 @@ import (
 	"glintfed.org/ent/storyview"
 	"glintfed.org/ent/userfilter"
 	"glintfed.org/internal/data"
-	"glintfed.org/internal/lib/logs"
 )
 
 type DeletePipeline struct {
@@ -34,14 +32,14 @@ func NewDeletePipeline(client *data.Client) *DeletePipeline {
 	}
 }
 
-func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profile) {
+func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profile) error {
 	if profile == nil {
-		return
+		return nil
 	}
 
 	// Local profile or profile with private key should not be processed by this worker
 	if profile.Domain == "" || profile.PrivateKey != "" {
-		return
+		return nil
 	}
 
 	pid := profile.ID
@@ -59,20 +57,20 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 
 	// 2. Delete Polls & Poll Votes
 	if _, err := dp.client.Ent.PollVote.Delete().Where(pollvote.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete poll vote", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 	if _, err := dp.client.Ent.Poll.Delete().Where(poll.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete poll", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 3. Delete Avatar
 	if _, err := dp.client.Ent.Avatar.Delete().Where(avatar.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete avatar", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 4. Delete Media Tags
 	if _, err := dp.client.Ent.MediaTag.Delete().Where(mediatag.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete media tag", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 5. Delete DMs & Conversations
@@ -82,7 +80,7 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 			directmessage.ToID(pid),
 		),
 	).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete direct messages", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 	if _, err := dp.client.Ent.Conversation.Delete().Where(
 		conversation.Or(
@@ -90,7 +88,7 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 			conversation.ToID(pid),
 		),
 	).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete conversations", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 6. Delete Follow Requests
@@ -100,7 +98,7 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 			followrequest.FollowerID(pid),
 		),
 	).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete follow requests", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 7. Delete Followers
@@ -110,21 +108,21 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 			follower.FollowingID(pid),
 		),
 	).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete followers", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 8. Delete Likes
 	if _, err := dp.client.Ent.Like.Delete().Where(like.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete likes", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 9. Delete Stories & Story Views
 	if _, err := dp.client.Ent.StoryView.Delete().Where(storyview.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete story views", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	if _, err := dp.client.Ent.Story.Delete().Where(story.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete stories", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 	// TODO:
 	//  foreach ($stories as $story) {
@@ -142,12 +140,12 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 			userfilter.FilterableID(pid),
 		),
 	).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete user filters", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 11. Delete Mentions
 	if _, err := dp.client.Ent.Mention.Delete().Where(mention.ProfileID(pid)).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete mentions", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 12. Delete Notifications
@@ -157,7 +155,7 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 			notification.ActorID(pid),
 		),
 	).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete notifications", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 13. Delete Reports
@@ -167,11 +165,13 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 			report.ReportedProfileID(pid),
 		),
 	).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete reports", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
 
 	// 14. Finalize: Delete Profile
 	if err := dp.client.Ent.Profile.DeleteOne(profile).Exec(ctx); err != nil {
-		slog.ErrorContext(ctx, "failed to delete profile", logs.ErrAttr(err), slog.Uint64("profile_id", pid))
+		return err
 	}
+
+	return nil
 }

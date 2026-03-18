@@ -75,12 +75,27 @@ func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "", http.StatusBadRequest)
 			return
 		case "Follow", "Accept":
-			s.wuc.Inbox(r.Context(), r.Header, payload)
+			h := r.Header.Clone()
+			go func() {
+				if err := s.wuc.Inbox(r.Context(), h, payload); err != nil {
+					slog.ErrorContext(r.Context(), "failed to handle inbox", logs.ErrAttr(err))
+				}
+			}()
 		default:
-			s.wuc.Inbox(r.Context(), r.Header, payload)
+			h := r.Header.Clone()
+			go func() {
+				if err := s.wuc.Inbox(r.Context(), h, payload); err != nil {
+					slog.ErrorContext(r.Context(), "failed to handle inbox", logs.ErrAttr(err))
+				}
+			}()
 		}
 	} else {
-		s.wuc.Inbox(r.Context(), r.Header, payload)
+		h := r.Header.Clone()
+		go func() {
+			if err := s.wuc.Inbox(r.Context(), h, payload); err != nil {
+				slog.ErrorContext(r.Context(), "failed to handle inbox", logs.ErrAttr(err))
+			}
+		}()
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -117,6 +132,8 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	username := chi.URLParam(r, "username")
+
 	if payload.Type != nil {
 		switch *payload.Type {
 		case "Delete":
@@ -140,12 +157,27 @@ func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "", http.StatusBadRequest)
 			return
 		case "Follow", "Accept":
-			s.wuc.Validate(r.Context(), chi.URLParam(r, "username"), r.Header, payload)
+			h := r.Header.Clone()
+			go func() {
+				if err := s.wuc.Validate(r.Context(), username, h, payload); err != nil {
+					slog.ErrorContext(r.Context(), "failed to handle validate inbox", logs.ErrAttr(err))
+				}
+			}()
 		default:
-			s.wuc.Validate(r.Context(), chi.URLParam(r, "username"), r.Header, payload)
+			h := r.Header.Clone()
+			go func() {
+				if err := s.wuc.Validate(r.Context(), username, h, payload); err != nil {
+					slog.ErrorContext(r.Context(), "failed to handle validate inbox", logs.ErrAttr(err))
+				}
+			}()
 		}
 	} else {
-		s.wuc.Validate(r.Context(), chi.URLParam(r, "username"), r.Header, payload)
+		h := r.Header.Clone()
+		go func() {
+			if err := s.wuc.Validate(r.Context(), username, h, payload); err != nil {
+				slog.ErrorContext(r.Context(), "failed to handle validate inbox", logs.ErrAttr(err))
+			}
+		}()
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -188,6 +220,12 @@ func (s *svc) handleDelete(ctx context.Context, header http.Header, payload work
 		return ErrInvalidType
 	}
 
-	s.wuc.Delete(ctx, header, payload)
+	h := header.Clone()
+	go func() {
+		if err := s.wuc.Delete(ctx, h, payload); err != nil {
+			slog.ErrorContext(ctx, "failed to handle delete inbox", logs.ErrAttr(err))
+		}
+	}()
+
 	return nil
 }
