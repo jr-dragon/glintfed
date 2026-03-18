@@ -6,7 +6,6 @@ import (
 
 	"glintfed.org/ent"
 	"glintfed.org/internal/data"
-	"glintfed.org/internal/service/internal"
 	"glintfed.org/internal/usecase/worker"
 )
 
@@ -64,10 +63,4 @@ type svc struct {
 	puc ProfileUsecase
 	suc StatusUsecase
 	wuc WorkerUsecase
-}
-
-func (s *svc) HostMeta(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.HostMeta")
-	defer span.End()
-	// TODO: Implement
 }
