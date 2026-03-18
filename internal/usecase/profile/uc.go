@@ -28,7 +28,7 @@ func NewUsecase(client *data.Client, cfg data.Config) *Usecase {
 //	LIMIT 1
 func (uc *Usecase) GetByUsername(ctx context.Context, username string) (*ent.Profile, error) {
 	return uc.client.Ent.Profile.Query().
-		Where(profile.UsernameEQ(username)).
+		Where(profile.Username(username)).
 		Only(ctx)
 }
 

@@ -18,7 +18,7 @@ func (uc *Usecase) GetLocalPostsCount(ctx context.Context) (int, error) {
 	return uc.client.Ent.Status.Query().
 		Where(
 			status.DeletedAtIsNil(),
-			status.LocalEQ(true),
+			status.Local(true),
 			status.TypeNEQ("share"),
 		).
 		Count(ctx)

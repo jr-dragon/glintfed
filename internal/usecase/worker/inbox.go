@@ -109,7 +109,7 @@ func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header
 	}
 
 	p, err := inbox.client.Ent.Profile.Query().
-		Where(profile.UsernameEQ(username), profile.DomainIsNil(), profile.StatusIsNil()).
+		Where(profile.Username(username), profile.DomainIsNil(), profile.StatusIsNil()).
 		First(ctx)
 	if err != nil {
 		if !ent.IsNotFound(err) {
@@ -156,7 +156,7 @@ func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Head
 		return fmt.Errorf("payload.Object.ID host mismatch: object_id=%s, signature_key_id=%s", objid.Host, signature.KeyId.Host)
 	}
 
-	actor, err := inbox.client.Ent.Profile.Query().Where(profile.KeyIDEQ(signature.Raw["keyId"])).First(ctx)
+	actor, err := inbox.client.Ent.Profile.Query().Where(profile.KeyID(signature.Raw["keyId"])).First(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get profile: %w", err)
 	}
