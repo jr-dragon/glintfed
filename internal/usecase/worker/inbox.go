@@ -64,7 +64,7 @@ func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, paylo
 		return
 	}
 
-	if err := inbox.verifySignature(ctx, header, payload); err != nil {
+	if err := inbox.verifySignature(ctx, header, payload, "/f/inbox"); err != nil {
 		if !ent.IsNotFound(err) {
 			slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
 		} else {
@@ -94,12 +94,12 @@ func (inbox *InboxUsecase) Inbox(ctx context.Context, header http.Header, payloa
 		return
 	}
 
-	if err := inbox.verifySignature(ctx, header, payload); err != nil {
+	if err := inbox.verifySignature(ctx, header, payload, "/f/inbox"); err != nil {
 		slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
 		return
 	}
 
-	// TODO: ActivityHandler::dispatch($headers, $profile, $payload)->onQueue('shared');
+	inbox.ah.Dispatch(ctx, header, payload)
 }
 
 func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header http.Header, payload InboxPayload) {
@@ -118,16 +118,15 @@ func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header
 		return
 	}
 
-	if err := inbox.verifySignature(ctx, header, payload); err != nil {
+	if err := inbox.verifySignature(ctx, header, payload, "/users/"+p.Username+"/inbox"); err != nil {
 		slog.ErrorContext(ctx, "failed to verify signature", logs.ErrAttr(err))
 		return
 	}
 
-	// TODO: ActivityHandler::dispatch($headers, $profile, $payload);
-	_ = p
+	inbox.ah.Dispatch(ctx, header, payload)
 }
 
-func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Header, payload InboxPayload) error {
+func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Header, payload InboxPayload, path string) error {
 	date, err := parseDate(header)
 	if err != nil {
 		return fmt.Errorf("request expired: error=%w, date=%+v", err, date)
@@ -167,7 +166,7 @@ func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Head
 		return fmt.Errorf("failed to load public key: error=%w", err)
 	}
 
-	if err := signature.Verify(pkey, header, payload, "/f/inbox"); err != nil {
+	if err := signature.Verify(pkey, header, payload, path); err != nil {
 		return fmt.Errorf("failed to verify signature: error=%w", err)
 	}
 

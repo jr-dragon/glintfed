@@ -28,6 +28,10 @@ func NewActivityHandler(client *data.Client) *ActivityHandler {
 	}
 }
 
+func (ah *ActivityHandler) Dispatch(ctx context.Context, header http.Header, payload InboxPayload) {
+	
+}
+
 func (ah *ActivityHandler) Delete(ctx context.Context, header http.Header, payload InboxPayload) {
 	if payload.Actor == nil || payload.Object == nil {
 		return
