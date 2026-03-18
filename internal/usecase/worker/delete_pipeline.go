@@ -20,6 +20,7 @@ import (
 	"glintfed.org/ent/storyview"
 	"glintfed.org/ent/userfilter"
 	"glintfed.org/internal/data"
+	"glintfed.org/internal/lib/errs"
 )
 
 type DeletePipeline struct {
@@ -173,5 +174,5 @@ func (dp *DeletePipeline) RemoteProfile(ctx context.Context, profile *ent.Profil
 		return err
 	}
 
-	return nil
+	return errs.Todo
 }
