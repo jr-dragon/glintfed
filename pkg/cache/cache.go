@@ -2,6 +2,8 @@ package cache
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"reflect"
 	"time"
 )
@@ -23,14 +25,19 @@ func Get(ctx context.Context, key string) any {
 func Set(ctx context.Context, key string, val any, ttl time.Duration) error {
 	v := reflect.ValueOf(val)
 	if v.Kind() == reflect.Func {
-		t := v.Type()
-		if t.NumIn() == 0 && t.NumOut() == 1 {
-			results := v.Call(nil)
-			val = results[0].Interface()
-		}
+		return errors.New("val cannot be function, use SetFunc instead")
 	}
-	
+
 	return drv.Set(ctx, key, val, ttl)
+}
+
+func SetFunc(ctx context.Context, key string, valf func() any, ttl time.Duration) error {
+	val := valf()
+	if err, iserr := val.(error); iserr {
+		return fmt.Errorf("valf returns err: %w", err)
+	}
+
+	return Set(ctx, key, val, ttl)
 }
 
 func Del(ctx context.Context, key string) error {
