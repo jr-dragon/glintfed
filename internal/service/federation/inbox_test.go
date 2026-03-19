@@ -18,7 +18,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.Activitypub.Enabled = false
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodPost, "/api/federation/sharedinbox", nil)
 		w := httptest.NewRecorder()
@@ -34,7 +34,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.Activitypub.Enabled = true
 		cfg.App.Federation.Activitypub.SharedInbox = true
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodPost, "/api/federation/sharedinbox", bytes.NewBufferString("invalid"))
 		w := httptest.NewRecorder()
@@ -51,12 +51,12 @@ func TestSvc_SharedInbox(t *testing.T) {
 		cfg.App.Federation.Activitypub.Enabled = true
 		cfg.App.Federation.Activitypub.SharedInbox = true
 
-		mockIUC := &InstanceUsecaseMock{
+		mockIUC := &InstanceModelMock{
 			GetBlockedDomainsFunc: func(ctx context.Context) (map[string]struct{}, error) {
 				return map[string]struct{}{"blocked.com": {}}, nil
 			},
 		}
-		s := New(cfg, mockIUC, nil, nil, nil)
+		s := New(cfg, mockIUC, nil, nil, nil, nil)
 
 		payload := worker.InboxPayload{
 			ID: "https://blocked.com/activity/1",
@@ -78,12 +78,12 @@ func TestSvc_SharedInbox(t *testing.T) {
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.SharedInbox = true
 
-			mockIUC := &InstanceUsecaseMock{
+			mockIUC := &InstanceModelMock{
 				GetBlockedDomainsFunc: func(ctx context.Context) (map[string]struct{}, error) {
 					return map[string]struct{}{}, nil
 				},
 			}
-			mockPUC := &ProfileUsecaseMock{
+			mockPUC := &ProfileModelMock{
 				RemoteUrlExistsFunc: func(ctx context.Context, url string) (bool, error) {
 					return true, nil
 				},
@@ -91,7 +91,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 			mockWUC := &WorkerUsecaseMock{
 				DeleteFunc: func(ctx context.Context, header http.Header, payload worker.InboxPayload) error { return nil },
 			}
-			s := New(cfg, mockIUC, mockPUC, nil, mockWUC)
+			s := New(cfg, mockIUC, mockPUC, nil, nil, mockWUC)
 
 			typ := "Delete"
 			payload := worker.InboxPayload{
@@ -125,7 +125,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.SharedInbox = true
 
-			mockIUC := &InstanceUsecaseMock{
+			mockIUC := &InstanceModelMock{
 				GetBlockedDomainsFunc: func(ctx context.Context) (map[string]struct{}, error) {
 					return map[string]struct{}{}, nil
 				},
@@ -133,7 +133,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 			mockWUC := &WorkerUsecaseMock{
 				InboxFunc: func(ctx context.Context, header http.Header, payload worker.InboxPayload) error { return nil },
 			}
-			s := New(cfg, mockIUC, nil, nil, mockWUC)
+			s := New(cfg, mockIUC, nil, nil, nil, mockWUC)
 
 			typ := "Follow"
 			payload := worker.InboxPayload{
@@ -161,7 +161,7 @@ func TestSvc_UserInbox(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.Activitypub.Enabled = false
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodPost, "/api/federation/users/alice/inbox", nil)
 		w := httptest.NewRecorder()
@@ -179,12 +179,12 @@ func TestSvc_UserInbox(t *testing.T) {
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.Inbox = true
 
-			mockIUC := &InstanceUsecaseMock{
+			mockIUC := &InstanceModelMock{
 				GetBlockedDomainsFunc: func(ctx context.Context) (map[string]struct{}, error) {
 					return map[string]struct{}{}, nil
 				},
 			}
-			mockSUC := &StatusUsecaseMock{
+			mockSUC := &StatusModelMock{
 				ObjectUrlExistsFunc: func(ctx context.Context, url string) (bool, error) {
 					return true, nil
 				},
@@ -192,7 +192,7 @@ func TestSvc_UserInbox(t *testing.T) {
 			mockWUC := &WorkerUsecaseMock{
 				DeleteFunc: func(ctx context.Context, header http.Header, payload worker.InboxPayload) error { return nil },
 			}
-			s := New(cfg, mockIUC, nil, mockSUC, mockWUC)
+			s := New(cfg, mockIUC, nil, mockSUC, nil, mockWUC)
 
 			typ := "Delete"
 			payload := worker.InboxPayload{
@@ -231,7 +231,7 @@ func TestSvc_UserInbox(t *testing.T) {
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.Inbox = true
 
-			mockIUC := &InstanceUsecaseMock{
+			mockIUC := &InstanceModelMock{
 				GetBlockedDomainsFunc: func(ctx context.Context) (map[string]struct{}, error) {
 					return map[string]struct{}{}, nil
 				},
@@ -241,7 +241,7 @@ func TestSvc_UserInbox(t *testing.T) {
 					return nil
 				},
 			}
-			s := New(cfg, mockIUC, nil, nil, mockWUC)
+			s := New(cfg, mockIUC, nil, nil, nil, mockWUC)
 
 			typ := "Follow"
 			payload := worker.InboxPayload{

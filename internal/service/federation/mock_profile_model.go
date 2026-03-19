@@ -9,16 +9,16 @@ import (
 	"sync"
 )
 
-// Ensure, that ProfileUsecaseMock does implement ProfileUsecase.
+// Ensure, that ProfileModelMock does implement ProfileModel.
 // If this is not the case, regenerate this file with moq.
-var _ ProfileUsecase = &ProfileUsecaseMock{}
+var _ ProfileModel = &ProfileModelMock{}
 
-// ProfileUsecaseMock is a mock implementation of ProfileUsecase.
+// ProfileModelMock is a mock implementation of ProfileModel.
 //
-//	func TestSomethingThatUsesProfileUsecase(t *testing.T) {
+//	func TestSomethingThatUsesProfileModel(t *testing.T) {
 //
-//		// make and configure a mocked ProfileUsecase
-//		mockedProfileUsecase := &ProfileUsecaseMock{
+//		// make and configure a mocked ProfileModel
+//		mockedProfileModel := &ProfileModelMock{
 //			GetByUsernameFunc: func(ctx context.Context, username string) (*ent.Profile, error) {
 //				panic("mock out the GetByUsername method")
 //			},
@@ -27,11 +27,11 @@ var _ ProfileUsecase = &ProfileUsecaseMock{}
 //			},
 //		}
 //
-//		// use mockedProfileUsecase in code that requires ProfileUsecase
+//		// use mockedProfileModel in code that requires ProfileModel
 //		// and then make assertions.
 //
 //	}
-type ProfileUsecaseMock struct {
+type ProfileModelMock struct {
 	// GetByUsernameFunc mocks the GetByUsername method.
 	GetByUsernameFunc func(ctx context.Context, username string) (*ent.Profile, error)
 
@@ -60,9 +60,9 @@ type ProfileUsecaseMock struct {
 }
 
 // GetByUsername calls GetByUsernameFunc.
-func (mock *ProfileUsecaseMock) GetByUsername(ctx context.Context, username string) (*ent.Profile, error) {
+func (mock *ProfileModelMock) GetByUsername(ctx context.Context, username string) (*ent.Profile, error) {
 	if mock.GetByUsernameFunc == nil {
-		panic("ProfileUsecaseMock.GetByUsernameFunc: method is nil but ProfileUsecase.GetByUsername was just called")
+		panic("ProfileModelMock.GetByUsernameFunc: method is nil but ProfileModel.GetByUsername was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -80,8 +80,8 @@ func (mock *ProfileUsecaseMock) GetByUsername(ctx context.Context, username stri
 // GetByUsernameCalls gets all the calls that were made to GetByUsername.
 // Check the length with:
 //
-//	len(mockedProfileUsecase.GetByUsernameCalls())
-func (mock *ProfileUsecaseMock) GetByUsernameCalls() []struct {
+//	len(mockedProfileModel.GetByUsernameCalls())
+func (mock *ProfileModelMock) GetByUsernameCalls() []struct {
 	Ctx      context.Context
 	Username string
 } {
@@ -96,9 +96,9 @@ func (mock *ProfileUsecaseMock) GetByUsernameCalls() []struct {
 }
 
 // RemoteUrlExists calls RemoteUrlExistsFunc.
-func (mock *ProfileUsecaseMock) RemoteUrlExists(ctx context.Context, url string) (bool, error) {
+func (mock *ProfileModelMock) RemoteUrlExists(ctx context.Context, url string) (bool, error) {
 	if mock.RemoteUrlExistsFunc == nil {
-		panic("ProfileUsecaseMock.RemoteUrlExistsFunc: method is nil but ProfileUsecase.RemoteUrlExists was just called")
+		panic("ProfileModelMock.RemoteUrlExistsFunc: method is nil but ProfileModel.RemoteUrlExists was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -116,8 +116,8 @@ func (mock *ProfileUsecaseMock) RemoteUrlExists(ctx context.Context, url string)
 // RemoteUrlExistsCalls gets all the calls that were made to RemoteUrlExists.
 // Check the length with:
 //
-//	len(mockedProfileUsecase.RemoteUrlExistsCalls())
-func (mock *ProfileUsecaseMock) RemoteUrlExistsCalls() []struct {
+//	len(mockedProfileModel.RemoteUrlExistsCalls())
+func (mock *ProfileModelMock) RemoteUrlExistsCalls() []struct {
 	Ctx context.Context
 	URL string
 } {

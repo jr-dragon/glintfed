@@ -8,8 +8,8 @@ import (
 	"glintfed.org/ent/instance"
 )
 
-func (uc *Usecase) GetBlockedDomains(ctx context.Context) (map[string]struct{}, error) {
-	domains, err := uc.client.Ent.Instance.Query().
+func (r *Repo) GetBlockedDomains(ctx context.Context) (map[string]struct{}, error) {
+	domains, err := r.Query().
 		Select("domain").
 		Where(instance.Banned(true)).All(ctx)
 	if err != nil {

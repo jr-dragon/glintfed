@@ -32,7 +32,7 @@ func TestWebfinger(t *testing.T) {
 	t.Run("bad_request_if_disabled", func(t *testing.T) {
 		disabledCfg := *cfg
 		disabledCfg.App.Federation.Webfinger.Enabled = false
-		s := New(&disabledCfg, nil, nil, nil, nil)
+		s := New(&disabledCfg, nil, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource=acct:alice@glintfed.test", nil)
 		w := httptest.NewRecorder()
@@ -43,7 +43,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("bad_request_if_missing_resource", func(t *testing.T) {
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger", nil)
 		w := httptest.NewRecorder()
@@ -54,7 +54,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("shared_inbox_resource", func(t *testing.T) {
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		resource := "acct:glintfed.test@glintfed.test"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -72,7 +72,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("user_resource_success", func(t *testing.T) {
-		puc := &ProfileUsecaseMock{
+		puc := &ProfileModelMock{
 			GetByUsernameFunc: func(ctx context.Context, username string) (*ent.Profile, error) {
 				if username == "alice" {
 					return &ent.Profile{Username: "alice", AvatarURL: "https://glintfed.test/avatar.webp"}, nil
@@ -80,7 +80,7 @@ func TestWebfinger(t *testing.T) {
 				return nil, fmt.Errorf("not found")
 			},
 		}
-		s := New(cfg, nil, puc, nil, nil)
+		s := New(cfg, nil, puc, nil, nil, nil)
 
 		resource := "https://glintfed.test/users/alice"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -98,7 +98,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("user_resource_acct_success", func(t *testing.T) {
-		puc := &ProfileUsecaseMock{
+		puc := &ProfileModelMock{
 			GetByUsernameFunc: func(ctx context.Context, username string) (*ent.Profile, error) {
 				if username == "alice" {
 					return &ent.Profile{Username: "alice", AvatarURL: "https://glintfed.test/avatar.webp"}, nil
@@ -106,7 +106,7 @@ func TestWebfinger(t *testing.T) {
 				return nil, fmt.Errorf("not found")
 			},
 		}
-		s := New(cfg, nil, puc, nil, nil)
+		s := New(cfg, nil, puc, nil, nil, nil)
 
 		resource := "acct:alice@glintfed.test"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -124,12 +124,12 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("user_resource_not_found", func(t *testing.T) {
-		puc := &ProfileUsecaseMock{
+		puc := &ProfileModelMock{
 			GetByUsernameFunc: func(ctx context.Context, username string) (*ent.Profile, error) {
 				return nil, fmt.Errorf("not found")
 			},
 		}
-		s := New(cfg, nil, puc, nil, nil)
+		s := New(cfg, nil, puc, nil, nil, nil)
 
 		resource := "https://glintfed.test/users/bob"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -141,7 +141,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("username_too_long", func(t *testing.T) {
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		resource := "https://glintfed.test/users/thisusernameiswaytoolongtobevalid"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -153,7 +153,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("invalid_username_characters", func(t *testing.T) {
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		resource := "https://glintfed.test/users/alice!"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
@@ -165,7 +165,7 @@ func TestWebfinger(t *testing.T) {
 	})
 
 	t.Run("invalid_resource_domain", func(t *testing.T) {
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		resource := "https://otherdomain.test/users/alice"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)

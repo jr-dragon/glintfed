@@ -1,18 +1,30 @@
-package instance
+package user
 
 import (
 	"context"
 	"time"
 
+	"glintfed.org/ent"
 	"glintfed.org/ent/user"
+	"glintfed.org/internal/data"
 )
+
+type Repo struct {
+	*ent.UserClient
+}
+
+func NewRepo(client *data.Client) *Repo {
+	return &Repo{
+		UserClient: client.Ent.User,
+	}
+}
 
 // GetTotalUsers
 //
 //	SELECT count(*)
 //	FROM users
-func (s *Usecase) GetTotalUsers(ctx context.Context) (int, error) {
-	return s.client.Ent.User.Query().Count(ctx)
+func (r *Repo) GetTotalUsers(ctx context.Context) (int, error) {
+	return r.Query().Count(ctx)
 }
 
 // GetMonthActiveUsers
@@ -21,9 +33,9 @@ func (s *Usecase) GetTotalUsers(ctx context.Context) (int, error) {
 //	FROM `users`
 //	WHERE
 //	  `updated_at` > datetime(NOW(), '-5 weeks') OR `last_active_at` > datetime(NOW(), '-5 weeks')
-func (s *Usecase) GetMonthActiveUsers(ctx context.Context) (int, error) {
+func (r *Repo) GetMonthActiveUsers(ctx context.Context) (int, error) {
 	threshold := time.Now().Add(-5 * 7 * 24 * time.Hour)
-	return s.client.Ent.User.Query().
+	return r.Query().
 		Where(
 			user.Or(
 				user.UpdatedAtGT(threshold),
@@ -39,9 +51,9 @@ func (s *Usecase) GetMonthActiveUsers(ctx context.Context) (int, error) {
 //	FROM `users`
 //	WHERE
 //		`updated_at` > datetime(NOW(), '-6 months') OR `last_active_at` > datetime(NOW(), '-6 months')
-func (s *Usecase) GetHalfYearActiveUsers(ctx context.Context) (int, error) {
+func (r *Repo) GetHalfYearActiveUsers(ctx context.Context) (int, error) {
 	threshold := time.Now().AddDate(0, -6, 0)
-	return s.client.Ent.User.Query().
+	return r.Query().
 		Where(
 			user.Or(
 				user.UpdatedAtGT(threshold),

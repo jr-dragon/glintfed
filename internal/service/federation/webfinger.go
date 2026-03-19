@@ -97,7 +97,7 @@ func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		profile, err := s.puc.GetByUsername(r.Context(), username)
+		profile, err := s.pm.GetByUsername(r.Context(), username)
 		if err != nil {
 			slog.ErrorContext(r.Context(), "failed to get profile by username", logs.ErrAttr(err))
 			http.Error(w, "", http.StatusBadRequest)

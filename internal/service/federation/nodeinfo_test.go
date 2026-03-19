@@ -14,7 +14,7 @@ func TestSvc_NodeinfoWellKnown(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = false
-		s := New(cfg, &InstanceUsecaseMock{}, nil, nil, nil)
+		s := New(cfg, &InstanceModelMock{}, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/nodeinfo", nil)
 		w := httptest.NewRecorder()
@@ -30,7 +30,7 @@ func TestSvc_NodeinfoWellKnown(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = true
 		cfg.App.Url = "https://example.com"
-		s := New(cfg, &InstanceUsecaseMock{}, nil, nil, nil)
+		s := New(cfg, &InstanceModelMock{}, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/nodeinfo", nil)
 		w := httptest.NewRecorder()
@@ -61,7 +61,7 @@ func TestSvc_Nodeinfo(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = false
-		s := New(cfg, &InstanceUsecaseMock{}, nil, nil, nil)
+		s := New(cfg, &InstanceModelMock{}, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/nodeinfo/2.0.json", nil)
 		w := httptest.NewRecorder()
@@ -89,7 +89,12 @@ func TestSvc_Nodeinfo(t *testing.T) {
 		cfg.App.MaxBioLength = 150
 		cfg.App.Groups.Enabled = true
 
-		mockIUC := &InstanceUsecaseMock{
+		mocksm := &StatusModelMock{
+			GetLocalPostsCountFunc: func(ctx context.Context) (int, error) {
+				return 1, nil
+			},
+		}
+		mockum := &UserModelMock{
 			GetTotalUsersFunc: func(ctx context.Context) (int, error) {
 				return 1, nil
 			},
@@ -99,11 +104,8 @@ func TestSvc_Nodeinfo(t *testing.T) {
 			GetHalfYearActiveUsersFunc: func(ctx context.Context) (int, error) {
 				return 1, nil
 			},
-			GetLocalPostsCountFunc: func(ctx context.Context) (int, error) {
-				return 1, nil
-			},
 		}
-		s := New(cfg, mockIUC, nil, nil, nil)
+		s := New(cfg, nil, nil, mocksm, mockum, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/nodeinfo/2.0.json", nil)
 		w := httptest.NewRecorder()

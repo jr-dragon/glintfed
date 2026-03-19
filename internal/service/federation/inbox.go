@@ -189,7 +189,7 @@ func (s *svc) validInboxDomain(ctx context.Context, domain string) error {
 		return err
 	}
 
-	blocked, err := s.iuc.GetBlockedDomains(ctx)
+	blocked, err := s.im.GetBlockedDomains(ctx)
 	if err != nil {
 		return err
 	}
@@ -204,13 +204,13 @@ func (s *svc) validInboxDomain(ctx context.Context, domain string) error {
 func (s *svc) handleDelete(ctx context.Context, header http.Header, payload worker.InboxPayload) error {
 	switch payload.Object.Type {
 	case "Person":
-		if exists, err := s.puc.RemoteUrlExists(ctx, payload.Object.ID); err != nil {
+		if exists, err := s.pm.RemoteUrlExists(ctx, payload.Object.ID); err != nil {
 			return err
 		} else if !exists {
 			return ErrMissingUrl
 		}
 	case "Tombstone":
-		if exists, err := s.suc.ObjectUrlExists(ctx, payload.Object.ID); err != nil {
+		if exists, err := s.sm.ObjectUrlExists(ctx, payload.Object.ID); err != nil {
 			return err
 		} else if !exists {
 			return ErrMissingUrl

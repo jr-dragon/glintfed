@@ -13,7 +13,7 @@ func TestSvc_HostMeta(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.Webfinger.Enabled = false
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/host-meta", nil)
 		w := httptest.NewRecorder()
@@ -29,7 +29,7 @@ func TestSvc_HostMeta(t *testing.T) {
 		cfg := &data.Config{}
 		cfg.App.Federation.Webfinger.Enabled = true
 		cfg.App.Url = "https://example.com"
-		s := New(cfg, nil, nil, nil, nil)
+		s := New(cfg, nil, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/host-meta", nil)
 		w := httptest.NewRecorder()

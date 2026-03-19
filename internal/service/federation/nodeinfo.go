@@ -198,21 +198,22 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	totalUsers, err := s.iuc.GetTotalUsers(r.Context())
+	totalUsers, err := s.um.GetTotalUsers(r.Context())
 	if err != nil {
 		const msg = "failed to get total users"
 		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
 		http.Error(w, msg, http.StatusInternalServerError)
 	}
 
-	activeMonth, err := s.iuc.GetMonthActiveUsers(r.Context())
+
+	activeMonth, err := s.um.GetMonthActiveUsers(r.Context())
 	if err != nil {
 		const msg = "failed to get month active users"
 		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
 		http.Error(w, msg, http.StatusInternalServerError)
 	}
 
-	activeHalfyear, err := s.iuc.GetHalfYearActiveUsers(r.Context())
+	activeHalfyear, err := s.um.GetHalfYearActiveUsers(r.Context())
 	if err != nil {
 		const msg = "failed to get half year active users"
 		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))
@@ -220,7 +221,7 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	localPosts, err := s.iuc.GetLocalPostsCount(r.Context())
+	localPosts, err := s.sm.GetLocalPostsCount(r.Context())
 	if err != nil {
 		const msg = "failed to get local posts count"
 		slog.ErrorContext(r.Context(), msg, logs.ErrAttr(err))

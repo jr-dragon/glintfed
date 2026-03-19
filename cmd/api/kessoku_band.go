@@ -5,6 +5,10 @@ package main
 import (
 	"github.com/mazrean/kessoku"
 	"glintfed.org/internal/data"
+	"glintfed.org/internal/model/instance"
+	"glintfed.org/internal/model/profile"
+	"glintfed.org/internal/model/status"
+	"glintfed.org/internal/model/user"
 	"glintfed.org/internal/server"
 	"glintfed.org/internal/service/admininvite"
 	"glintfed.org/internal/service/api"
@@ -44,9 +48,6 @@ import (
 	"glintfed.org/internal/service/stories/storyapiv1"
 	"glintfed.org/internal/service/story"
 	"glintfed.org/internal/service/userappsettings"
-	"glintfed.org/internal/usecase/instance"
-	"glintfed.org/internal/usecase/profile"
-	"glintfed.org/internal/usecase/status"
 	"glintfed.org/internal/usecase/worker"
 )
 
@@ -88,11 +89,12 @@ func InitApp(config *data.Config, client *data.Client) *app {
 	service33 := kessoku.Bind[notifications.Service](kessoku.Provide(notifications.New)).Fn()()
 	service34 := kessoku.Bind[admin.Service](kessoku.Provide(admin.New)).Fn()()
 	service35 := kessoku.Bind[group.Service](kessoku.Provide(group.New)).Fn()()
-	usecase := kessoku.Bind[federation.InstanceUsecase](kessoku.Provide(instance.NewUsecase)).Fn()(client)
-	usecase0 := kessoku.Bind[federation.ProfileUsecase](kessoku.Provide(profile.NewUsecase)).Fn()(client, config)
-	usecase1 := kessoku.Bind[federation.StatusUsecase](kessoku.Provide(status.NewUsecase)).Fn()(client)
+	repo := kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewRepo)).Fn()(client)
+	repo0 := kessoku.Bind[federation.ProfileModel](kessoku.Provide(profile.NewRepo)).Fn()(client)
+	repo1 := kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewRepo)).Fn()(client)
+	repo2 := kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewRepo)).Fn()(client)
 	inboxUsecase := kessoku.Bind[federation.WorkerUsecase](kessoku.Provide(worker.NewInboxUsecase)).Fn()(client)
-	service36 := kessoku.Bind[federation.Service](kessoku.Provide(federation.New)).Fn()(config, usecase, usecase0, usecase1, inboxUsecase)
+	service36 := kessoku.Bind[federation.Service](kessoku.Provide(federation.New)).Fn()(config, repo, repo0, repo1, repo2, inboxUsecase)
 	services := kessoku.Provide(server.NewAPIServices).Fn()(service, service36, service0, service1, service2, service3, service4, service5, service6, service7, service8, service9, service10, service11, service12, service13, service14, service15, service16, service17, service18, service19, service20, service21, service22, service23, service24, service25, service26, service27, service28, service29, service30, service31, service32, service33, service34, service35)
 	app0 := kessoku.Provide(newapp).Fn()(config, services)
 	return app0

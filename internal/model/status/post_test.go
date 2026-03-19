@@ -1,4 +1,4 @@
-package instance
+package status
 
 import (
 	"context"
@@ -15,7 +15,7 @@ func TestUsecase_GetLocalPostsCount(t *testing.T) {
 	}
 	defer cleanup()
 
-	uc := NewUsecase(client)
+	repo := NewRepo(client)
 	ctx := context.Background()
 
 	t.Run("CountOnlyLocalNonSharePosts", func(t *testing.T) {
@@ -68,7 +68,7 @@ func TestUsecase_GetLocalPostsCount(t *testing.T) {
 			t.Fatalf("failed to create status 4: %v", err)
 		}
 
-		count, err := uc.GetLocalPostsCount(ctx)
+		count, err := repo.GetLocalPostsCount(ctx)
 		if err != nil {
 			t.Fatalf("GetLocalPostsCount returned error: %v", err)
 		}

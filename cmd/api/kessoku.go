@@ -2,6 +2,10 @@ package main
 
 import (
 	"github.com/mazrean/kessoku"
+	"glintfed.org/internal/model/instance"
+	"glintfed.org/internal/model/profile"
+	"glintfed.org/internal/model/status"
+	"glintfed.org/internal/model/user"
 	"glintfed.org/internal/server"
 	"glintfed.org/internal/service/admininvite"
 	"glintfed.org/internal/service/api"
@@ -42,9 +46,6 @@ import (
 	storiesapiv1 "glintfed.org/internal/service/stories/storyapiv1"
 	"glintfed.org/internal/service/story"
 	"glintfed.org/internal/service/userappsettings"
-	"glintfed.org/internal/usecase/instance"
-	"glintfed.org/internal/usecase/profile"
-	"glintfed.org/internal/usecase/status"
 	"glintfed.org/internal/usecase/worker"
 )
 
@@ -94,9 +95,10 @@ var _ = kessoku.Inject[*app](
 	),
 	// usecases
 	kessoku.Set(
-		kessoku.Bind[federation.InstanceUsecase](kessoku.Provide(instance.NewUsecase)),
-		kessoku.Bind[federation.ProfileUsecase](kessoku.Provide(profile.NewUsecase)),
-		kessoku.Bind[federation.StatusUsecase](kessoku.Provide(status.NewUsecase)),
+		kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewRepo)),
+		kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewRepo)),
+		kessoku.Bind[federation.ProfileModel](kessoku.Provide(profile.NewRepo)),
+		kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewRepo)),
 		kessoku.Bind[federation.WorkerUsecase](kessoku.Provide(worker.NewInboxUsecase)),
 	),
 	kessoku.Provide(server.NewAPIServices),

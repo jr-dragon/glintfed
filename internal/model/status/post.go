@@ -1,4 +1,4 @@
-package instance
+package status
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 //	  `deleted_at` IS NULL AND
 //	  `local` = true
 //	  `type` = "share"
-func (uc *Usecase) GetLocalPostsCount(ctx context.Context) (int, error) {
-	return uc.client.Ent.Status.Query().
+func (r *Repo) GetLocalPostsCount(ctx context.Context) (int, error) {
+	return r.Query().
 		Where(
 			status.DeletedAtIsNil(),
 			status.Local(true),

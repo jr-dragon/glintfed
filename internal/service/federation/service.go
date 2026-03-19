@@ -18,23 +18,27 @@ type Service interface {
 	Nodeinfo(w http.ResponseWriter, r *http.Request)
 }
 
-//go:generate go tool moq -rm -out mock_instance_usecase.go . InstanceUsecase
-type InstanceUsecase interface {
-	GetLocalPostsCount(ctx context.Context) (int, error)
-	GetTotalUsers(ctx context.Context) (int, error)
-	GetMonthActiveUsers(ctx context.Context) (int, error)
-	GetHalfYearActiveUsers(ctx context.Context) (int, error)
+//go:generate go tool moq -rm -out mock_instance_model.go . InstanceModel
+type InstanceModel interface {
 	GetBlockedDomains(ctx context.Context) (map[string]struct{}, error)
 }
 
-//go:generate go tool moq -rm -out mock_profile_usecase.go . ProfileUsecase
-type ProfileUsecase interface {
+//go:generate go tool moq -rm -out mock_user_model.go . UserModel
+type UserModel interface {
+	GetTotalUsers(ctx context.Context) (int, error)
+	GetMonthActiveUsers(ctx context.Context) (int, error)
+	GetHalfYearActiveUsers(ctx context.Context) (int, error)
+}
+
+//go:generate go tool moq -rm -out mock_profile_model.go . ProfileModel
+type ProfileModel interface {
 	GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
 	RemoteUrlExists(ctx context.Context, url string) (bool, error)
 }
 
-//go:generate go tool moq -rm -out mock_status_usecase.go . StatusUsecase
-type StatusUsecase interface {
+//go:generate go tool moq -rm -out mock_status_model.go . StatusModel
+type StatusModel interface {
+	GetLocalPostsCount(ctx context.Context) (int, error)
 	ObjectUrlExists(ctx context.Context, url string) (bool, error)
 }
 
@@ -45,22 +49,26 @@ type WorkerUsecase interface {
 	Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) error
 }
 
-func New(cfg *data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase, wuc WorkerUsecase) Service {
+func New(cfg *data.Config, im InstanceModel, pm ProfileModel, sm StatusModel, um UserModel, wuc WorkerUsecase) Service {
 	return &svc{
 		cfg: cfg,
 
-		iuc: iuc,
-		puc: puc,
-		suc: suc,
 		wuc: wuc,
+
+		im: im,
+		pm: pm,
+		sm: sm,
+		um: um,
 	}
 }
 
 type svc struct {
 	cfg *data.Config
 
-	iuc InstanceUsecase
-	puc ProfileUsecase
-	suc StatusUsecase
+	im InstanceModel
+	pm ProfileModel
+	sm StatusModel
+	um UserModel
+
 	wuc WorkerUsecase
 }

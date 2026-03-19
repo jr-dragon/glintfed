@@ -17,7 +17,7 @@ func TestUsecase_ObjectUrlExists(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	uc := NewUsecase(client)
+	repo := NewRepo(client)
 
 	// Create test status
 	url := "https://example.com/statuses/1"
@@ -36,13 +36,13 @@ func TestUsecase_ObjectUrlExists(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Run("exists", func(t *testing.T) {
-		exists, err := uc.ObjectUrlExists(ctx, url)
+		exists, err := repo.ObjectUrlExists(ctx, url)
 		assert.NoError(t, err)
 		assert.True(t, exists)
 	})
 
 	t.Run("not exists", func(t *testing.T) {
-		exists, err := uc.ObjectUrlExists(ctx, "https://example.com/statuses/2")
+		exists, err := repo.ObjectUrlExists(ctx, "https://example.com/statuses/2")
 		assert.NoError(t, err)
 		assert.False(t, exists)
 	})
