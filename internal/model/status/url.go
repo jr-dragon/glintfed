@@ -11,6 +11,6 @@ import (
 //	SELECT exists(*)
 //	FROM statuses
 //	WHERE object_url = ?
-func (r *Repo) ObjectUrlExists(ctx context.Context, url string) (bool, error) {
-	return r.Query().Where(status.ObjectURL(url)).Exist(ctx)
+func (m *Model) ObjectUrlExists(ctx context.Context, url string) (bool, error) {
+	return m.Query().Where(status.ObjectURL(url)).Exist(ctx)
 }

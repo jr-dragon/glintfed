@@ -15,7 +15,7 @@ func TestUsecase_GetLocalPostsCount(t *testing.T) {
 	}
 	defer cleanup()
 
-	repo := NewRepo(client)
+	model := NewModel(client)
 	ctx := context.Background()
 
 	t.Run("CountOnlyLocalNonSharePosts", func(t *testing.T) {
@@ -68,7 +68,7 @@ func TestUsecase_GetLocalPostsCount(t *testing.T) {
 			t.Fatalf("failed to create status 4: %v", err)
 		}
 
-		count, err := repo.GetLocalPostsCount(ctx)
+		count, err := model.GetLocalPostsCount(ctx)
 		if err != nil {
 			t.Fatalf("GetLocalPostsCount returned error: %v", err)
 		}

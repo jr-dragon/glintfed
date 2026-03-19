@@ -16,7 +16,7 @@ func TestUsecase_GetBlockedDomains(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	repo := NewRepo(client)
+	model := NewModel(client)
 
 	// Create test instances
 	_, err = client.Ent.Instance.Create().
@@ -32,7 +32,7 @@ func TestUsecase_GetBlockedDomains(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Run("success", func(t *testing.T) {
-		domains, err := repo.GetBlockedDomains(ctx)
+		domains, err := model.GetBlockedDomains(ctx)
 		assert.NoError(t, err)
 		assert.Contains(t, domains, "banned.com")
 		assert.NotContains(t, domains, "allowed.com")

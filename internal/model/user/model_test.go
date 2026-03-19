@@ -15,7 +15,7 @@ func TestUsecase_GetTotalUsers(t *testing.T) {
 	}
 	defer cleanup()
 
-	repo := NewRepo(client)
+	model := NewModel(client)
 	ctx := context.Background()
 
 	_, err = client.Ent.User.Create().
@@ -36,7 +36,7 @@ func TestUsecase_GetTotalUsers(t *testing.T) {
 		t.Fatalf("failed to create user 2: %v", err)
 	}
 
-	count, err := repo.GetTotalUsers(ctx)
+	count, err := model.GetTotalUsers(ctx)
 	if err != nil {
 		t.Fatalf("GetTotalUsers failed: %v", err)
 	}
@@ -52,7 +52,7 @@ func TestUsecase_GetMonthActiveUsers(t *testing.T) {
 	}
 	defer cleanup()
 
-	repo := NewRepo(client)
+	model := NewModel(client)
 	ctx := context.Background()
 
 	now := time.Now()
@@ -95,7 +95,7 @@ func TestUsecase_GetMonthActiveUsers(t *testing.T) {
 		t.Fatalf("failed to create user 3: %v", err)
 	}
 
-	count, err := repo.GetMonthActiveUsers(ctx)
+	count, err := model.GetMonthActiveUsers(ctx)
 	if err != nil {
 		t.Fatalf("GetMonthActiveUsers failed: %v", err)
 	}
@@ -111,7 +111,7 @@ func TestUsecase_GetHalfYearActiveUsers(t *testing.T) {
 	}
 	defer cleanup()
 
-	repo := NewRepo(client)
+	model := NewModel(client)
 	ctx := context.Background()
 
 	now := time.Now()
@@ -154,7 +154,7 @@ func TestUsecase_GetHalfYearActiveUsers(t *testing.T) {
 		t.Fatalf("failed to create user 3: %v", err)
 	}
 
-	count, err := repo.GetHalfYearActiveUsers(ctx)
+	count, err := model.GetHalfYearActiveUsers(ctx)
 	if err != nil {
 		t.Fatalf("GetHalfYearActiveUsers failed: %v", err)
 	}

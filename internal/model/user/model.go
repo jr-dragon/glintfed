@@ -9,12 +9,12 @@ import (
 	"glintfed.org/internal/data"
 )
 
-type Repo struct {
+type Model struct {
 	*ent.UserClient
 }
 
-func NewRepo(client *data.Client) *Repo {
-	return &Repo{
+func NewModel(client *data.Client) *Model {
+	return &Model{
 		UserClient: client.Ent.User,
 	}
 }
@@ -23,8 +23,8 @@ func NewRepo(client *data.Client) *Repo {
 //
 //	SELECT count(*)
 //	FROM users
-func (r *Repo) GetTotalUsers(ctx context.Context) (int, error) {
-	return r.Query().Count(ctx)
+func (m *Model) GetTotalUsers(ctx context.Context) (int, error) {
+	return m.Query().Count(ctx)
 }
 
 // GetMonthActiveUsers
@@ -33,9 +33,9 @@ func (r *Repo) GetTotalUsers(ctx context.Context) (int, error) {
 //	FROM `users`
 //	WHERE
 //	  `updated_at` > datetime(NOW(), '-5 weeks') OR `last_active_at` > datetime(NOW(), '-5 weeks')
-func (r *Repo) GetMonthActiveUsers(ctx context.Context) (int, error) {
+func (m *Model) GetMonthActiveUsers(ctx context.Context) (int, error) {
 	threshold := time.Now().Add(-5 * 7 * 24 * time.Hour)
-	return r.Query().
+	return m.Query().
 		Where(
 			user.Or(
 				user.UpdatedAtGT(threshold),
@@ -51,9 +51,9 @@ func (r *Repo) GetMonthActiveUsers(ctx context.Context) (int, error) {
 //	FROM `users`
 //	WHERE
 //		`updated_at` > datetime(NOW(), '-6 months') OR `last_active_at` > datetime(NOW(), '-6 months')
-func (r *Repo) GetHalfYearActiveUsers(ctx context.Context) (int, error) {
+func (m *Model) GetHalfYearActiveUsers(ctx context.Context) (int, error) {
 	threshold := time.Now().AddDate(0, -6, 0)
-	return r.Query().
+	return m.Query().
 		Where(
 			user.Or(
 				user.UpdatedAtGT(threshold),

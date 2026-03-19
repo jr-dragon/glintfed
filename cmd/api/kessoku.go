@@ -95,11 +95,14 @@ var _ = kessoku.Inject[*app](
 	),
 	// usecases
 	kessoku.Set(
-		kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewRepo)),
-		kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewRepo)),
-		kessoku.Bind[federation.ProfileModel](kessoku.Provide(profile.NewRepo)),
-		kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewRepo)),
 		kessoku.Bind[federation.WorkerUsecase](kessoku.Provide(worker.NewInboxUsecase)),
+	),
+	// model
+	kessoku.Set(
+		kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewModel)),
+		kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewModel)),
+		kessoku.Bind[federation.ProfileModel](kessoku.Provide(profile.NewModel)),
+		kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)),
 	),
 	kessoku.Provide(server.NewAPIServices),
 	kessoku.Provide(newapp),

@@ -8,12 +8,12 @@ import (
 	"glintfed.org/internal/data"
 )
 
-type Repo struct {
+type Model struct {
 	*ent.ProfileClient
 }
 
-func NewRepo(client *data.Client) *Repo {
-	return &Repo{
+func NewModel(client *data.Client) *Model {
+	return &Model{
 		ProfileClient: client.Ent.Profile,
 	}
 }
@@ -24,8 +24,8 @@ func NewRepo(client *data.Client) *Repo {
 //	FROM profiles
 //	WHERE username = ?
 //	LIMIT 1
-func (r *Repo) GetByUsername(ctx context.Context, username string) (*ent.Profile, error) {
-	return r.Query().
+func (m *Model) GetByUsername(ctx context.Context, username string) (*ent.Profile, error) {
+	return m.Query().
 		Where(profile.Username(username)).
 		Only(ctx)
 }
@@ -35,8 +35,8 @@ func (r *Repo) GetByUsername(ctx context.Context, username string) (*ent.Profile
 //	SELECT exists(*)
 //	FROM profiles
 //	WHERE remote_url = ?
-func (r *Repo) RemoteUrlExists(ctx context.Context, url string) (bool, error) {
-	return r.Query().
+func (m *Model) RemoteUrlExists(ctx context.Context, url string) (bool, error) {
+	return m.Query().
 		Where(profile.RemoteURL(url)).
 		Exist(ctx)
 }
