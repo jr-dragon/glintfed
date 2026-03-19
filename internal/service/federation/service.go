@@ -45,7 +45,7 @@ type WorkerUsecase interface {
 	Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) error
 }
 
-func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase, wuc WorkerUsecase) Service {
+func New(cfg *data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUsecase, wuc WorkerUsecase) Service {
 	return &svc{
 		cfg: cfg,
 
@@ -57,7 +57,7 @@ func New(cfg data.Config, iuc InstanceUsecase, puc ProfileUsecase, suc StatusUse
 }
 
 type svc struct {
-	cfg data.Config
+	cfg *data.Config
 
 	iuc InstanceUsecase
 	puc ProfileUsecase

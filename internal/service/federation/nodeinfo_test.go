@@ -12,7 +12,7 @@ import (
 
 func TestSvc_NodeinfoWellKnown(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = false
 		s := New(cfg, &InstanceUsecaseMock{}, nil, nil, nil)
 
@@ -27,7 +27,7 @@ func TestSvc_NodeinfoWellKnown(t *testing.T) {
 	})
 
 	t.Run("Enabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = true
 		cfg.App.Url = "https://example.com"
 		s := New(cfg, &InstanceUsecaseMock{}, nil, nil, nil)
@@ -59,7 +59,7 @@ func TestSvc_NodeinfoWellKnown(t *testing.T) {
 
 func TestSvc_Nodeinfo(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = false
 		s := New(cfg, &InstanceUsecaseMock{}, nil, nil, nil)
 
@@ -74,7 +74,7 @@ func TestSvc_Nodeinfo(t *testing.T) {
 	})
 
 	t.Run("Enabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.NodeInfo.Enabled = true
 		cfg.App.Name = "TestNode"
 		cfg.App.Version = "1.0.0"

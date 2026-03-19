@@ -16,7 +16,7 @@ import (
 
 func TestSvc_SharedInbox(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.Activitypub.Enabled = false
 		s := New(cfg, nil, nil, nil, nil)
 
@@ -31,7 +31,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 	})
 
 	t.Run("InvalidJSON", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.Activitypub.Enabled = true
 		cfg.App.Federation.Activitypub.SharedInbox = true
 		s := New(cfg, nil, nil, nil, nil)
@@ -47,7 +47,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 	})
 
 	t.Run("BlockedDomain", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.Activitypub.Enabled = true
 		cfg.App.Federation.Activitypub.SharedInbox = true
 
@@ -74,7 +74,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 
 	t.Run("DeletePerson_Success", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
-			cfg := data.Config{}
+			cfg := &data.Config{}
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.SharedInbox = true
 
@@ -121,7 +121,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 
 	t.Run("Follow_Success", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
-			cfg := data.Config{}
+			cfg := &data.Config{}
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.SharedInbox = true
 
@@ -159,7 +159,7 @@ func TestSvc_SharedInbox(t *testing.T) {
 
 func TestSvc_UserInbox(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.Activitypub.Enabled = false
 		s := New(cfg, nil, nil, nil, nil)
 
@@ -175,7 +175,7 @@ func TestSvc_UserInbox(t *testing.T) {
 
 	t.Run("DeleteTombstone_Success", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
-			cfg := data.Config{}
+			cfg := &data.Config{}
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.Inbox = true
 
@@ -227,7 +227,7 @@ func TestSvc_UserInbox(t *testing.T) {
 
 	t.Run("Follow_Success", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
-			cfg := data.Config{}
+			cfg := &data.Config{}
 			cfg.App.Federation.Activitypub.Enabled = true
 			cfg.App.Federation.Activitypub.Inbox = true
 

@@ -14,7 +14,7 @@ import (
 )
 
 func TestWebfinger(t *testing.T) {
-	cfg := data.Config{
+	cfg := &data.Config{
 		App: data.AppConfig{
 			Url:           "https://glintfed.test",
 			MaxNameLength: 20,
@@ -30,9 +30,9 @@ func TestWebfinger(t *testing.T) {
 	}
 
 	t.Run("bad_request_if_disabled", func(t *testing.T) {
-		disabledCfg := cfg
+		disabledCfg := *cfg
 		disabledCfg.App.Federation.Webfinger.Enabled = false
-		s := New(disabledCfg, nil, nil, nil, nil)
+		s := New(&disabledCfg, nil, nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource=acct:alice@glintfed.test", nil)
 		w := httptest.NewRecorder()
@@ -83,6 +83,32 @@ func TestWebfinger(t *testing.T) {
 		s := New(cfg, nil, puc, nil, nil)
 
 		resource := "https://glintfed.test/users/alice"
+		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
+		w := httptest.NewRecorder()
+
+		s.Webfinger(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var resp webfinger
+		err := json.NewDecoder(w.Body).Decode(&resp)
+		assert.NoError(t, err)
+		assert.Equal(t, "acct:alice@glintfed.test", resp.Subject)
+		assert.Contains(t, resp.Aliases, "https://glintfed.test/alice")
+	})
+
+	t.Run("user_resource_acct_success", func(t *testing.T) {
+		puc := &ProfileUsecaseMock{
+			GetByUsernameFunc: func(ctx context.Context, username string) (*ent.Profile, error) {
+				if username == "alice" {
+					return &ent.Profile{Username: "alice", AvatarURL: "https://glintfed.test/avatar.webp"}, nil
+				}
+				return nil, fmt.Errorf("not found")
+			},
+		}
+		s := New(cfg, nil, puc, nil, nil)
+
+		resource := "acct:alice@glintfed.test"
 		req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource="+resource, nil)
 		w := httptest.NewRecorder()
 

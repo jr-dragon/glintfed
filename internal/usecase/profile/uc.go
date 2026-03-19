@@ -10,10 +10,10 @@ import (
 
 type Usecase struct {
 	client *data.Client
-	cfg    data.Config
+	cfg    *data.Config
 }
 
-func NewUsecase(client *data.Client, cfg data.Config) *Usecase {
+func NewUsecase(client *data.Client, cfg *data.Config) *Usecase {
 	return &Usecase{
 		client: client,
 		cfg:    cfg,

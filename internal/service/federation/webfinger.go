@@ -71,45 +71,55 @@ func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if u.Scheme == "https" {
-		if strings.HasPrefix(resource, "https://"+u.Host+"/users/") {
-			username := strings.TrimLeft(resource, "https://"+u.Host+"/users/")
-			if len(username) > s.cfg.App.MaxNameLength {
-				slog.ErrorContext(r.Context(), "username too long", slog.String("username", username))
-				http.Error(w, "", http.StatusBadRequest)
-				return
-			}
-
-			if !isValidUsername(username) {
-				slog.ErrorContext(r.Context(), "invalid username", slog.String("username", username))
-				http.Error(w, "", http.StatusBadRequest)
-				return
-			}
-
-			profile, err := s.puc.GetByUsername(r.Context(), username)
-			if err != nil {
-				slog.ErrorContext(r.Context(), "failed to get profile by username", logs.ErrAttr(err))
-				http.Error(w, "", http.StatusBadRequest)
-				return
-			}
-
-			webfinger, err := s.newWebfinger(profile)
-			if err != nil {
-				slog.ErrorContext(r.Context(), "failed to create webfinger struct", logs.ErrAttr(err))
-				http.Error(w, "", http.StatusInternalServerError)
-				return
-			}
-
-			json.NewEncoder(w).Encode(webfinger)
-		} else {
-			slog.ErrorContext(r.Context(), "resource starts with 'https://', but invalid domain or path")
+	var username string
+	if strings.HasPrefix(resource, "https://"+u.Host+"/users/") {
+		username = strings.TrimPrefix(resource, "https://"+u.Host+"/users/")
+	} else if strings.HasPrefix(resource, "acct:") {
+		parts := strings.Split(strings.TrimPrefix(resource, "acct:"), "@")
+		if len(parts) != 2 || parts[1] != u.Host {
+			slog.ErrorContext(r.Context(), "invalid acct resource", slog.String("resource", resource))
 			http.Error(w, "", http.StatusBadRequest)
 			return
 		}
+		username = parts[0]
 	}
+
+	if username != "" {
+		if len(username) > s.cfg.App.MaxNameLength {
+			slog.ErrorContext(r.Context(), "username too long", slog.String("username", username))
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+
+		if !isValidUsername(username) {
+			slog.ErrorContext(r.Context(), "invalid username", slog.String("username", username))
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+
+		profile, err := s.puc.GetByUsername(r.Context(), username)
+		if err != nil {
+			slog.ErrorContext(r.Context(), "failed to get profile by username", logs.ErrAttr(err))
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+
+		webfinger, err := s.newWebfinger(profile)
+		if err != nil {
+			slog.ErrorContext(r.Context(), "failed to create webfinger struct", logs.ErrAttr(err))
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(webfinger)
+		return
+	}
+
+	slog.ErrorContext(r.Context(), "invalid resource format", slog.String("resource", resource))
+	http.Error(w, "", http.StatusBadRequest)
 }
 
-func isShareboxResource(cfg data.Config, u *url.URL, resource string) bool {
+func isShareboxResource(cfg *data.Config, u *url.URL, resource string) bool {
 	var sb strings.Builder
 	sb.WriteString("acct:")
 	sb.WriteString(u.Host)

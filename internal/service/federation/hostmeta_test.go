@@ -11,7 +11,7 @@ import (
 
 func TestSvc_HostMeta(t *testing.T) {
 	t.Run("Disabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.Webfinger.Enabled = false
 		s := New(cfg, nil, nil, nil, nil)
 
@@ -26,7 +26,7 @@ func TestSvc_HostMeta(t *testing.T) {
 	})
 
 	t.Run("Enabled", func(t *testing.T) {
-		cfg := data.Config{}
+		cfg := &data.Config{}
 		cfg.App.Federation.Webfinger.Enabled = true
 		cfg.App.Url = "https://example.com"
 		s := New(cfg, nil, nil, nil, nil)

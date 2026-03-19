@@ -16,7 +16,7 @@ func TestUsecase_GetByUsername(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	uc := NewUsecase(client, data.Config{})
+	uc := NewUsecase(client, &data.Config{})
 
 	// Create test profiles
 	_, err = client.Ent.Profile.Create().
@@ -45,7 +45,7 @@ func TestUsecase_RemoteUrlExists(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	uc := NewUsecase(client, data.Config{})
+	uc := NewUsecase(client, &data.Config{})
 
 	// Create test profiles
 	url := "https://example.com/users/alice"

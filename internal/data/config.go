@@ -165,14 +165,15 @@ type WebfingerConfig struct {
 	Enabled bool `mapstructure:"enabled" env:"WEBFINGER"`
 }
 
-func NewConfig(paths ...string) (cfg Config, err error) {
+func NewConfig(paths ...string) (cfg *Config, err error) {
+	cfg = &Config{}
 	config.WithOptions(config.ParseEnv, config.ParseTime)
 	config.AddDriver(yaml.Driver)
 
 	if err = config.LoadFiles(paths...); err != nil {
 		return
 	}
-	if err = config.BindStruct("", &cfg); err != nil {
+	if err = config.BindStruct("", cfg); err != nil {
 		return
 	}
 

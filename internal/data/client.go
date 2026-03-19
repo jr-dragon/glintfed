@@ -25,7 +25,7 @@ type Client struct {
 	RDBMock redismock.ClientMock
 }
 
-func NewClient(cfg Config) (c *Client, cleanup func(), err error) {
+func NewClient(cfg *Config) (c *Client, cleanup func(), err error) {
 	c = &Client{}
 
 	ctx := context.Background()
@@ -56,7 +56,7 @@ func NewTestClient(t *testing.T) (c *Client, cleanup func(), err error) {
 	return
 }
 
-func (c *Client) initSQLClient(ctx context.Context, cfg Config) (err error) {
+func (c *Client) initSQLClient(ctx context.Context, cfg *Config) (err error) {
 	if c.DB, err = otelsql.Open(
 		cfg.Service.Database.SQL.Driver, cfg.Service.Database.SQL.DSN,
 		otelsql.WithDBSystem(cfg.Service.Database.SQL.Driver),
@@ -69,7 +69,7 @@ func (c *Client) initSQLClient(ctx context.Context, cfg Config) (err error) {
 	return c.Ent.Schema.Create(ctx)
 }
 
-func (c *Client) initRedisClient(_ context.Context, cfg Config) (err error) {
+func (c *Client) initRedisClient(_ context.Context, cfg *Config) (err error) {
 	c.RDB = redis.NewClient(&redis.Options{
 		Addr:     cfg.Service.Database.Redis.Addr,
 		Password: cfg.Service.Database.Redis.Password,

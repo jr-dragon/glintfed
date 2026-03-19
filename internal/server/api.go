@@ -54,7 +54,7 @@ import (
 	"glintfed.org/internal/usecase/worker"
 )
 
-func NewAPIServer(cfg data.Config, client *data.Client) *http.Server {
+func NewAPIServer(cfg *data.Config, client *data.Client) *http.Server {
 	mux := chi.NewRouter()
 
 	mux.Use(
