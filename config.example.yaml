@@ -68,6 +68,13 @@ server:
     bind: ":8000"
 
 service:
+  database:
+    sql:
+      driver: sqlite3
+      dsn: file:./glintfed.sqlite?_fk=1
+    redis:
+      addr: localhost:6379
+
   open_telemetry:
     tracing_enabled: false
     tracing_endpoint: localhost:4317
