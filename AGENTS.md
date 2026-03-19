@@ -64,7 +64,7 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 - **實作邏輯**: 建立 `svc` 結構體並實作 `Service` 介面，透過 `Usecase` 介面調用業務邏輯。
 - **Mocking**: 在 `service.go` 中加入 `//go:generate moq` 指令，並執行 `go generate ./...` 生成 Mock 物件。
   ```go
-  //go:generate moq -rm -out mock_profile_usecase.go . ProfileUsecase
+  //go:generate go tool moq -rm -out mock_profile_usecase.go . ProfileUsecase
   type ProfileUsecase interface {
       GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
   }

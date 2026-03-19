@@ -16,8 +16,9 @@ all: gen lint test build
 init:
 	@echo "Installing dependencies..."
 	@go install golang.org/x/tools/cmd/goimports@latest
-	@go install entgo.io/ent/cmd/ent@latest
-	@go install github.com/matryer/moq@latest
+	@go get -tool entgo.io/ent/cmd/ent@latest
+	@go get -tool github.com/matryer/moq@latest
+	@go get -tool github.com/mazrean/kessoku/cmd/kessoku
 
 # Generate code
 gen:

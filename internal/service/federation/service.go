@@ -18,7 +18,7 @@ type Service interface {
 	Nodeinfo(w http.ResponseWriter, r *http.Request)
 }
 
-//go:generate moq -rm -out mock_instance_usecase.go . InstanceUsecase
+//go:generate go tool moq -rm -out mock_instance_usecase.go . InstanceUsecase
 type InstanceUsecase interface {
 	GetLocalPostsCount(ctx context.Context) (int, error)
 	GetTotalUsers(ctx context.Context) (int, error)
@@ -27,18 +27,18 @@ type InstanceUsecase interface {
 	GetBlockedDomains(ctx context.Context) (map[string]struct{}, error)
 }
 
-//go:generate moq -rm -out mock_profile_usecase.go . ProfileUsecase
+//go:generate go tool moq -rm -out mock_profile_usecase.go . ProfileUsecase
 type ProfileUsecase interface {
 	GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
 	RemoteUrlExists(ctx context.Context, url string) (bool, error)
 }
 
-//go:generate moq -rm -out mock_status_usecase.go . StatusUsecase
+//go:generate go tool moq -rm -out mock_status_usecase.go . StatusUsecase
 type StatusUsecase interface {
 	ObjectUrlExists(ctx context.Context, url string) (bool, error)
 }
 
-//go:generate moq -rm -out mock_worker_usecase.go . WorkerUsecase
+//go:generate go tool moq -rm -out mock_worker_usecase.go . WorkerUsecase
 type WorkerUsecase interface {
 	Delete(ctx context.Context, header http.Header, payload worker.InboxPayload) error
 	Inbox(ctx context.Context, header http.Header, payload worker.InboxPayload) error
