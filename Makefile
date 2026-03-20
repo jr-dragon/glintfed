@@ -43,6 +43,7 @@ test:
 lint:
 	@echo "Formatting code..."
 	@go fmt ./...
+	@go vet ./...
 	@if command -v goimports >/dev/null 2>&1; then \
 		echo "Running goimports..."; \
 		goimports -w -local glintfed.org $$(find . -type f -name '*.go' -not -path './ent/*' -not -path './**/mock_*' -not -path './**/kessoku_band.go'); \
