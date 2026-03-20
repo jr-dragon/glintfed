@@ -57,11 +57,11 @@ mux.Get("/.well-known/change-password", func(w http.ResponseWriter, r *http.Requ
 })
 ```
 
-## Service Handler 實作規範
+## Service Layer 實作規範
 
-每個 Handler 必須包含 OpenTelemetry 追蹤與 Todo 註釋。
+每個 Service 應定義為 Interface，並透過建構子注入依賴。
 
-### 標準範本
+### 標準範本 (Kessoku DI)
 使用 `internal.T` (otel.Tracer) 進行追蹤，並維持與 Laravel 方法名一致的 Go 函數名。
 
 ```go
@@ -69,17 +69,61 @@ package v1
 
 import (
 	"net/http"
+	"glintfed.org/internal/data"
 	"glintfed.org/internal/service/internal"
 )
 
-//對應 Laravel 的 UserController@show
-func UserShow(w http.ResponseWriter, r *http.Request) {
+type Service interface {
+	UserShow(w http.ResponseWriter, r *http.Request)
+}
+
+func New(cfg *data.Config) Service {
+	return &svc{cfg: cfg}
+}
+
+type svc struct {
+	cfg *data.Config
+}
+
+// 對應 Laravel 的 UserController@show
+func (s *svc) UserShow(w http.ResponseWriter, r *http.Request) {
 	_, span := internal.T.Start(r.Context(), "ApiV1.UserShow")
 	defer span.End()
 
 	// TODO: Implement UserShow
 }
 ```
+
+**注意**：修改 `New` 建構子參數後，必須在專案根目錄執行 `make gen` 以更新 Kessoku DI 生成代碼。
+
+## Model 網域與 URL 邏輯遷移
+
+Laravel Model 中與 URL 生成或 ActivityPub JSON 相關的邏輯（例如 `getActor()`, `permalink()`）應遷移至 `ent/` 套件下的獨立檔案。
+
+### 規範與命名
+- **檔案命名**：`<model>_url.go` (例如 `instanceactor_url.go`)。
+- **實作方式**：定義為 `ent` model pointer 的 method。
+- **配置傳遞**：由於 `ent` 套件無法直接存取全域配置，這類 method 應明確接收需要的參數 (如 `appURL`, `appDomain`)。
+
+```go
+// ent/instanceactor_url.go
+func (ia *InstanceActor) GetActor(appURL, appDomain string) map[string]any {
+    return map[string]any{
+        "id": ia.Permalink(appURL),
+        // ...
+    }
+}
+```
+
+## 測試規範 (Testing Strategy)
+
+每個遷移的組件都必須包含對應的測試。
+
+| 組件 | 測試檔案 | 測試重點 | 工具/方法 |
+| :--- | :--- | :--- | :--- |
+| **Service Handler** | `service_test.go` | HTTP 回應碼、Content-Type、JSON 欄位 | `httptest`, `moq` |
+| **Model DB 邏輯** | `model_test.go` | CRUD 操作、Query 邏輯 | `data.NewTestClient` (SQLite In-memory) |
+| **Model URL 邏輯** | `<model>_url_test.go` | URL 拼接、ActivityPub 結構 | 格式化斷言 |
 
 ## 轉換清單 (Cheat Sheet)
 
@@ -90,6 +134,7 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
 | `middleware('auth')` | `r.Use(middleware.Auth)` |
 | `Controller@method` | `pkg.Method` |
 | `Log::info()` | `logs.Info()` |
+| `config('app.url')` | 透過建構子注入 `*data.Config` |
 
 ## Eloquent Model 遷移至 ent
 
@@ -104,23 +149,13 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
 ./.agents/skills/laravel-to-go/scripts/gen-ent-schema.sh <LARAVEL_APP_ROOT>
 ```
 
-該腳本會掃描 Laravel 中的 `app/*.php` 與 `app/Models/*.php`，找出所有繼承自 `Model` 或 `Authenticatable` 的類別，並執行 `ent new`。
-
 ### 0.1 透過資料庫取得屬性映射資訊
 
-若已經有既有的資料庫（如本地端的 MySQL 或開發環境中的 Docker 容器），可以使用以下腳本來取得資料表的欄位定義，協助進行屬性映射。
+可以使用以下腳本來取得資料表的欄位定義，協助進行屬性映射。
 
-**使用本地 MySQL CLI：**
 ```bash
 ./.agents/skills/laravel-to-go/scripts/get-columns-from-mysql-cli.sh <LARAVEL_APP_ROOT> [specific_table]
 ```
-
-**使用 Docker 容器中的 MySQL：**
-```bash
-./.agents/skills/laravel-to-go/scripts/get-columns-from-mysql-container.sh <LARAVEL_APP_ROOT> [specific_table]
-```
-
-這些腳本會列出每個資料表的 `DESCRIBE` 結果，幫助你快速確認每個欄位的型別、長度及是否可為空（NULL）。
 
 ### 1. 型別映射 (Field Types)
 
@@ -138,37 +173,24 @@ func UserShow(w http.ResponseWriter, r *http.Request) {
 ### 2. Eloquent 屬性映射
 
 - **`$fillable`**: 所有出現在 `$fillable` 的欄位都應定義在 `Fields()` 中。
-- **`$hidden`**: 敏感資訊（如 `password`, `email`, `2fa_secret`）應加上 `.Sensitive()`。
-- **`$casts`**: 
-    - `datetime`, `timestamp` -> `field.Time`
-    - `array`, `json` -> `field.JSON`
-- **軟刪除 (`SoftDeletes`)**: 必須包含 `field.Time("deleted_at").Optional()`。
+- **`$hidden`**: 敏感資訊加上 `.Sensitive()`。
+- **軟刪除 (`SoftDeletes`)**: 包含 `field.Time("deleted_at").Optional()`。
 
 ### 3. 命名規範與特殊處理
 
-- **CamelCase**: Go 的欄位名稱使用 CamelCase，`ent` 會自動將其轉換為資料庫的 snake_case。
-- **數字開頭欄位**: Go 的欄位名稱不能以數字開頭。若 Laravel 欄位為 `2fa_enabled`，應定義為 `TwoFaEnabled` 並使用 `StorageKey`。
+- **CamelCase**: Go 的欄位名稱使用 CamelCase，`ent` 會自動轉換。
+- **數字開頭欄位**: 使用 `StorageKey`。
   ```go
-  field.Bool("two_fa_enabled").StorageKey("2fa_enabled").Default(false)
+  field.Bool("two_fa_enabled").StorageKey("2fa_enabled")
   ```
-- **資料表名稱**: 使用 `Annotations` 明確指定與 Laravel 一致的複數表名。
-  ```go
-  func (User) Annotations() []schema.Annotation {
-      return []schema.Annotation{
-          entsql.Annotation{Table: "users"},
-      }
-  }
-  ```
+- **資料表名稱**: 使用 `Annotations` 指定。
 
 ### 4. 標準元數據欄位 (Standard Metadata)
-
-每個 Schema 通常都應包含以下標準欄位：
 
 ```go
 func (X) Fields() []ent.Field {
     return []ent.Field{
         field.Uint64("id").Unique(),
-        // ... 其他欄位
         field.Time("created_at").Default(time.Now).Immutable(),
         field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
         field.Time("deleted_at").Optional(),
