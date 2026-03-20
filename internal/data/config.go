@@ -177,8 +177,8 @@ func NewConfig(paths ...string) (cfg *Config, err error) {
 		return
 	}
 
-	if strings.HasSuffix(cfg.App.Url, "/") {
-		strings.TrimSuffix(cfg.App.Url, "/")
+	if before, ok := strings.CutSuffix(cfg.App.Url, "/"); ok {
+		cfg.App.Url = before
 	}
 
 	return

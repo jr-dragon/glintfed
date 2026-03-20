@@ -52,10 +52,10 @@ type InboxUsecase struct {
 type InboxPayload struct {
 	Raw   string
 	ID    string  `json:"id"`
-	Type  *string `json:"type,omitempty"`
-	Actor *string `json:"actor,omitempty"`
+	Type  *string `json:"type,omitzero"`
+	Actor *string `json:"actor,omitzero"`
 
-	Object *InboxPayloadObject `json:"object,omitempty"`
+	Object *InboxPayloadObject `json:"object,omitzero"`
 }
 
 type InboxPayloadObject struct {
@@ -211,9 +211,9 @@ func parseSignature(h http.Header) (s signature, err error) {
 	s.Raw = make(map[string]string)
 
 	sigstr := h.Get("signature")
-	parts := strings.Split(sigstr, ",")
+	parts := strings.SplitSeq(sigstr, ",")
 
-	for _, p := range parts {
+	for p := range parts {
 		key, value, ok := strings.Cut(p, "=")
 		if !ok {
 			continue

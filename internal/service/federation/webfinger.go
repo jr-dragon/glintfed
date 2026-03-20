@@ -22,9 +22,9 @@ type SharedInboxResponse struct {
 
 type SharedInboxLink struct {
 	Rel      string  `json:"rel"`
-	Type     *string `json:"type,omitempty"`
-	Href     *string `json:"href,omitempty"`
-	Template *string `json:"template,omitempty"`
+	Type     *string `json:"type,omitzero"`
+	Href     *string `json:"href,omitzero"`
+	Template *string `json:"template,omitzero"`
 }
 
 func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
@@ -72,10 +72,10 @@ func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var username string
-	if strings.HasPrefix(resource, "https://"+u.Host+"/users/") {
-		username = strings.TrimPrefix(resource, "https://"+u.Host+"/users/")
-	} else if strings.HasPrefix(resource, "acct:") {
-		parts := strings.Split(strings.TrimPrefix(resource, "acct:"), "@")
+	if after, ok := strings.CutPrefix(resource, "https://"+u.Host+"/users/"); ok {
+		username = after
+	} else if after, ok := strings.CutPrefix(resource, "acct:"); ok {
+		parts := strings.Split(after, "@")
 		if len(parts) != 2 || parts[1] != u.Host {
 			slog.ErrorContext(r.Context(), "invalid acct resource", slog.String("resource", resource))
 			http.Error(w, "", http.StatusBadRequest)
