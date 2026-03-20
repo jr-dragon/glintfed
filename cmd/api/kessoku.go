@@ -96,12 +96,16 @@ var _ = kessoku.Inject[*app](
 	// usecases
 	kessoku.Set(
 		kessoku.Bind[federation.WorkerUsecase](kessoku.Provide(worker.NewInboxUsecase)),
+		kessoku.Bind[worker.ActivityDispatcher](kessoku.Provide(worker.NewActivityHandler)),
+		kessoku.Bind[worker.ProfileGetter](kessoku.Provide(func(m *profile.Model) worker.ProfileGetter { return m })),
+		kessoku.Bind[worker.ProfileRemover](kessoku.Provide(worker.NewDeletePipeline)),
 	),
 	// model
 	kessoku.Set(
 		kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewModel)),
 		kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewModel)),
-		kessoku.Bind[federation.ProfileModel](kessoku.Provide(profile.NewModel)),
+		kessoku.Provide(profile.NewModel),
+		kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel { return m })),
 		kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)),
 	),
 	kessoku.Provide(server.NewAPIServices),

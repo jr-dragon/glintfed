@@ -90,11 +90,19 @@ func InitApp(config *data.Config, client *data.Client) *app {
 	service34 := kessoku.Bind[admin.Service](kessoku.Provide(admin.New)).Fn()()
 	service35 := kessoku.Bind[group.Service](kessoku.Provide(group.New)).Fn()()
 	model := kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewModel)).Fn()(client)
-	model0 := kessoku.Bind[federation.ProfileModel](kessoku.Provide(profile.NewModel)).Fn()(client)
-	model1 := kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)).Fn()(client)
-	model2 := kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewModel)).Fn()(client)
-	inboxUsecase := kessoku.Bind[federation.WorkerUsecase](kessoku.Provide(worker.NewInboxUsecase)).Fn()(client)
-	service36 := kessoku.Bind[federation.Service](kessoku.Provide(federation.New)).Fn()(config, model, model0, model1, model2, inboxUsecase)
+	model0 := kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)).Fn()(client)
+	model1 := kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewModel)).Fn()(client)
+	model2 := kessoku.Provide(profile.NewModel).Fn()(client)
+	deletePipeline := kessoku.Bind[worker.ProfileRemover](kessoku.Provide(worker.NewDeletePipeline)).Fn()(client)
+	activityHandler := kessoku.Bind[worker.ActivityDispatcher](kessoku.Provide(worker.NewActivityHandler)).Fn()(client)
+	profileModel := kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel {
+		return m
+	})).Fn()(model2)
+	profileGetter := kessoku.Bind[worker.ProfileGetter](kessoku.Provide(func(m *profile.Model) worker.ProfileGetter {
+		return m
+	})).Fn()(model2)
+	inboxUsecase := kessoku.Bind[federation.WorkerUsecase](kessoku.Provide(worker.NewInboxUsecase)).Fn()(client, profileGetter, deletePipeline, activityHandler)
+	service36 := kessoku.Bind[federation.Service](kessoku.Provide(federation.New)).Fn()(config, model, profileModel, model0, model1, inboxUsecase)
 	services := kessoku.Provide(server.NewAPIServices).Fn()(service, service36, service0, service1, service2, service3, service4, service5, service6, service7, service8, service9, service10, service11, service12, service13, service14, service15, service16, service17, service18, service19, service20, service21, service22, service23, service24, service25, service26, service27, service28, service29, service30, service31, service32, service33, service34, service35)
 	app0 := kessoku.Provide(newapp).Fn()(config, services)
 	return app0

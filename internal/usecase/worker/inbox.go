@@ -19,20 +19,34 @@ import (
 	"time"
 
 	"glintfed.org/ent"
-	"glintfed.org/ent/profile"
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/lib/logs"
 )
 
+//go:generate go tool moq -rm -out mock_profile_remover.go . ProfileRemover
 type ProfileRemover interface {
 	RemoteProfile(ctx context.Context, profile *ent.Profile) error
+}
+
+//go:generate go tool moq -rm -out mock_profile_getter.go . ProfileGetter
+type ProfileGetter interface {
+	GetActiveLocalProfile(ctx context.Context, username string) (*ent.Profile, error)
+	GetActiveRemoteProfile(ctx context.Context, url string) (*ent.Profile, error)
+	GetByKeyID(ctx context.Context, kid string) (*ent.Profile, error)
+}
+
+//go:generate go tool moq -rm -out mock_activity_dispatcher.go . ActivityDispatcher
+type ActivityDispatcher interface {
+	Delete(ctx context.Context, header http.Header, payload InboxPayload) error
+	Dispatch(ctx context.Context, header http.Header, payload InboxPayload) error
 }
 
 type InboxUsecase struct {
 	client *data.Client
 
+	pg ProfileGetter
 	pr ProfileRemover
-	ah *ActivityHandler
+	ad ActivityDispatcher
 }
 
 type InboxPayload struct {
@@ -50,11 +64,12 @@ type InboxPayloadObject struct {
 	AttributedTo *string `json:"attributedTo"`
 }
 
-func NewInboxUsecase(client *data.Client) *InboxUsecase {
+func NewInboxUsecase(client *data.Client, pg ProfileGetter, pr ProfileRemover, ad ActivityDispatcher) *InboxUsecase {
 	return &InboxUsecase{
 		client: client,
-		pr:     NewDeletePipeline(client),
-		ah:     NewActivityHandler(client),
+		pg:     pg,
+		pr:     pr,
+		ad:     ad,
 	}
 }
 
@@ -73,16 +88,14 @@ func (inbox *InboxUsecase) Delete(ctx context.Context, header http.Header, paylo
 	}
 
 	if payload.Object.Type == "Person" && payload.Actor != nil && *payload.Actor == payload.Object.ID {
-		profile, err := inbox.client.Ent.Profile.Query().
-			Where(profile.DomainNotNil(), profile.StatusIsNil(), profile.RemoteURL(payload.Object.ID)).
-			First(ctx)
+		profile, err := inbox.pg.GetActiveRemoteProfile(ctx, payload.Object.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get profile: %w", err)
 		}
 
 		return inbox.pr.RemoteProfile(ctx, profile)
 	} else {
-		return inbox.ah.Delete(ctx, header, payload)
+		return inbox.ad.Delete(ctx, header, payload)
 	}
 }
 
@@ -95,7 +108,7 @@ func (inbox *InboxUsecase) Inbox(ctx context.Context, header http.Header, payloa
 		return fmt.Errorf("failed to verify signature: %w", err)
 	}
 
-	return inbox.ah.Dispatch(ctx, header, payload)
+	return inbox.ad.Dispatch(ctx, header, payload)
 }
 
 func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header http.Header, payload InboxPayload) error {
@@ -103,9 +116,7 @@ func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header
 		return errors.New("missing required field in header")
 	}
 
-	p, err := inbox.client.Ent.Profile.Query().
-		Where(profile.Username(username), profile.DomainIsNil(), profile.StatusIsNil()).
-		First(ctx)
+	p, err := inbox.pg.GetActiveLocalProfile(ctx, username)
 	if err != nil {
 		if !ent.IsNotFound(err) {
 			return fmt.Errorf("failed to get profile for validation: %w", err)
@@ -117,7 +128,7 @@ func (inbox *InboxUsecase) Validate(ctx context.Context, username string, header
 		return fmt.Errorf("failed to verify signature: %w", err)
 	}
 
-	return inbox.ah.Dispatch(ctx, header, payload)
+	return inbox.ad.Dispatch(ctx, header, payload)
 }
 
 func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Header, payload InboxPayload, path string) error {
@@ -150,7 +161,7 @@ func (inbox *InboxUsecase) verifySignature(ctx context.Context, header http.Head
 		return fmt.Errorf("payload.Object.ID host mismatch: object_id=%s, signature_key_id=%s", objid.Host, signature.KeyId.Host)
 	}
 
-	actor, err := inbox.client.Ent.Profile.Query().Where(profile.KeyID(signature.Raw["keyId"])).First(ctx)
+	actor, err := inbox.pg.GetByKeyID(ctx, signature.Raw["keyId"])
 	if err != nil {
 		return fmt.Errorf("failed to get profile: %w", err)
 	}
