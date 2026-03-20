@@ -1,11 +1,16 @@
 package instanceactor
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"net/url"
 
+	"glintfed.org/ent"
 	"glintfed.org/internal/data"
+	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
 )
 
@@ -15,20 +20,46 @@ type Service interface {
 	Outbox(w http.ResponseWriter, r *http.Request)
 }
 
-func New(cfg *data.Config) Service {
+//go:generate go tool moq -rm -out mock_instance_actor_getter.go . InstanceActorGetter
+type InstanceActorGetter interface {
+	Get(ctx context.Context) (*ent.InstanceActor, error)
+}
+
+func New(cfg *data.Config, iag InstanceActorGetter) Service {
 	return &svc{
 		cfg: cfg,
+
+		iag: iag,
 	}
 }
 
 type svc struct {
 	cfg *data.Config
+
+	iag InstanceActorGetter
 }
 
 func (s *svc) Profile(w http.ResponseWriter, r *http.Request) {
 	_, span := internal.T.Start(r.Context(), "InstanceActor.Profile")
 	defer span.End()
-	// TODO: Implement
+
+	parsed, err := url.Parse(s.cfg.App.Url)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "failed to parse app url", logs.ErrAttr(err))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	ia, err := s.iag.Get(r.Context())
+	if err != nil {
+		slog.ErrorContext(r.Context(), "failed to get instance actor", logs.ErrAttr(err))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(ia.GetActor(parsed.String(), parsed.Host)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func (s *svc) Inbox(w http.ResponseWriter, r *http.Request) {
@@ -65,11 +96,11 @@ func (s *svc) Outbox(w http.ResponseWriter, r *http.Request) {
 					"@id":   "as:movedTo",
 					"@type": "@id",
 				},
-				"schema":        "http://schema.org#",
-				"PropertyValue": "schema:PropertyValue",
-				"value":         "schema:value",
-				"discoverable":  "toot:discoverable",
-				"Device":        "toot:Device",
+				"schema":           "http://schema.org#",
+				"PropertyValue":    "schema:PropertyValue",
+				"value":            "schema:value",
+				"discoverable":     "toot:discoverable",
+				"Device":           "toot:Device",
 				"Ed25519Signature": "toot:Ed25519Signature",
 				"Ed25519Key":       "toot:Ed25519Key",
 				"Curve25519Key":    "toot:Curve25519Key",

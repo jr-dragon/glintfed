@@ -48,6 +48,7 @@ import (
 	"glintfed.org/internal/service/story"
 	"glintfed.org/internal/service/userappsettings"
 	"glintfed.org/internal/usecase/worker"
+	instanceactorm "glintfed.org/internal/model/instanceactor"
 )
 
 //go:generate go tool kessoku $GOFILE
@@ -108,6 +109,7 @@ var _ = kessoku.Inject[*app](
 		kessoku.Provide(profile.NewModel),
 		kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel { return m })),
 		kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)),
+		kessoku.Bind[instanceactor.InstanceActorGetter](kessoku.Provide(instanceactorm.NewModel)),
 	),
 	kessoku.Provide(server.NewAPIServices),
 	kessoku.Provide(newapp),

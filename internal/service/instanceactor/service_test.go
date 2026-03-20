@@ -1,14 +1,51 @@
 package instanceactor
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 )
+
+func TestProfile(t *testing.T) {
+	cfg := &data.Config{
+		App: data.AppConfig{
+			Url: "https://example.com",
+		},
+	}
+
+	ia := &ent.InstanceActor{
+		PublicKey: "test-public-key",
+	}
+
+	iag := &InstanceActorGetterMock{
+		GetFunc: func(ctx context.Context) (*ent.InstanceActor, error) {
+			return ia, nil
+		},
+	}
+
+	s := New(cfg, iag)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/i/actor", nil)
+
+	s.Profile(w, r)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var res map[string]any
+	err := json.Unmarshal(w.Body.Bytes(), &res)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "https://example.com/i/actor", res["id"])
+	assert.Equal(t, "Application", res["type"])
+	assert.Equal(t, "example.com", res["preferredUsername"])
+}
 
 func TestOutbox(t *testing.T) {
 	cfg := &data.Config{
@@ -16,7 +53,8 @@ func TestOutbox(t *testing.T) {
 			Url: "https://example.com",
 		},
 	}
-	s := New(cfg)
+	iag := &InstanceActorGetterMock{}
+	s := New(cfg, iag)
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/i/actor/outbox", nil)
