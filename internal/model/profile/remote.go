@@ -36,4 +36,3 @@ func (m *Model) GetActiveRemoteProfile(ctx context.Context, url string) (*ent.Pr
 		).
 		First(ctx)
 }
-

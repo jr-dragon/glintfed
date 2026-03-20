@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/samber/lo"
+
 	"glintfed.org/ent"
 	"glintfed.org/ent/instance"
 )

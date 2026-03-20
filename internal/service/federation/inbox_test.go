@@ -10,6 +10,7 @@ import (
 	"testing/synctest"
 
 	"github.com/go-chi/chi/v5"
+
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/usecase/worker"
 )

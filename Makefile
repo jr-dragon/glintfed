@@ -45,7 +45,7 @@ lint:
 	@go fmt ./...
 	@if command -v goimports >/dev/null 2>&1; then \
 		echo "Running goimports..."; \
-		goimports -w $$(find . -type f -name '*.go' -not -path "./ent/*" -not -path "./vendor/*"); \
+		goimports -w -local glintfed.org $$(find . -type f -name '*.go' -not -path './ent/*' -not -path './**/mock_*' -not -path './**/kessoku_band.go'); \
 	else \
 		echo "goimports not found, skipping..."; \
 	fi

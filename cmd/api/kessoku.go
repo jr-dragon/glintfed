@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/mazrean/kessoku"
+
 	"glintfed.org/internal/model/instance"
 	"glintfed.org/internal/model/profile"
 	"glintfed.org/internal/model/status"

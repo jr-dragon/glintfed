@@ -205,7 +205,6 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusInternalServerError)
 	}
 
-
 	activeMonth, err := s.um.GetMonthActiveUsers(r.Context())
 	if err != nil {
 		const msg = "failed to get month active users"
