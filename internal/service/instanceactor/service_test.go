@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 )

@@ -4,6 +4,7 @@ import (
 	"github.com/mazrean/kessoku"
 
 	"glintfed.org/internal/model/instance"
+	instanceactorm "glintfed.org/internal/model/instanceactor"
 	"glintfed.org/internal/model/profile"
 	"glintfed.org/internal/model/status"
 	"glintfed.org/internal/model/user"
@@ -48,7 +49,6 @@ import (
 	"glintfed.org/internal/service/story"
 	"glintfed.org/internal/service/userappsettings"
 	"glintfed.org/internal/usecase/worker"
-	instanceactorm "glintfed.org/internal/model/instanceactor"
 )
 
 //go:generate go tool kessoku $GOFILE

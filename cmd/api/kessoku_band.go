@@ -6,7 +6,7 @@ import (
 	"github.com/mazrean/kessoku"
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/model/instance"
-	instanceactor0 "glintfed.org/internal/model/instanceactor"
+	"glintfed.org/internal/model/instanceactor"
 	"glintfed.org/internal/model/profile"
 	"glintfed.org/internal/model/status"
 	"glintfed.org/internal/model/user"
@@ -41,7 +41,7 @@ import (
 	"glintfed.org/internal/service/groups/search"
 	"glintfed.org/internal/service/groups/topic"
 	"glintfed.org/internal/service/healthcheck"
-	"glintfed.org/internal/service/instanceactor"
+	instanceactor0 "glintfed.org/internal/service/instanceactor"
 	"glintfed.org/internal/service/landing"
 	"glintfed.org/internal/service/media"
 	"glintfed.org/internal/service/pixelfeddirectory"
@@ -92,11 +92,11 @@ func InitApp(config *data.Config, client *data.Client) *app {
 	model := kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewModel)).Fn()(client)
 	model0 := kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)).Fn()(client)
 	model1 := kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewModel)).Fn()(client)
-	model2 := kessoku.Bind[instanceactor.InstanceActorGetter](kessoku.Provide(instanceactor0.NewModel)).Fn()(client)
+	model2 := kessoku.Bind[instanceactor0.InstanceActorGetter](kessoku.Provide(instanceactor.NewModel)).Fn()(client)
 	model3 := kessoku.Provide(profile.NewModel).Fn()(client)
 	deletePipeline := kessoku.Bind[worker.ProfileRemover](kessoku.Provide(worker.NewDeletePipeline)).Fn()(client)
 	activityHandler := kessoku.Bind[worker.ActivityDispatcher](kessoku.Provide(worker.NewActivityHandler)).Fn()(client)
-	service35 := kessoku.Bind[instanceactor.Service](kessoku.Provide(instanceactor.New)).Fn()(config, model2)
+	service35 := kessoku.Bind[instanceactor0.Service](kessoku.Provide(instanceactor0.New)).Fn()(config, model2)
 	profileModel := kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel {
 		return m
 	})).Fn()(model3)
