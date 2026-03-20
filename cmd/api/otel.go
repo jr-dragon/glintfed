@@ -17,7 +17,7 @@ import (
 	"glintfed.org/internal/data"
 )
 
-func setupOTelSDK(ctx context.Context, cfg data.Config) (cleanup func(context.Context) error, err error) {
+func setupOTelSDK(ctx context.Context, cfg *data.Config) (cleanup func(context.Context) error, err error) {
 	var cleanups []func(context.Context) error
 	cleanup = func(ctx context.Context) error {
 		var err error

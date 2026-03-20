@@ -1,8 +1,8 @@
 package schema
 
 import (
-	"entgo.io/ent/schema"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"time"
 
 	"entgo.io/ent"

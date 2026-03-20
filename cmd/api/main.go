@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"log/slog"
+	"net/http"
 
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/lib/logs"
@@ -52,10 +53,18 @@ func main() {
 	}
 	defer clientCleanup()
 
-	srv := server.NewAPIServer(cfg, client)
-
-	if err := srv.ListenAndServe(); err != nil {
+	if err := InitApp(cfg, client).ListenAndServe(); err != nil {
 		slog.Error("failed to start api server", logs.ErrAttr(err))
 		return
+	}
+}
+
+type app struct {
+	*http.Server
+}
+
+func newapp(cfg *data.Config, svcs *server.Services) *app {
+	return &app{
+		Server: server.NewAPIServer(cfg, svcs),
 	}
 }

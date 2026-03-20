@@ -50,7 +50,7 @@ import (
 	"glintfed.org/internal/service/userappsettings"
 )
 
-func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
+func NewAPIServer(cfg *data.Config, svcs *Services) *http.Server {
 	mux := chi.NewRouter()
 
 	mux.Use(
@@ -59,473 +59,429 @@ func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
 		middleware.Recoverer,
 	)
 
-	// Services
-	healthSvc := healthcheck.New()
-	fedSvc := federation.New()
-	iaSvc := instanceactor.New()
-	storySvc := story.New()
-	mediaSvc := media.New()
-	appRegSvc := appregister.New()
-
-	// API Services
-	apiSvc := api.New()
-	apiV1Svc := apiv1.New()
-	apiV1Dot1Svc := apiv1dot1.New()
-	apiV2Svc := apiv2.New()
-	tagsSvc := tags.New()
-	domainBlockSvc := domainblock.New()
-	statusEditSvc := statusedit.New()
-	adminDomainBlocksSvc := admindomainblocks.New()
-	customFilterSvc := customfilter.New()
-	discoverSvc := discover.New()
-	pixelfedDirectorySvc := pixelfeddirectory.New()
-	storyApiSvc := storyapiv1.New()
-	composeSvc := compose.New()
-	dmSvc := directmessage.New()
-	collectionSvc := collection.New()
-	landingSvc := landing.New()
-	adminInviteSvc := admininvite.New()
-	userAppSettingsSvc := userappsettings.New()
-	adminApiSvc := adminapi.New()
-
-	// Groups Services
-	groupsApiSvc := groupsapi.New()
-	groupsCreateSvc := groupscreate.New()
-	groupsSearchSvc := groupssearch.New()
-	groupsCommentSvc := groupscomment.New()
-	groupsDiscoverSvc := groupsdiscover.New()
-	groupsMetaSvc := groupsmeta.New()
-	groupsPostSvc := groupspost.New()
-	groupsTopicSvc := groupstopic.New()
-	groupsMemberSvc := groupsmember.New()
-	groupsFeedSvc := groupsfeed.New()
-	groupsNotificationsSvc := groupsnotifications.New()
-	groupsAdminSvc := groupsadminapi.New()
-	groupSvc := group.New()
-
 	// Root Routes
-	mux.Post("/f/inbox", fedSvc.SharedInbox)
-	mux.Post("/users/{username}/inbox", fedSvc.UserInbox)
-	mux.Get("/i/actor", iaSvc.Profile)
-	mux.Post("/i/actor/inbox", iaSvc.Inbox)
-	mux.Get("/i/actor/outbox", iaSvc.Outbox)
-	mux.Get("/stories/{username}/{id}", storySvc.GetActivityObject)
+	mux.Post("/f/inbox", svcs.Federation.SharedInbox)
+	mux.Post("/users/{username}/inbox", svcs.Federation.UserInbox)
+	mux.Get("/i/actor", svcs.InstanceActor.Profile)
+	mux.Post("/i/actor/inbox", svcs.InstanceActor.Inbox)
+	mux.Get("/i/actor/outbox", svcs.InstanceActor.Outbox)
+	mux.Get("/stories/{username}/{id}", svcs.Story.GetActivityObject)
 
-	mux.Get("/.well-known/webfinger", fedSvc.Webfinger)
-	mux.Get("/.well-known/nodeinfo", fedSvc.NodeinfoWellKnown)
-	mux.Get("/.well-known/host-meta", fedSvc.HostMeta)
+	mux.Get("/.well-known/webfinger", svcs.Federation.Webfinger)
+	mux.Get("/.well-known/nodeinfo", svcs.Federation.NodeinfoWellKnown)
+	mux.Get("/.well-known/host-meta", svcs.Federation.HostMeta)
 	mux.Handle("GET /.well-known/change-password", http.RedirectHandler("/settings/password", http.StatusFound))
 
-	mux.Get("/api/nodeinfo/2.0.json", fedSvc.Nodeinfo)
-	mux.Get("/api/service/health-check", healthSvc.Get)
-	mux.Post("/api/auth/app-code-verify", appRegSvc.VerifyCode)
-	mux.Post("/api/auth/onboarding", appRegSvc.Onboarding)
-	mux.Get("/storage/m/_v2/{pid}/{mhash}/{uhash}/{f}", mediaSvc.FallbackRedirect)
+	mux.Get("/api/nodeinfo/2.0.json", svcs.Federation.Nodeinfo)
+	mux.Get("/api/service/health-check", svcs.HealthCheck.Get)
+	mux.Post("/api/auth/app-code-verify", svcs.AppRegister.VerifyCode)
+	mux.Post("/api/auth/onboarding", svcs.AppRegister.Onboarding)
+	mux.Get("/storage/m/_v2/{pid}/{mhash}/{uhash}/{f}", svcs.Media.FallbackRedirect)
 
 	// API Routes
 	mux.Route("/api", func(r chi.Router) {
 
 		// V0
 		r.Route("/v0/groups", func(r chi.Router) {
-			r.Get("/config", groupsApiSvc.GetConfig)
-			r.Post("/permission/create", groupsCreateSvc.CheckCreatePermission)
-			r.Post("/create", groupsCreateSvc.StoreGroup)
+			r.Get("/config", svcs.GroupAPI.GetConfig)
+			r.Post("/permission/create", svcs.GroupCreate.CheckCreatePermission)
+			r.Post("/create", svcs.GroupCreate.StoreGroup)
 
-			r.Post("/search/invite/friends/send", groupsSearchSvc.InviteFriendsToGroup)
-			r.Post("/search/invite/friends", groupsSearchSvc.SearchFriendsToInvite)
-			r.Post("/search/global", groupsSearchSvc.SearchGlobalResults)
-			r.Post("/search/lac", groupsSearchSvc.SearchLocalAutocomplete)
-			r.Post("/search/addrec", groupsSearchSvc.SearchAddRecent)
-			r.Get("/search/getrec", groupsSearchSvc.SearchGetRecent)
+			r.Post("/search/invite/friends/send", svcs.GroupSearch.InviteFriendsToGroup)
+			r.Post("/search/invite/friends", svcs.GroupSearch.SearchFriendsToInvite)
+			r.Post("/search/global", svcs.GroupSearch.SearchGlobalResults)
+			r.Post("/search/lac", svcs.GroupSearch.SearchLocalAutocomplete)
+			r.Post("/search/addrec", svcs.GroupSearch.SearchAddRecent)
+			r.Get("/search/getrec", svcs.GroupSearch.SearchGetRecent)
 
-			r.Get("/comments", groupsCommentSvc.GetComments)
-			r.Post("/comment", groupsCommentSvc.StoreComment)
-			r.Post("/comment/photo", groupsCommentSvc.StoreCommentPhoto)
-			r.Post("/comment/delete", groupsCommentSvc.DeleteComment)
+			r.Get("/comments", svcs.GroupComment.GetComments)
+			r.Post("/comment", svcs.GroupComment.StoreComment)
+			r.Post("/comment/photo", svcs.GroupComment.StoreCommentPhoto)
+			r.Post("/comment/delete", svcs.GroupComment.DeleteComment)
 
-			r.Get("/discover/popular", groupsDiscoverSvc.GetDiscoverPopular)
-			r.Get("/discover/new", groupsDiscoverSvc.GetDiscoverNew)
+			r.Get("/discover/popular", svcs.GroupDiscover.GetDiscoverPopular)
+			r.Get("/discover/new", svcs.GroupDiscover.GetDiscoverNew)
 
-			r.Post("/delete", groupsMetaSvc.DeleteGroup)
+			r.Post("/delete", svcs.GroupMeta.DeleteGroup)
 
-			r.Post("/status/new", groupsPostSvc.StorePost)
-			r.Post("/status/delete", groupsPostSvc.DeletePost)
-			r.Post("/status/like", groupsPostSvc.LikePost)
-			r.Post("/status/unlike", groupsPostSvc.UnlikePost)
+			r.Post("/status/new", svcs.GroupPost.StorePost)
+			r.Post("/status/delete", svcs.GroupPost.DeletePost)
+			r.Post("/status/like", svcs.GroupPost.LikePost)
+			r.Post("/status/unlike", svcs.GroupPost.UnlikePost)
 
-			r.Get("/topics/list", groupsTopicSvc.GroupTopics)
-			r.Get("/topics/tag", groupsTopicSvc.GroupTopicTag)
+			r.Get("/topics/list", svcs.GroupTopic.GroupTopics)
+			r.Get("/topics/tag", svcs.GroupTopic.GroupTopicTag)
 
-			r.Get("/accounts/{gid}/{pid}", groupsApiSvc.GetGroupAccount)
-			r.Get("/categories/list", groupsApiSvc.GetGroupCategories)
-			r.Get("/category/list", groupsApiSvc.GetGroupsByCategory)
-			r.Get("/self/recommended/list", groupsApiSvc.GetRecommendedGroups)
-			r.Get("/self/list", groupsApiSvc.GetSelfGroups)
+			r.Get("/accounts/{gid}/{pid}", svcs.GroupAPI.GetGroupAccount)
+			r.Get("/categories/list", svcs.GroupAPI.GetGroupCategories)
+			r.Get("/category/list", svcs.GroupAPI.GetGroupsByCategory)
+			r.Get("/self/recommended/list", svcs.GroupAPI.GetRecommendedGroups)
+			r.Get("/self/list", svcs.GroupAPI.GetSelfGroups)
 
-			r.Get("/media/list", groupsPostSvc.GetGroupMedia)
+			r.Get("/media/list", svcs.GroupPost.GetGroupMedia)
 
-			r.Get("/members/list", groupsMemberSvc.GetGroupMembers)
-			r.Get("/members/requests", groupsMemberSvc.GetGroupMemberJoinRequests)
-			r.Post("/members/request", groupsMemberSvc.HandleGroupMemberJoinRequest)
-			r.Get("/members/get", groupsMemberSvc.GetGroupMember)
-			r.Get("/member/intersect/common", groupsMemberSvc.GetGroupMemberCommonIntersections)
+			r.Get("/members/list", svcs.GroupMember.GetGroupMembers)
+			r.Get("/members/requests", svcs.GroupMember.GetGroupMemberJoinRequests)
+			r.Post("/members/request", svcs.GroupMember.HandleGroupMemberJoinRequest)
+			r.Get("/members/get", svcs.GroupMember.GetGroupMember)
+			r.Get("/member/intersect/common", svcs.GroupMember.GetGroupMemberCommonIntersections)
 
-			r.Get("/status", groupsPostSvc.GetStatus)
+			r.Get("/status", svcs.GroupPost.GetStatus)
 
-			r.Post("/like", groupSvc.LikePost)
-			r.Post("/comment/like", groupsCommentSvc.LikePost)
-			r.Post("/comment/unlike", groupsCommentSvc.UnlikePost)
+			r.Post("/like", svcs.Group.LikePost)
+			r.Post("/comment/like", svcs.GroupComment.LikePost)
+			r.Post("/comment/unlike", svcs.GroupComment.UnlikePost)
 
-			r.Get("/self/feed", groupsFeedSvc.GetSelfFeed)
-			r.Get("/self/notifications", groupsNotificationsSvc.SelfGlobalNotifications)
+			r.Get("/self/feed", svcs.GroupFeed.GetSelfFeed)
+			r.Get("/self/notifications", svcs.GroupNotification.SelfGlobalNotifications)
 
-			r.Get("/{id}/user/{pid}/feed", groupsFeedSvc.GetGroupProfileFeed)
-			r.Get("/{id}/feed", groupsFeedSvc.GetGroupFeed)
-			r.Get("/{id}/atabs", groupsAdminSvc.GetAdminTabs)
-			r.Get("/{id}/admin/interactions", groupsAdminSvc.GetInteractionLogs)
-			r.Get("/{id}/admin/blocks", groupsAdminSvc.GetBlocks)
-			r.Post("/{id}/admin/blocks/add", groupsAdminSvc.AddBlock)
-			r.Post("/{id}/admin/blocks/undo", groupsAdminSvc.UndoBlock)
-			r.Post("/{id}/admin/blocks/export", groupsAdminSvc.ExportBlocks)
-			r.Get("/{id}/reports/list", groupsAdminSvc.GetReportList)
+			r.Get("/{id}/user/{pid}/feed", svcs.GroupFeed.GetGroupProfileFeed)
+			r.Get("/{id}/feed", svcs.GroupFeed.GetGroupFeed)
+			r.Get("/{id}/atabs", svcs.GroupAdminAPI.GetAdminTabs)
+			r.Get("/{id}/admin/interactions", svcs.GroupAdminAPI.GetInteractionLogs)
+			r.Get("/{id}/admin/blocks", svcs.GroupAdminAPI.GetBlocks)
+			r.Post("/{id}/admin/blocks/add", svcs.GroupAdminAPI.AddBlock)
+			r.Post("/{id}/admin/blocks/undo", svcs.GroupAdminAPI.UndoBlock)
+			r.Post("/{id}/admin/blocks/export", svcs.GroupAdminAPI.ExportBlocks)
+			r.Get("/{id}/reports/list", svcs.GroupAdminAPI.GetReportList)
 
-			r.Get("/{id}/members/interaction-limits", groupSvc.GetMemberInteractionLimits)
-			r.Post("/{id}/invite/check", groupSvc.GroupMemberInviteCheck)
-			r.Post("/{id}/invite/accept", groupSvc.GroupMemberInviteAccept)
-			r.Post("/{id}/invite/decline", groupSvc.GroupMemberInviteDecline)
-			r.Post("/{id}/members/interaction-limits", groupSvc.UpdateMemberInteractionLimits)
-			r.Post("/{id}/report/action", groupSvc.ReportAction)
-			r.Post("/{id}/report/create", groupSvc.ReportCreate)
-			r.Post("/{id}/admin/mbs", groupSvc.MetaBlockSearch)
-			r.Post("/{id}/join", groupSvc.JoinGroup)
-			r.Post("/{id}/cjr", groupSvc.CancelJoinRequest)
-			r.Post("/{id}/leave", groupSvc.GroupLeave)
-			r.Post("/{id}/settings", groupSvc.UpdateGroup)
-			r.Get("/{id}/likes/{sid}", groupSvc.ShowStatusLikes)
-			r.Get("/{id}", groupSvc.GetGroup)
+			r.Get("/{id}/members/interaction-limits", svcs.Group.GetMemberInteractionLimits)
+			r.Post("/{id}/invite/check", svcs.Group.GroupMemberInviteCheck)
+			r.Post("/{id}/invite/accept", svcs.Group.GroupMemberInviteAccept)
+			r.Post("/{id}/invite/decline", svcs.Group.GroupMemberInviteDecline)
+			r.Post("/{id}/members/interaction-limits", svcs.Group.UpdateMemberInteractionLimits)
+			r.Post("/{id}/report/action", svcs.Group.ReportAction)
+			r.Post("/{id}/report/create", svcs.Group.ReportCreate)
+			r.Post("/{id}/admin/mbs", svcs.Group.MetaBlockSearch)
+			r.Post("/{id}/join", svcs.Group.JoinGroup)
+			r.Post("/{id}/cjr", svcs.Group.CancelJoinRequest)
+			r.Post("/{id}/leave", svcs.Group.GroupLeave)
+			r.Post("/{id}/settings", svcs.Group.UpdateGroup)
+			r.Get("/{id}/likes/{sid}", svcs.Group.ShowStatusLikes)
+			r.Get("/{id}", svcs.Group.GetGroup)
 		})
 
 		// V1
 		r.Route("/v1", func(r chi.Router) {
-			r.Post("/apps", apiV1Svc.Apps)
-			r.Get("/apps/verify_credentials", apiV1Svc.GetApp)
-			r.Get("/instance", apiV1Svc.Instance)
-			r.Get("/instance/peers", apiV1Svc.InstancePeers)
-			r.Get("/bookmarks", apiV1Svc.Bookmarks)
+			r.Post("/apps", svcs.APIv1.Apps)
+			r.Get("/apps/verify_credentials", svcs.APIv1.GetApp)
+			r.Get("/instance", svcs.APIv1.Instance)
+			r.Get("/instance/peers", svcs.APIv1.InstancePeers)
+			r.Get("/bookmarks", svcs.APIv1.Bookmarks)
 
-			r.Get("/accounts/verify_credentials", apiV1Svc.VerifyCredentials)
-			r.Post("/accounts/update_credentials", apiV1Svc.AccountUpdateCredentials)
-			r.Patch("/accounts/update_credentials", apiV1Svc.AccountUpdateCredentials)
-			r.Get("/accounts/relationships", apiV1Svc.AccountRelationshipsById)
-			r.Get("/accounts/lookup", apiV1Svc.AccountLookupById)
-			r.Get("/accounts/search", apiV1Svc.AccountSearch)
-			r.Get("/accounts/{id}/statuses", apiV1Svc.AccountStatusesById)
-			r.Get("/accounts/{id}/following", apiV1Svc.AccountFollowingById)
-			r.Get("/accounts/{id}/followers", apiV1Svc.AccountFollowersById)
-			r.Post("/accounts/{id}/follow", apiV1Svc.AccountFollowById)
-			r.Post("/accounts/{id}/unfollow", apiV1Svc.AccountUnfollowById)
-			r.Post("/accounts/{id}/block", apiV1Svc.AccountBlockById)
-			r.Post("/accounts/{id}/unblock", apiV1Svc.AccountUnblockById)
-			r.Post("/accounts/{id}/remove_from_followers", apiV1Svc.AccountRemoveFollowById)
-			r.Post("/accounts/{id}/pin", apiV1Svc.AccountEndorsements)
-			r.Post("/accounts/{id}/unpin", apiV1Svc.AccountEndorsements)
-			r.Post("/accounts/{id}/mute", apiV1Svc.AccountMuteById)
-			r.Post("/accounts/{id}/unmute", apiV1Svc.AccountUnmuteById)
-			r.Get("/accounts/{id}/lists", apiV1Svc.AccountListsById)
-			r.Get("/lists/{id}/accounts", apiV1Svc.AccountListsById)
-			r.Get("/accounts/{id}", apiV1Svc.AccountById)
+			r.Get("/accounts/verify_credentials", svcs.APIv1.VerifyCredentials)
+			r.Post("/accounts/update_credentials", svcs.APIv1.AccountUpdateCredentials)
+			r.Patch("/accounts/update_credentials", svcs.APIv1.AccountUpdateCredentials)
+			r.Get("/accounts/relationships", svcs.APIv1.AccountRelationshipsById)
+			r.Get("/accounts/lookup", svcs.APIv1.AccountLookupById)
+			r.Get("/accounts/search", svcs.APIv1.AccountSearch)
+			r.Get("/accounts/{id}/statuses", svcs.APIv1.AccountStatusesById)
+			r.Get("/accounts/{id}/following", svcs.APIv1.AccountFollowingById)
+			r.Get("/accounts/{id}/followers", svcs.APIv1.AccountFollowersById)
+			r.Post("/accounts/{id}/follow", svcs.APIv1.AccountFollowById)
+			r.Post("/accounts/{id}/unfollow", svcs.APIv1.AccountUnfollowById)
+			r.Post("/accounts/{id}/block", svcs.APIv1.AccountBlockById)
+			r.Post("/accounts/{id}/unblock", svcs.APIv1.AccountUnblockById)
+			r.Post("/accounts/{id}/remove_from_followers", svcs.APIv1.AccountRemoveFollowById)
+			r.Post("/accounts/{id}/pin", svcs.APIv1.AccountEndorsements)
+			r.Post("/accounts/{id}/unpin", svcs.APIv1.AccountEndorsements)
+			r.Post("/accounts/{id}/mute", svcs.APIv1.AccountMuteById)
+			r.Post("/accounts/{id}/unmute", svcs.APIv1.AccountUnmuteById)
+			r.Get("/accounts/{id}/lists", svcs.APIv1.AccountListsById)
+			r.Get("/lists/{id}/accounts", svcs.APIv1.AccountListsById)
+			r.Get("/accounts/{id}", svcs.APIv1.AccountById)
 
-			r.Post("/avatar/update", apiSvc.AvatarUpdate)
-			r.Get("/blocks", apiV1Svc.AccountBlocks)
-			r.Get("/conversations", apiV1Svc.Conversations)
-			r.Get("/custom_emojis", apiV1Svc.CustomEmojis)
-			r.Get("/domain_blocks", domainBlockSvc.Index)
-			r.Post("/domain_blocks", domainBlockSvc.Store)
-			r.Delete("/domain_blocks", domainBlockSvc.Delete)
-			r.Get("/endorsements", apiV1Svc.AccountEndorsements)
-			r.Get("/favourites", apiV1Svc.AccountFavourites)
-			r.Get("/filters", apiV1Svc.AccountFilters)
-			r.Get("/follow_requests", apiV1Svc.AccountFollowRequests)
-			r.Post("/follow_requests/{id}/authorize", apiV1Svc.AccountFollowRequestAccept)
-			r.Post("/follow_requests/{id}/reject", apiV1Svc.AccountFollowRequestReject)
-			r.Get("/lists", apiV1Svc.AccountLists)
-			r.Post("/media", apiV1Svc.MediaUpload)
-			r.Get("/media/{id}", apiV1Svc.MediaGet)
-			r.Put("/media/{id}", apiV1Svc.MediaUpdate)
-			r.Get("/mutes", apiV1Svc.AccountMutes)
-			r.Get("/notifications", apiV1Svc.AccountNotifications)
-			r.Get("/suggestions", apiV1Svc.AccountSuggestions)
+			r.Post("/avatar/update", svcs.API.AvatarUpdate)
+			r.Get("/blocks", svcs.APIv1.AccountBlocks)
+			r.Get("/conversations", svcs.APIv1.Conversations)
+			r.Get("/custom_emojis", svcs.APIv1.CustomEmojis)
+			r.Get("/domain_blocks", svcs.DomainBlock.Index)
+			r.Post("/domain_blocks", svcs.DomainBlock.Store)
+			r.Delete("/domain_blocks", svcs.DomainBlock.Delete)
+			r.Get("/endorsements", svcs.APIv1.AccountEndorsements)
+			r.Get("/favourites", svcs.APIv1.AccountFavourites)
+			r.Get("/filters", svcs.APIv1.AccountFilters)
+			r.Get("/follow_requests", svcs.APIv1.AccountFollowRequests)
+			r.Post("/follow_requests/{id}/authorize", svcs.APIv1.AccountFollowRequestAccept)
+			r.Post("/follow_requests/{id}/reject", svcs.APIv1.AccountFollowRequestReject)
+			r.Get("/lists", svcs.APIv1.AccountLists)
+			r.Post("/media", svcs.APIv1.MediaUpload)
+			r.Get("/media/{id}", svcs.APIv1.MediaGet)
+			r.Put("/media/{id}", svcs.APIv1.MediaUpdate)
+			r.Get("/mutes", svcs.APIv1.AccountMutes)
+			r.Get("/notifications", svcs.APIv1.AccountNotifications)
+			r.Get("/suggestions", svcs.APIv1.AccountSuggestions)
 
-			r.Post("/statuses/{id}/favourite", apiV1Svc.StatusFavouriteById)
-			r.Post("/statuses/{id}/unfavourite", apiV1Svc.StatusUnfavouriteById)
-			r.Get("/statuses/{id}/context", apiV1Svc.StatusContext)
-			r.Get("/statuses/{id}/card", apiV1Svc.StatusCard)
-			r.Get("/statuses/{id}/reblogged_by", apiV1Svc.StatusRebloggedBy)
-			r.Get("/statuses/{id}/favourited_by", apiV1Svc.StatusFavouritedBy)
-			r.Post("/statuses/{id}/reblog", apiV1Svc.StatusShare)
-			r.Post("/statuses/{id}/unreblog", apiV1Svc.StatusUnshare)
-			r.Post("/statuses/{id}/bookmark", apiV1Svc.BookmarkStatus)
-			r.Post("/statuses/{id}/unbookmark", apiV1Svc.UnbookmarkStatus)
-			r.Post("/statuses/{id}/pin", apiV1Svc.StatusPin)
-			r.Post("/statuses/{id}/unpin", apiV1Svc.StatusUnpin)
-			r.Delete("/statuses/{id}", apiV1Svc.StatusDelete)
-			r.Get("/statuses/{id}", apiV1Svc.StatusById)
-			r.Post("/statuses", apiV1Svc.StatusCreate)
+			r.Post("/statuses/{id}/favourite", svcs.APIv1.StatusFavouriteById)
+			r.Post("/statuses/{id}/unfavourite", svcs.APIv1.StatusUnfavouriteById)
+			r.Get("/statuses/{id}/context", svcs.APIv1.StatusContext)
+			r.Get("/statuses/{id}/card", svcs.APIv1.StatusCard)
+			r.Get("/statuses/{id}/reblogged_by", svcs.APIv1.StatusRebloggedBy)
+			r.Get("/statuses/{id}/favourited_by", svcs.APIv1.StatusFavouritedBy)
+			r.Post("/statuses/{id}/reblog", svcs.APIv1.StatusShare)
+			r.Post("/statuses/{id}/unreblog", svcs.APIv1.StatusUnshare)
+			r.Post("/statuses/{id}/bookmark", svcs.APIv1.BookmarkStatus)
+			r.Post("/statuses/{id}/unbookmark", svcs.APIv1.UnbookmarkStatus)
+			r.Post("/statuses/{id}/pin", svcs.APIv1.StatusPin)
+			r.Post("/statuses/{id}/unpin", svcs.APIv1.StatusUnpin)
+			r.Delete("/statuses/{id}", svcs.APIv1.StatusDelete)
+			r.Get("/statuses/{id}", svcs.APIv1.StatusById)
+			r.Post("/statuses", svcs.APIv1.StatusCreate)
 
-			r.Get("/timelines/home", apiV1Svc.TimelineHome)
-			r.Get("/timelines/public", apiV1Svc.TimelinePublic)
-			r.Get("/timelines/tag/{hashtag}", apiV1Svc.TimelineHashtag)
-			r.Get("/discover/posts", apiV1Svc.DiscoverPosts)
+			r.Get("/timelines/home", svcs.APIv1.TimelineHome)
+			r.Get("/timelines/public", svcs.APIv1.TimelinePublic)
+			r.Get("/timelines/tag/{hashtag}", svcs.APIv1.TimelineHashtag)
+			r.Get("/discover/posts", svcs.APIv1.DiscoverPosts)
 
-			r.Get("/preferences", apiV1Svc.GetPreferences)
-			r.Get("/trends", apiV1Svc.GetTrends)
-			r.Get("/announcements", apiV1Svc.GetAnnouncements)
-			r.Get("/markers", apiV1Svc.GetMarkers)
-			r.Post("/markers", apiV1Svc.SetMarkers)
+			r.Get("/preferences", svcs.APIv1.GetPreferences)
+			r.Get("/trends", svcs.APIv1.GetTrends)
+			r.Get("/announcements", svcs.APIv1.GetAnnouncements)
+			r.Get("/markers", svcs.APIv1.GetMarkers)
+			r.Post("/markers", svcs.APIv1.SetMarkers)
 
-			r.Get("/followed_tags", tagsSvc.GetFollowedTags)
-			r.Post("/tags/{id}/follow", tagsSvc.FollowHashtag)
-			r.Post("/tags/{id}/unfollow", tagsSvc.UnfollowHashtag)
-			r.Get("/tags/{id}/related", tagsSvc.RelatedTags)
-			r.Get("/tags/{id}", tagsSvc.GetHashtag)
+			r.Get("/followed_tags", svcs.Tags.GetFollowedTags)
+			r.Post("/tags/{id}/follow", svcs.Tags.FollowHashtag)
+			r.Post("/tags/{id}/unfollow", svcs.Tags.UnfollowHashtag)
+			r.Get("/tags/{id}/related", svcs.Tags.RelatedTags)
+			r.Get("/tags/{id}", svcs.Tags.GetHashtag)
 
-			r.Get("/statuses/{id}/history", statusEditSvc.History)
-			r.Put("/statuses/{id}", statusEditSvc.Store)
+			r.Get("/statuses/{id}/history", svcs.StatusEdit.History)
+			r.Put("/statuses/{id}", svcs.StatusEdit.Store)
 
 			r.Route("/admin", func(r chi.Router) {
-				r.Get("/domain_blocks", adminDomainBlocksSvc.Index)
-				r.Post("/domain_blocks", adminDomainBlocksSvc.Create)
-				r.Get("/domain_blocks/{id}", adminDomainBlocksSvc.Show)
-				r.Put("/domain_blocks/{id}", adminDomainBlocksSvc.Update)
-				r.Delete("/domain_blocks/{id}", adminDomainBlocksSvc.Delete)
+				r.Get("/domain_blocks", svcs.AdminDomainBlock.Index)
+				r.Post("/domain_blocks", svcs.AdminDomainBlock.Create)
+				r.Get("/domain_blocks/{id}", svcs.AdminDomainBlock.Show)
+				r.Put("/domain_blocks/{id}", svcs.AdminDomainBlock.Update)
+				r.Delete("/domain_blocks/{id}", svcs.AdminDomainBlock.Delete)
 			})
 		})
 
 		// V2
 		r.Route("/v2", func(r chi.Router) {
-			r.Get("/search", apiV2Svc.Search)
-			r.Post("/media", apiV2Svc.MediaUploadV2)
-			r.Get("/streaming/config", apiV2Svc.GetWebsocketConfig)
-			r.Get("/instance", apiV2Svc.Instance)
+			r.Get("/search", svcs.APIv2.Search)
+			r.Post("/media", svcs.APIv2.MediaUploadV2)
+			r.Get("/streaming/config", svcs.APIv2.GetWebsocketConfig)
+			r.Get("/instance", svcs.APIv2.Instance)
 
-			r.Get("/filters", customFilterSvc.Index)
-			r.Get("/filters/{id}", customFilterSvc.Show)
-			r.Post("/filters", customFilterSvc.Store)
-			r.Put("/filters/{id}", customFilterSvc.Update)
-			r.Delete("/filters/{id}", customFilterSvc.Delete)
+			r.Get("/filters", svcs.CustomFilter.Index)
+			r.Get("/filters/{id}", svcs.CustomFilter.Show)
+			r.Post("/filters", svcs.CustomFilter.Store)
+			r.Put("/filters/{id}", svcs.CustomFilter.Update)
+			r.Delete("/filters/{id}", svcs.CustomFilter.Delete)
 		})
 
 		// V1.1
 		r.Route("/v1.1", func(r chi.Router) {
-			r.Post("/report", apiV1Dot1Svc.Report)
+			r.Post("/report", svcs.APIv1Dot1.Report)
 
 			r.Route("/accounts", func(r chi.Router) {
-				r.Get("/timelines/home", apiV1Svc.TimelineHome)
-				r.Delete("/avatar", apiV1Dot1Svc.DeleteAvatar)
-				r.Get("/{id}/posts", apiV1Dot1Svc.AccountPosts)
-				r.Post("/change-password", apiV1Dot1Svc.AccountChangePassword)
-				r.Get("/login-activity", apiV1Dot1Svc.AccountLoginActivity)
-				r.Get("/two-factor", apiV1Dot1Svc.AccountTwoFactor)
-				r.Get("/emails-from-pixelfed", apiV1Dot1Svc.AccountEmailsFromPixelfed)
-				r.Get("/apps-and-applications", apiV1Dot1Svc.AccountApps)
-				r.Get("/mutuals/{id}", apiV1Dot1Svc.GetMutualAccounts)
-				r.Get("/username/{username}", apiV1Dot1Svc.AccountUsernameToId)
+				r.Get("/timelines/home", svcs.APIv1.TimelineHome)
+				r.Delete("/avatar", svcs.APIv1Dot1.DeleteAvatar)
+				r.Get("/{id}/posts", svcs.APIv1Dot1.AccountPosts)
+				r.Post("/change-password", svcs.APIv1Dot1.AccountChangePassword)
+				r.Get("/login-activity", svcs.APIv1Dot1.AccountLoginActivity)
+				r.Get("/two-factor", svcs.APIv1Dot1.AccountTwoFactor)
+				r.Get("/emails-from-pixelfed", svcs.APIv1Dot1.AccountEmailsFromPixelfed)
+				r.Get("/apps-and-applications", svcs.APIv1Dot1.AccountApps)
+				r.Get("/mutuals/{id}", svcs.APIv1Dot1.GetMutualAccounts)
+				r.Get("/username/{username}", svcs.APIv1Dot1.AccountUsernameToId)
 			})
 
 			r.Route("/collections", func(r chi.Router) {
-				r.Get("/accounts/{id}", collectionSvc.GetUserCollections)
-				r.Get("/items/{id}", collectionSvc.GetItems)
-				r.Get("/view/{id}", collectionSvc.GetCollection)
-				r.Post("/add", collectionSvc.StoreId)
-				r.Post("/update/{id}", collectionSvc.Store)
-				r.Delete("/delete/{id}", collectionSvc.Delete)
-				r.Post("/remove", collectionSvc.DeleteId)
-				r.Get("/self", collectionSvc.GetSelfCollections)
+				r.Get("/accounts/{id}", svcs.Collection.GetUserCollections)
+				r.Get("/items/{id}", svcs.Collection.GetItems)
+				r.Get("/view/{id}", svcs.Collection.GetCollection)
+				r.Post("/add", svcs.Collection.StoreId)
+				r.Post("/update/{id}", svcs.Collection.Store)
+				r.Delete("/delete/{id}", svcs.Collection.Delete)
+				r.Post("/remove", svcs.Collection.DeleteId)
+				r.Get("/self", svcs.Collection.GetSelfCollections)
 			})
 
 			r.Route("/direct", func(r chi.Router) {
-				r.Get("/thread", dmSvc.Thread)
-				r.Post("/thread/send", dmSvc.Create)
-				r.Delete("/thread/message", dmSvc.Delete)
-				r.Post("/thread/mute", dmSvc.Mute)
-				r.Post("/thread/unmute", dmSvc.Unmute)
-				r.Post("/thread/media", dmSvc.MediaUpload)
-				r.Post("/thread/read", dmSvc.Read)
-				r.Post("/lookup", dmSvc.ComposeLookup)
-				r.Get("/compose/mutuals", dmSvc.ComposeMutuals)
+				r.Get("/thread", svcs.DirectMessage.Thread)
+				r.Post("/thread/send", svcs.DirectMessage.Create)
+				r.Delete("/thread/message", svcs.DirectMessage.Delete)
+				r.Post("/thread/mute", svcs.DirectMessage.Mute)
+				r.Post("/thread/unmute", svcs.DirectMessage.Unmute)
+				r.Post("/thread/media", svcs.DirectMessage.MediaUpload)
+				r.Post("/thread/read", svcs.DirectMessage.Read)
+				r.Post("/lookup", svcs.DirectMessage.ComposeLookup)
+				r.Get("/compose/mutuals", svcs.DirectMessage.ComposeMutuals)
 			})
 
 			r.Route("/archive", func(r chi.Router) {
-				r.Post("/add/{id}", apiV1Dot1Svc.Archive)
-				r.Post("/remove/{id}", apiV1Dot1Svc.Unarchive)
-				r.Get("/list", apiV1Dot1Svc.ArchivedPosts)
+				r.Post("/add/{id}", svcs.APIv1Dot1.Archive)
+				r.Post("/remove/{id}", svcs.APIv1Dot1.Unarchive)
+				r.Get("/list", svcs.APIv1Dot1.ArchivedPosts)
 			})
 
 			r.Route("/places", func(r chi.Router) {
-				r.Get("/posts/{id}/{slug}", apiV1Dot1Svc.PlacesById)
+				r.Get("/posts/{id}/{slug}", svcs.APIv1Dot1.PlacesById)
 			})
 
 			r.Route("/stories", func(r chi.Router) {
-				r.Get("/carousel", storyApiSvc.Carousel)
-				r.Post("/add", storyApiSvc.Add)
-				r.Post("/publish", storyApiSvc.Publish)
-				r.Post("/seen", storyApiSvc.Viewed)
-				r.Post("/self-expire/{id}", storyApiSvc.Delete)
-				r.Post("/comment", storyApiSvc.Comment)
+				r.Get("/carousel", svcs.StoryAPIv1.Carousel)
+				r.Post("/add", svcs.StoryAPIv1.Add)
+				r.Post("/publish", svcs.StoryAPIv1.Publish)
+				r.Post("/seen", svcs.StoryAPIv1.Viewed)
+				r.Post("/self-expire/{id}", svcs.StoryAPIv1.Delete)
+				r.Post("/comment", svcs.StoryAPIv1.Comment)
 			})
 
 			r.Route("/compose", func(r chi.Router) {
-				r.Get("/search/location", composeSvc.SearchLocation)
-				r.Get("/settings", composeSvc.ComposeSettings)
+				r.Get("/search/location", svcs.Compose.SearchLocation)
+				r.Get("/settings", svcs.Compose.ComposeSettings)
 			})
 
 			r.Route("/discover", func(r chi.Router) {
-				r.Get("/accounts/popular", apiV1Svc.DiscoverAccountsPopular)
-				r.Get("/posts/trending", discoverSvc.TrendingApi)
-				r.Get("/posts/hashtags", discoverSvc.TrendingHashtags)
-				r.Get("/posts/network/trending", discoverSvc.DiscoverNetworkTrending)
+				r.Get("/accounts/popular", svcs.APIv1.DiscoverAccountsPopular)
+				r.Get("/posts/trending", svcs.Discover.TrendingApi)
+				r.Get("/posts/hashtags", svcs.Discover.TrendingHashtags)
+				r.Get("/posts/network/trending", svcs.Discover.DiscoverNetworkTrending)
 			})
 
 			r.Route("/directory", func(r chi.Router) {
-				r.Get("/listing", pixelfedDirectorySvc.Get)
+				r.Get("/listing", svcs.PixelfedDirectory.Get)
 			})
 
 			r.Route("/auth", func(r chi.Router) {
-				r.Get("/iarpfc", apiV1Dot1Svc.InAppRegistrationPreFlightCheck)
-				r.Post("/iar", apiV1Dot1Svc.InAppRegistration)
-				r.Post("/iarc", apiV1Dot1Svc.InAppRegistrationConfirm)
-				r.Get("/iarer", apiV1Dot1Svc.InAppRegistrationEmailRedirect)
+				r.Get("/iarpfc", svcs.APIv1Dot1.InAppRegistrationPreFlightCheck)
+				r.Post("/iar", svcs.APIv1Dot1.InAppRegistration)
+				r.Post("/iarc", svcs.APIv1Dot1.InAppRegistrationConfirm)
+				r.Get("/iarer", svcs.APIv1Dot1.InAppRegistrationEmailRedirect)
 
-				r.Post("/invite/admin/verify", adminInviteSvc.ApiVerifyCheck)
-				r.Post("/invite/admin/uc", adminInviteSvc.ApiUsernameCheck)
-				r.Post("/invite/admin/ec", adminInviteSvc.ApiEmailCheck)
+				r.Post("/invite/admin/verify", svcs.AdminInvite.ApiVerifyCheck)
+				r.Post("/invite/admin/uc", svcs.AdminInvite.ApiUsernameCheck)
+				r.Post("/invite/admin/ec", svcs.AdminInvite.ApiEmailCheck)
 			})
 
 			r.Route("/push", func(r chi.Router) {
-				r.Get("/state", apiV1Dot1Svc.GetPushState)
-				r.Post("/compare", apiV1Dot1Svc.ComparePush)
-				r.Post("/update", apiV1Dot1Svc.UpdatePush)
-				r.Post("/disable", apiV1Dot1Svc.DisablePush)
+				r.Get("/state", svcs.APIv1Dot1.GetPushState)
+				r.Post("/compare", svcs.APIv1Dot1.ComparePush)
+				r.Post("/update", svcs.APIv1Dot1.UpdatePush)
+				r.Post("/disable", svcs.APIv1Dot1.DisablePush)
 			})
 
-			r.Post("/status/create", apiV1Dot1Svc.StatusCreate)
-			r.Get("/nag/state", apiV1Dot1Svc.NagState)
+			r.Post("/status/create", svcs.APIv1Dot1.StatusCreate)
+			r.Get("/nag/state", svcs.APIv1Dot1.NagState)
 		})
 
 		// V1.2
 		r.Route("/v1.2", func(r chi.Router) {
 			r.Route("/stories", func(r chi.Router) {
-				r.Get("/viewers", storyApiSvc.Viewers)
-				r.Post("/publish", storyApiSvc.PublishNext)
-				r.Get("/carousel", storyApiSvc.CarouselNext)
-				r.Get("/mention-autocomplete", storyApiSvc.MentionAutocomplete)
+				r.Get("/viewers", svcs.StoryAPIv1.Viewers)
+				r.Post("/publish", svcs.StoryAPIv1.PublishNext)
+				r.Get("/carousel", svcs.StoryAPIv1.CarouselNext)
+				r.Get("/mention-autocomplete", svcs.StoryAPIv1.MentionAutocomplete)
 			})
 		})
 
 		// Admin
 		r.Route("/admin", func(r chi.Router) {
-			r.Post("/moderate/post/{id}", apiV1Dot1Svc.ModeratePost)
-			r.Get("/supported", adminApiSvc.Supported)
-			r.Get("/stats", adminApiSvc.GetStats)
+			r.Post("/moderate/post/{id}", svcs.APIv1Dot1.ModeratePost)
+			r.Get("/supported", svcs.AdminAPI.Supported)
+			r.Get("/stats", svcs.AdminAPI.GetStats)
 
-			r.Get("/autospam/list", adminApiSvc.Autospam)
-			r.Post("/autospam/handle", adminApiSvc.AutospamHandle)
-			r.Get("/mod-reports/list", adminApiSvc.ModReports)
-			r.Post("/mod-reports/handle", adminApiSvc.ModReportHandle)
-			r.Get("/config", adminApiSvc.GetConfiguration)
-			r.Post("/config/update", adminApiSvc.UpdateConfiguration)
-			r.Get("/users/list", adminApiSvc.GetUsers)
-			r.Get("/users/get", adminApiSvc.GetUser)
-			r.Post("/users/action", adminApiSvc.UserAdminAction)
-			r.Get("/instances/list", adminApiSvc.Instances)
-			r.Get("/instances/get", adminApiSvc.GetInstance)
-			r.Post("/instances/moderate", adminApiSvc.ModerateInstance)
-			r.Post("/instances/refresh-stats", adminApiSvc.RefreshInstanceStats)
-			r.Get("/instance/stats", adminApiSvc.GetAllStats)
+			r.Get("/autospam/list", svcs.AdminAPI.Autospam)
+			r.Post("/autospam/handle", svcs.AdminAPI.AutospamHandle)
+			r.Get("/mod-reports/list", svcs.AdminAPI.ModReports)
+			r.Post("/mod-reports/handle", svcs.AdminAPI.ModReportHandle)
+			r.Get("/config", svcs.AdminAPI.GetConfiguration)
+			r.Post("/config/update", svcs.AdminAPI.UpdateConfiguration)
+			r.Get("/users/list", svcs.AdminAPI.GetUsers)
+			r.Get("/users/get", svcs.AdminAPI.GetUser)
+			r.Post("/users/action", svcs.AdminAPI.UserAdminAction)
+			r.Get("/instances/list", svcs.AdminAPI.Instances)
+			r.Get("/instances/get", svcs.AdminAPI.GetInstance)
+			r.Post("/instances/moderate", svcs.AdminAPI.ModerateInstance)
+			r.Post("/instances/refresh-stats", svcs.AdminAPI.RefreshInstanceStats)
+			r.Get("/instance/stats", svcs.AdminAPI.GetAllStats)
 		})
 
 		// Landing
 		r.Route("/landing/v1", func(r chi.Router) {
-			r.Get("/directory", landingSvc.GetDirectoryApi)
+			r.Get("/directory", svcs.Landing.GetDirectoryApi)
 		})
 
 		// Pixelfed
 		r.Route("/pixelfed", func(r chi.Router) {
 			r.Route("/v1", func(r chi.Router) {
-				r.Post("/report", apiV1Dot1Svc.Report)
+				r.Post("/report", svcs.APIv1Dot1.Report)
 
 				r.Route("/accounts", func(r chi.Router) {
-					r.Get("/timelines/home", apiV1Svc.TimelineHome)
-					r.Delete("/avatar", apiV1Dot1Svc.DeleteAvatar)
-					r.Get("/{id}/posts", apiV1Dot1Svc.AccountPosts)
-					r.Post("/change-password", apiV1Dot1Svc.AccountChangePassword)
-					r.Get("/login-activity", apiV1Dot1Svc.AccountLoginActivity)
-					r.Get("/two-factor", apiV1Dot1Svc.AccountTwoFactor)
-					r.Get("/emails-from-pixelfed", apiV1Dot1Svc.AccountEmailsFromPixelfed)
-					r.Get("/apps-and-applications", apiV1Dot1Svc.AccountApps)
+					r.Get("/timelines/home", svcs.APIv1.TimelineHome)
+					r.Delete("/avatar", svcs.APIv1Dot1.DeleteAvatar)
+					r.Get("/{id}/posts", svcs.APIv1Dot1.AccountPosts)
+					r.Post("/change-password", svcs.APIv1Dot1.AccountChangePassword)
+					r.Get("/login-activity", svcs.APIv1Dot1.AccountLoginActivity)
+					r.Get("/two-factor", svcs.APIv1Dot1.AccountTwoFactor)
+					r.Get("/emails-from-pixelfed", svcs.APIv1Dot1.AccountEmailsFromPixelfed)
+					r.Get("/apps-and-applications", svcs.APIv1Dot1.AccountApps)
 				})
 
 				r.Route("/archive", func(r chi.Router) {
-					r.Post("/add/{id}", apiV1Dot1Svc.Archive)
-					r.Post("/remove/{id}", apiV1Dot1Svc.Unarchive)
-					r.Get("/list", apiV1Dot1Svc.ArchivedPosts)
+					r.Post("/add/{id}", svcs.APIv1Dot1.Archive)
+					r.Post("/remove/{id}", svcs.APIv1Dot1.Unarchive)
+					r.Get("/list", svcs.APIv1Dot1.ArchivedPosts)
 				})
 
 				r.Route("/collections", func(r chi.Router) {
-					r.Get("/accounts/{id}", collectionSvc.GetUserCollections)
-					r.Get("/items/{id}", collectionSvc.GetItems)
-					r.Get("/view/{id}", collectionSvc.GetCollection)
-					r.Post("/add", collectionSvc.StoreId)
-					r.Post("/update/{id}", collectionSvc.Store)
-					r.Delete("/delete/{id}", collectionSvc.Delete)
-					r.Post("/remove", collectionSvc.DeleteId)
-					r.Get("/self", collectionSvc.GetSelfCollections)
+					r.Get("/accounts/{id}", svcs.Collection.GetUserCollections)
+					r.Get("/items/{id}", svcs.Collection.GetItems)
+					r.Get("/view/{id}", svcs.Collection.GetCollection)
+					r.Post("/add", svcs.Collection.StoreId)
+					r.Post("/update/{id}", svcs.Collection.Store)
+					r.Delete("/delete/{id}", svcs.Collection.Delete)
+					r.Post("/remove", svcs.Collection.DeleteId)
+					r.Get("/self", svcs.Collection.GetSelfCollections)
 				})
 
 				r.Route("/compose", func(r chi.Router) {
-					r.Get("/search/location", composeSvc.SearchLocation)
-					r.Get("/settings", composeSvc.ComposeSettings)
+					r.Get("/search/location", svcs.Compose.SearchLocation)
+					r.Get("/settings", svcs.Compose.ComposeSettings)
 				})
 
 				r.Route("/direct", func(r chi.Router) {
-					r.Get("/thread", dmSvc.Thread)
-					r.Post("/thread/send", dmSvc.Create)
-					r.Delete("/thread/message", dmSvc.Delete)
-					r.Post("/thread/mute", dmSvc.Mute)
-					r.Post("/thread/unmute", dmSvc.Unmute)
-					r.Post("/thread/media", dmSvc.MediaUpload)
-					r.Post("/thread/read", dmSvc.Read)
-					r.Post("/lookup", dmSvc.ComposeLookup)
+					r.Get("/thread", svcs.DirectMessage.Thread)
+					r.Post("/thread/send", svcs.DirectMessage.Create)
+					r.Delete("/thread/message", svcs.DirectMessage.Delete)
+					r.Post("/thread/mute", svcs.DirectMessage.Mute)
+					r.Post("/thread/unmute", svcs.DirectMessage.Unmute)
+					r.Post("/thread/media", svcs.DirectMessage.MediaUpload)
+					r.Post("/thread/read", svcs.DirectMessage.Read)
+					r.Post("/lookup", svcs.DirectMessage.ComposeLookup)
 				})
 
 				r.Route("/discover", func(r chi.Router) {
-					r.Get("/accounts/popular", apiV1Svc.DiscoverAccountsPopular)
-					r.Get("/posts/trending", discoverSvc.TrendingApi)
-					r.Get("/posts/hashtags", discoverSvc.TrendingHashtags)
+					r.Get("/accounts/popular", svcs.APIv1.DiscoverAccountsPopular)
+					r.Get("/posts/trending", svcs.Discover.TrendingApi)
+					r.Get("/posts/hashtags", svcs.Discover.TrendingHashtags)
 				})
 
 				r.Route("/directory", func(r chi.Router) {
-					r.Get("/listing", pixelfedDirectorySvc.Get)
+					r.Get("/listing", svcs.PixelfedDirectory.Get)
 				})
 
 				r.Route("/places", func(r chi.Router) {
-					r.Get("/posts/{id}/{slug}", apiV1Dot1Svc.PlacesById)
+					r.Get("/posts/{id}/{slug}", svcs.APIv1Dot1.PlacesById)
 				})
 
-				r.Get("/web/settings", apiV1Dot1Svc.GetWebSettings)
-				r.Post("/web/settings", apiV1Dot1Svc.SetWebSettings)
-				r.Get("/app/settings", userAppSettingsSvc.Get)
-				r.Post("/app/settings", userAppSettingsSvc.Store)
+				r.Get("/web/settings", svcs.APIv1Dot1.GetWebSettings)
+				r.Post("/web/settings", svcs.APIv1Dot1.SetWebSettings)
+				r.Get("/app/settings", svcs.UserAppSetting.Get)
+				r.Post("/app/settings", svcs.UserAppSetting.Store)
 
 				r.Route("/stories", func(r chi.Router) {
-					r.Get("/carousel", storyApiSvc.Carousel)
-					r.Get("/self-carousel", storyApiSvc.SelfCarousel)
-					r.Post("/add", storyApiSvc.Add)
-					r.Post("/publish", storyApiSvc.Publish)
-					r.Post("/seen", storyApiSvc.Viewed)
-					r.Post("/self-expire/{id}", storyApiSvc.Delete)
-					r.Post("/comment", storyApiSvc.Comment)
-					r.Get("/viewers", storyApiSvc.Viewers)
+					r.Get("/carousel", svcs.StoryAPIv1.Carousel)
+					r.Get("/self-carousel", svcs.StoryAPIv1.SelfCarousel)
+					r.Post("/add", svcs.StoryAPIv1.Add)
+					r.Post("/publish", svcs.StoryAPIv1.Publish)
+					r.Post("/seen", svcs.StoryAPIv1.Viewed)
+					r.Post("/self-expire/{id}", svcs.StoryAPIv1.Delete)
+					r.Post("/comment", svcs.StoryAPIv1.Comment)
+					r.Get("/viewers", svcs.StoryAPIv1.Viewers)
 				})
 			})
 		})
@@ -534,5 +490,128 @@ func NewAPIServer(cfg data.Config, clients *data.Client) *http.Server {
 	return &http.Server{
 		Addr:    cfg.Server.API.Bind,
 		Handler: h2c.NewHandler(mux, &http2.Server{}),
+	}
+}
+
+type Services struct {
+	HealthCheck       healthcheck.Service
+	Federation        federation.Service
+	InstanceActor     instanceactor.Service
+	Story             story.Service
+	Media             media.Service
+	AppRegister       appregister.Service
+	API               api.Service
+	APIv1             apiv1.Service
+	APIv1Dot1         apiv1dot1.Service
+	APIv2             apiv2.Service
+	Tags              tags.Service
+	DomainBlock       domainblock.Service
+	StatusEdit        statusedit.Service
+	AdminDomainBlock  admindomainblocks.Service
+	CustomFilter      customfilter.Service
+	Discover          discover.Service
+	PixelfedDirectory pixelfeddirectory.Service
+	StoryAPIv1        storyapiv1.Service
+	Compose           compose.Service
+	Landing           landing.Service
+	AdminInvite       admininvite.Service
+	UserAppSetting    userappsettings.Service
+	AdminAPI          adminapi.Service
+	Collection        collection.Service
+	DirectMessage     directmessage.Service
+	GroupAPI          groupsapi.Service
+	GroupCreate       groupscreate.Service
+	GroupSearch       groupssearch.Service
+	GroupComment      groupscomment.Service
+	GroupDiscover     groupsdiscover.Service
+	GroupMeta         groupsmeta.Service
+	GroupPost         groupspost.Service
+	GroupTopic        groupstopic.Service
+	GroupMember       groupsmember.Service
+	GroupFeed         groupsfeed.Service
+	GroupNotification groupsnotifications.Service
+	GroupAdminAPI     groupsadminapi.Service
+	Group             group.Service
+}
+
+func NewAPIServices(
+	healthCheck healthcheck.Service,
+	federation federation.Service,
+	instanceActor instanceactor.Service,
+	story story.Service,
+	media media.Service,
+	appRegister appregister.Service,
+	api api.Service,
+	apiv1 apiv1.Service,
+	apiv1dot1 apiv1dot1.Service,
+	apiv2 apiv2.Service,
+	tags tags.Service,
+	domainBlock domainblock.Service,
+	statusEdit statusedit.Service,
+	adminDomainBlock admindomainblocks.Service,
+	customFilter customfilter.Service,
+	discover discover.Service,
+	pixelfedDirectory pixelfeddirectory.Service,
+	storyAPIv1 storyapiv1.Service,
+	compose compose.Service,
+	landing landing.Service,
+	adminInvite admininvite.Service,
+	userAppSetting userappsettings.Service,
+	adminAPI adminapi.Service,
+	collection collection.Service,
+	directMessage directmessage.Service,
+	groupAPI groupsapi.Service,
+	groupCreate groupscreate.Service,
+	groupSearch groupssearch.Service,
+	groupComment groupscomment.Service,
+	groupDiscover groupsdiscover.Service,
+	groupMeta groupsmeta.Service,
+	groupPost groupspost.Service,
+	groupTopic groupstopic.Service,
+	groupMember groupsmember.Service,
+	groupFeed groupsfeed.Service,
+	groupNotification groupsnotifications.Service,
+	groupAdminAPI groupsadminapi.Service,
+	group group.Service,
+) *Services {
+	return &Services{
+		HealthCheck:       healthCheck,
+		Federation:        federation,
+		InstanceActor:     instanceActor,
+		Story:             story,
+		Media:             media,
+		AppRegister:       appRegister,
+		API:               api,
+		APIv1:             apiv1,
+		APIv1Dot1:         apiv1dot1,
+		APIv2:             apiv2,
+		Tags:              tags,
+		DomainBlock:       domainBlock,
+		StatusEdit:        statusEdit,
+		AdminDomainBlock:  adminDomainBlock,
+		CustomFilter:      customFilter,
+		Discover:          discover,
+		PixelfedDirectory: pixelfedDirectory,
+		StoryAPIv1:        storyAPIv1,
+		Compose:           compose,
+		Landing:           landing,
+		AdminInvite:       adminInvite,
+		UserAppSetting:    userAppSetting,
+		AdminAPI:          adminAPI,
+		Collection:        collection,
+		DirectMessage:     directMessage,
+		GroupAPI:          groupAPI,
+		GroupCreate:       groupCreate,
+		GroupSearch:       groupSearch,
+		GroupComment:      groupComment,
+		GroupDiscover:     groupDiscover,
+		GroupMeta:         groupMeta,
+		GroupPost:         groupPost,
+		GroupTopic:        groupTopic,
+		GroupMember:       groupMember,
+		GroupFeed:         groupFeed,
+		GroupNotification: groupNotification,
+		GroupAdminAPI:     groupAdminAPI,
+		Group:             group,
 	}
 }

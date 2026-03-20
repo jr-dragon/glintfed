@@ -54,6 +54,31 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 - `make all`: 執行 `gen` -> `lint` -> `test` -> `build` 的完整流程。
 - `make clean`: 清除編譯產物。
 
+## API 開發流程
+
+專案採用 **Service-Usecase-Data (Ent)** 的分層架構，開發 API 時請遵循以下流程：
+
+### 1. 服務層 (Service Layer) - `internal/service/{module}`
+服務層負責處理 HTTP 請求、路由邏輯與 Tracing。
+- **定義介面**: 在 `service.go` 中定義 `Service` 介面及其需要的 `Usecase` 介面。
+- **實作邏輯**: 建立 `svc` 結構體並實作 `Service` 介面，透過 `Usecase` 介面調用業務邏輯。
+- **Mocking**: 在 `service.go` 中加入 `//go:generate moq` 指令，並執行 `go generate ./...` 生成 Mock 物件。
+  ```go
+  //go:generate go tool moq -rm -out mock_profile_usecase.go . ProfileUsecase
+  type ProfileUsecase interface {
+      GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
+  }
+  ```
+
+### 2. 業務邏輯層 (Usecase Layer) - `internal/usecase/{module}`
+業務邏輯層負責具體的業務規則與資料庫操作。
+- **初始化**: 在 `uc.go` 中定義 `Usecase` 結構體與 `NewUsecase` 構造函式，通常會接收 `*data.Client` 作為依賴。
+- **實作功能**: 將具體功能實作在個別的 `.go` 檔案中 (如 `post.go`)。
+
+### 3. 測試策略 (Testing Strategy)
+- **Service 測試**: 位於 `internal/service/{module}` 下，使用 `moq` 生成的 Mock 物件來隔離 Usecase 依賴，並利用 `net/http/httptest` 測試 Handler。
+- **Usecase 測試**: 位於 `internal/usecase/{module}` 下，使用 `data.NewTestClient(t)` 建立測試用的資料庫實例 (SQLite in-memory)，並進行整合測試。
+
 ## Agent 注意事項
 
 2. **依賴檢查**: 加入新套件前應確認 `go.mod` 及其與現有技術棧的相容性。

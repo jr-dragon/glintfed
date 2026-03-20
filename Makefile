@@ -16,7 +16,9 @@ all: gen lint test build
 init:
 	@echo "Installing dependencies..."
 	@go install golang.org/x/tools/cmd/goimports@latest
-	@go install entgo.io/ent/cmd/ent@latest
+	@go get -tool entgo.io/ent/cmd/ent@latest
+	@go get -tool github.com/matryer/moq@latest
+	@go get -tool github.com/mazrean/kessoku/cmd/kessoku
 
 # Generate code
 gen:
@@ -41,9 +43,10 @@ test:
 lint:
 	@echo "Formatting code..."
 	@go fmt ./...
+	@go vet ./...
 	@if command -v goimports >/dev/null 2>&1; then \
 		echo "Running goimports..."; \
-		goimports -w $$(find . -type f -name '*.go' -not -path "./ent/*" -not -path "./vendor/*"); \
+		goimports -w -local glintfed.org $$(find . -type f -name '*.go' -not -path './ent/*' -not -path './**/mock_*' -not -path './**/kessoku_band.go'); \
 	else \
 		echo "goimports not found, skipping..."; \
 	fi

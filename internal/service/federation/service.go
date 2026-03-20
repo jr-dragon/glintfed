@@ -1,9 +1,12 @@
 package federation
 
 import (
+	"context"
 	"net/http"
 
-	"glintfed.org/internal/service/internal"
+	"glintfed.org/ent"
+	"glintfed.org/internal/data"
+	"glintfed.org/internal/usecase/worker"
 )
 
 type Service interface {
@@ -15,44 +18,57 @@ type Service interface {
 	Nodeinfo(w http.ResponseWriter, r *http.Request)
 }
 
-func New() Service {
-	return &svc{}
+//go:generate go tool moq -rm -out mock_instance_model.go . InstanceModel
+type InstanceModel interface {
+	GetBlockedDomains(ctx context.Context) (map[string]struct{}, error)
 }
 
-type svc struct{}
-
-func (s *svc) SharedInbox(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.SharedInbox")
-	defer span.End()
-	// TODO: Implement
+//go:generate go tool moq -rm -out mock_user_model.go . UserModel
+type UserModel interface {
+	GetTotalUsers(ctx context.Context) (int, error)
+	GetMonthActiveUsers(ctx context.Context) (int, error)
+	GetHalfYearActiveUsers(ctx context.Context) (int, error)
 }
 
-func (s *svc) UserInbox(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.UserInbox")
-	defer span.End()
-	// TODO: Implement
+//go:generate go tool moq -rm -out mock_profile_model.go . ProfileModel
+type ProfileModel interface {
+	GetByUsername(ctx context.Context, username string) (*ent.Profile, error)
+	RemoteUrlExists(ctx context.Context, url string) (bool, error)
 }
 
-func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.Webfinger")
-	defer span.End()
-	// TODO: Implement
+//go:generate go tool moq -rm -out mock_status_model.go . StatusModel
+type StatusModel interface {
+	GetLocalPostsCount(ctx context.Context) (int, error)
+	ObjectUrlExists(ctx context.Context, url string) (bool, error)
 }
 
-func (s *svc) NodeinfoWellKnown(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.NodeinfoWellKnown")
-	defer span.End()
-	// TODO: Implement
+//go:generate go tool moq -rm -out mock_worker_usecase.go . WorkerUsecase
+type WorkerUsecase interface {
+	Delete(ctx context.Context, header http.Header, payload worker.InboxPayload) error
+	Inbox(ctx context.Context, header http.Header, payload worker.InboxPayload) error
+	Validate(ctx context.Context, username string, header http.Header, payload worker.InboxPayload) error
 }
 
-func (s *svc) HostMeta(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.HostMeta")
-	defer span.End()
-	// TODO: Implement
+func New(cfg *data.Config, im InstanceModel, pm ProfileModel, sm StatusModel, um UserModel, wuc WorkerUsecase) Service {
+	return &svc{
+		cfg: cfg,
+
+		wuc: wuc,
+
+		im: im,
+		pm: pm,
+		sm: sm,
+		um: um,
+	}
 }
 
-func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
-	_, span := internal.T.Start(r.Context(), "Federation.Nodeinfo")
-	defer span.End()
-	// TODO: Implement
+type svc struct {
+	cfg *data.Config
+
+	im InstanceModel
+	pm ProfileModel
+	sm StatusModel
+	um UserModel
+
+	wuc WorkerUsecase
 }

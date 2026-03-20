@@ -1,11 +1,11 @@
 package schema
 
 import (
-	"entgo.io/ent/schema"
-	"entgo.io/ent/dialect/entsql"
-	"time"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Hashtag holds the schema definition for the Hashtag entity.
