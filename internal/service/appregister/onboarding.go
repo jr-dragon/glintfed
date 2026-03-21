@@ -120,7 +120,7 @@ func (s *svc) Onboarding(w http.ResponseWriter, r *http.Request) {
 	}
 
 	scopes := []string{"read", "write", "follow", "push"}
-	tokens, err := s.om.CreateTokens(ctx, user.ID, scopes)
+	tokens, err := s.ouc.CreateTokens(ctx, user.ID, scopes)
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to create OAuth tokens", logs.ErrAttr(err))
 		http.Error(w, "", http.StatusInternalServerError)
@@ -146,15 +146,6 @@ func (s *svc) Onboarding(w http.ResponseWriter, r *http.Request) {
 			PID:      fmt.Sprintf("%d", user.ProfileID),
 			Username: user.Username,
 		},
-	}
-
-	if user.ProfileID != 0 {
-		account, err := s.ag.GetByProfileID(ctx, user.ProfileID)
-		if err != nil {
-			slog.ErrorContext(ctx, "failed to fetch account for onboarding response", logs.ErrAttr(err))
-		} else {
-			resp.Account = account
-		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

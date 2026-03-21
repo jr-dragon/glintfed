@@ -2,7 +2,6 @@ package appregister
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -10,6 +9,7 @@ import (
 	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 	usermodel "glintfed.org/internal/model/user"
+	"glintfed.org/internal/usecase/oauth"
 )
 
 type Service interface {
@@ -33,30 +33,14 @@ type UserModel interface {
 	Create(ctx context.Context, params usermodel.CreateUserParams) (*ent.User, error)
 }
 
-//go:generate go tool moq -rm -out mock_oauth_model.go . OAuthModel
-type OAuthModel interface {
+//go:generate go tool moq -rm -out mock_oauth_usecase.go . OAuthUsecase
+type OAuthUsecase interface {
 	// CreateTokens creates an OAuth access token and a refresh token for the given user ID
 	// with the specified scopes, and returns the resulting token details.
-	CreateTokens(ctx context.Context, userID uint64, scopes []string) (*OAuthTokenResult, error)
+	CreateTokens(ctx context.Context, userID uint64, scopes []string) (*oauth.TokenResult, error)
 }
 
-//go:generate go tool moq -rm -out mock_account_getter.go . AccountGetter
-type AccountGetter interface {
-	// GetByProfileID returns the Mastodon-compatible account representation for the given
-	// profile ID as a raw JSON value.
-	GetByProfileID(ctx context.Context, profileID uint64) (json.RawMessage, error)
-}
-
-// OAuthTokenResult contains the OAuth token details returned after successful onboarding.
-type OAuthTokenResult struct {
-	AccessToken  string
-	RefreshToken string
-	ClientID     string
-	ClientSecret string
-	ExpiresIn    int64
-}
-
-func New(cfg *data.Config, arm AppRegisterModel, um UserModel, om OAuthModel, ag AccountGetter) Service {
+func New(cfg *data.Config, arm AppRegisterModel, um UserModel, ouc OAuthUsecase) Service {
 	v := validator.New()
 	// Register custom tag "username" implementing PHP's validateUsernameRule logic.
 	_ = v.RegisterValidation("username", validateUsernameTag)
@@ -66,8 +50,7 @@ func New(cfg *data.Config, arm AppRegisterModel, um UserModel, om OAuthModel, ag
 		validate: v,
 		arm:      arm,
 		um:       um,
-		om:       om,
-		ag:       ag,
+		ouc:      ouc,
 	}
 }
 
@@ -76,6 +59,5 @@ type svc struct {
 	validate *validator.Validate
 	arm      AppRegisterModel
 	um       UserModel
-	om       OAuthModel
-	ag       AccountGetter
+	ouc      OAuthUsecase
 }
