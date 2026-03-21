@@ -119,19 +119,18 @@ func (s *svc) GetActivityObject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// PHP: abort_if($story->created_at->lt(now()->subMinutes(20)), 404);
 	if st.CreatedAt.Before(time.Now().Add(-20 * time.Minute)) {
 		http.NotFound(w, r)
 		return
 	}
 
-	// Transform to ActivityPub object
-	obj := s.buildGetActivityObjectRepsonse(st)
+	if err := json.NewEncoder(w).Encode(s.buildGetActivityObjectRepsonse(st)); err != nil {
+		slog.ErrorContext(r.Context(), "failed to encode story activity object", logs.ErrAttr(err))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/activity+json")
-	if err := json.NewEncoder(w).Encode(obj); err != nil {
-		slog.ErrorContext(r.Context(), "failed to encode story object", logs.ErrAttr(err))
-	}
 }
 
 func (s *svc) buildGetActivityObjectRepsonse(st *ent.Story) GetActivityObjectResponse {
@@ -147,11 +146,11 @@ func (s *svc) buildGetActivityObjectRepsonse(st *ent.Story) GetActivityObjectRes
 
 	return GetActivityObjectResponse{
 		Context:      "https://www.w3.org/ns/activitystreams",
-		ID:           "",
+		ID:           st.Url(s.cfg.App.Url),
 		Type:         "Story",
-		To:           []string{""},
+		To:           []string{st.Edges.Profile.Permalink(s.cfg.App.Url, "/followers")},
 		CC:           []string{},
-		AttributedTo: "",
+		AttributedTo: st.Edges.Profile.Permalink(s.cfg.App.Url),
 		Published:    st.CreatedAt.Format(time.RFC3339),
 		ExpiresAt:    st.ExpiresAt.Format(time.RFC3339),
 		Duration:     st.Duration,
@@ -159,7 +158,7 @@ func (s *svc) buildGetActivityObjectRepsonse(st *ent.Story) GetActivityObjectRes
 		CanReact:     st.CanReact,
 		Attachment: StoryAttachmentResponse{
 			Type:      attachmentType,
-			URL:       st.Path, // TODO: storage path
+			URL:       st.MediaUrl(s.cfg.App.Url),
 			MediaType: st.Mime,
 		},
 	}

@@ -67,7 +67,11 @@ func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			slog.ErrorContext(r.Context(), "failed to encode SharedInboxResponse", logs.ErrAttr(err), slog.Any("resp", resp))
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -111,7 +115,11 @@ func (s *svc) Webfinger(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(webfinger)
+		if err := json.NewEncoder(w).Encode(webfinger); err != nil {
+			slog.ErrorContext(r.Context(), "failed to encode webfinger", logs.ErrAttr(err), slog.Any("webfinger", webfinger))
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 

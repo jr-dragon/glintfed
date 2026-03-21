@@ -41,7 +41,11 @@ func (s *svc) NodeinfoWellKnown(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		slog.ErrorContext(r.Context(), "failed to encode NodeInfoResponse", logs.ErrAttr(err), slog.Any("resp", resp))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
 }
 
 type NodeInfoResponse struct {
@@ -261,7 +265,11 @@ func (s *svc) Nodeinfo(w http.ResponseWriter, r *http.Request) {
 		OpenRegistrations: s.cfg.App.Auth.EnableRegistration,
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		slog.ErrorContext(r.Context(), "failed to encode NodeInfoResp", logs.ErrAttr(err), slog.Any("resp", resp))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (s *svc) getFeatures() Features {
