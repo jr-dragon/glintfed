@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/mazrean/kessoku"
 
+	appregisterm "glintfed.org/internal/model/appregister"
 	"glintfed.org/internal/model/instance"
 	instanceactorm "glintfed.org/internal/model/instanceactor"
 	"glintfed.org/internal/model/profile"
@@ -49,6 +50,7 @@ import (
 	storiesapiv1 "glintfed.org/internal/service/stories/storyapiv1"
 	"glintfed.org/internal/service/story"
 	"glintfed.org/internal/service/userappsettings"
+	"glintfed.org/internal/usecase/oauth"
 	"glintfed.org/internal/usecase/worker"
 )
 
@@ -102,16 +104,22 @@ var _ = kessoku.Inject[*app](
 		kessoku.Bind[worker.ActivityDispatcher](kessoku.Provide(worker.NewActivityHandler)),
 		kessoku.Bind[worker.ProfileGetter](kessoku.Provide(func(m *profile.Model) worker.ProfileGetter { return m })),
 		kessoku.Bind[worker.ProfileRemover](kessoku.Provide(worker.NewDeletePipeline)),
+		kessoku.Bind[appregister.OAuthUsecase](kessoku.Provide(oauth.NewUsecase)),
 	),
 	// model
 	kessoku.Set(
-		kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewModel)),
-		kessoku.Bind[federation.UserModel](kessoku.Provide(user.NewModel)),
 		kessoku.Provide(profile.NewModel),
+		kessoku.Provide(user.NewModel),
+	),
+	kessoku.Set(
+		kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewModel)),
+		kessoku.Bind[federation.UserModel](kessoku.Provide(func(m *user.Model) federation.UserModel { return m })),
 		kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel { return m })),
 		kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)),
 		kessoku.Bind[instanceactor.InstanceActorGetter](kessoku.Provide(instanceactorm.NewModel)),
 		kessoku.Bind[story.StoryGetter](kessoku.Provide(storym.NewModel)),
+		kessoku.Bind[appregister.AppRegisterModel](kessoku.Provide(appregisterm.NewModel)),
+		kessoku.Bind[appregister.UserModel](kessoku.Provide(func(m *user.Model) appregister.UserModel { return m })),
 	),
 	kessoku.Provide(server.NewAPIServices),
 	kessoku.Provide(newapp),
