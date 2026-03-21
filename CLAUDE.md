@@ -32,12 +32,16 @@ internal/server/api.go       # chi router, all route registrations
     ↓
 internal/service/{module}/   # HTTP handlers, OTel tracing, interface definitions
     ↓
+internal/usecase/{module}/   # Complex business logic (e.g. OAuth token issuance)
+    ↓
 internal/model/{module}/     # DB operations implementing service interfaces
     ↓
 ent/                         # Generated ORM code (do not edit manually)
     ↓
 SQLite / Redis
 ```
+
+Use `internal/usecase/` when business logic is too complex for the service layer and does not belong directly to DB operations (e.g. OAuth token creation, external API calls). Use `internal/lib/errs.Todo` to mark stub implementations that are not yet complete.
 
 **Key files:**
 - `cmd/api/kessoku.go` — DI wiring; register new services/models here
@@ -61,7 +65,18 @@ func (s *svc) MyHandler(w http.ResponseWriter, r *http.Request) {
 ```
 
 ### 2. Model Layer (`internal/model/{module}/model.go`)
-- Implement the service's dependency interfaces using `*data.Client`
+- Embed the specific `*ent.{Entity}Client` (not `*data.Client`) in the `Model` struct; `NewModel` accepts `*data.Client` and extracts the client:
+
+```go
+type Model struct {
+    *ent.AppRegisterClient
+}
+
+func NewModel(client *data.Client) *Model {
+    return &Model{AppRegisterClient: client.Ent.AppRegister}
+}
+```
+
 - Add SQL Godoc comments on every method:
 
 ```go
@@ -91,3 +106,5 @@ func (m *Model) GetByID(ctx context.Context, id uint64) (*ent.Story, error) { ..
 - **Config**: Default `config.yaml`; see `config.example.yaml` for structure
 - **Style**: Follow [Google Go Style Guide](https://google.github.io/styleguide/go/)
 - **Federation reference**: `pixelfed/app/Http/Controllers/Api/` for PHP originals
+- **Request validation**: Use `github.com/go-playground/validator/v10` struct tags for static constraints; dynamic constraints sourced from `cfg` are checked manually after `validate.Struct()`. Register custom validators (e.g. `username`) once in `New()` via `v.RegisterValidation(...)`.
+- **Stub implementations**: Return `errs.Todo` (`internal/lib/errs`) for functions that are not yet implemented, and add a `// TODO:` comment explaining what needs to be done.
