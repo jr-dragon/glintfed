@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
+
 	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 	usermodel "glintfed.org/internal/model/user"

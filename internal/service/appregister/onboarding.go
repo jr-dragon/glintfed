@@ -11,8 +11,9 @@ import (
 	"unicode"
 
 	"github.com/go-playground/validator/v10"
-	usermodel "glintfed.org/internal/model/user"
+
 	"glintfed.org/internal/lib/logs"
+	usermodel "glintfed.org/internal/model/user"
 	"glintfed.org/internal/service/internal"
 )
 
