@@ -59,7 +59,7 @@ mux.Get("/.well-known/change-password", func(w http.ResponseWriter, r *http.Requ
 
 ## Service Layer 實作規範
 
-每個 Service 應定義為 Interface，並透過建構子注入依賴。
+每個 Service 應定義為 Interface，並透過建構子注入依賴。為了提升測試性，資料存取邏輯應抽象為獨立的介面（如 `Getter`, `Storer`），並由 Model 層實作。
 
 ### 標準範本 (Kessoku DI)
 使用 `internal.T` (otel.Tracer) 進行追蹤，並維持與 Laravel 方法名一致的 Go 函數名。
@@ -68,7 +68,9 @@ mux.Get("/.well-known/change-password", func(w http.ResponseWriter, r *http.Requ
 package v1
 
 import (
+	"context"
 	"net/http"
+	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/service/internal"
 )
@@ -77,12 +79,21 @@ type Service interface {
 	UserShow(w http.ResponseWriter, r *http.Request)
 }
 
-func New(cfg *data.Config) Service {
-	return &svc{cfg: cfg}
+//go:generate go tool moq -rm -out mock_user_getter.go . UserGetter
+type UserGetter interface {
+    GetByID(ctx context.Context, id uint64) (*ent.User, error)
+}
+
+func New(cfg *data.Config, ug UserGetter) Service {
+	return &svc{
+		cfg: cfg,
+		ug:  ug,
+	}
 }
 
 type svc struct {
 	cfg *data.Config
+	ug  UserGetter
 }
 
 // 對應 Laravel 的 UserController@show
@@ -90,7 +101,7 @@ func (s *svc) UserShow(w http.ResponseWriter, r *http.Request) {
 	_, span := internal.T.Start(r.Context(), "ApiV1.UserShow")
 	defer span.End()
 
-	// TODO: Implement UserShow
+	// 使用 s.ug 進行資料存取
 }
 ```
 

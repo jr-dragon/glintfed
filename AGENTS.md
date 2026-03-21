@@ -66,13 +66,26 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 ### 1. 服務層 (Service Layer) - `internal/service/{module}`
 服務層負責 HTTP 介面定義與 Handler 實作。
 - **定義介面**: 在 `service.go` 中定義 `Service` 介面及其需要的依賴介面 (如 `Getter`, `Storer`)。
-- **實作邏輯**: 建立 `svc` 結構體並實作 `Service` 介面，透過依賴介面調用資料邏輯。
-- **Mocking**: 在 `service.go` 中加入 `//go:generate moq` 指令，生成 Mock 物件用於測試。
+- **實作邏輯**: 建立 `svc` 結構體並實作 `Service` 介面，透過構造函式注入依賴介面來調用資料邏輯。
+- **Mocking**: 在 `service.go` 中加入 `//go:generate go tool moq -rm -out mock_{name}.go . {InterfaceName}` 指令，生成 Mock 物件用於測試。
 
 ### 2. 資料模型層 (Model Layer) - `internal/model/{module}`
 資料模型層負責實作 Service 層定義的依賴介面。
 - **初始化**: 在 `model.go` 中定義 `Model` 結構體與 `NewModel` 構造函式，通常會接收 `*data.Client`。
 - **實作功能**: 直接使用 `ent` 客戶端進行資料庫操作。
+- **SQL 註解**: 在 Model 方法上加入呈現其背後 SQL 邏輯的 Godoc 註解，以利開發者快速理解資料庫操作流程，如下範例所示：
+
+```go
+// GetByUsernameAndID
+//
+//	SELECT * FROM stories
+//	INNER JOIN profiles ON stories.profile_id = profiles.id
+//	WHERE profiles.username = ? AND stories.id = ?
+//	LIMIT 1
+func (m *Model) GetByUsernameAndID(ctx context.Context, username string, id uint64) (*ent.Story, error) {
+    // ...
+}
+```
 
 ### 3. 依賴注入 (DI) - `cmd/api/kessoku.go`
 - 在 `kessoku.go` 中將 Service 與 Model 綁定。
