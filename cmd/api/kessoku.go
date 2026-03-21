@@ -7,6 +7,7 @@ import (
 	instanceactorm "glintfed.org/internal/model/instanceactor"
 	"glintfed.org/internal/model/profile"
 	"glintfed.org/internal/model/status"
+	storym "glintfed.org/internal/model/story"
 	"glintfed.org/internal/model/user"
 	"glintfed.org/internal/server"
 	"glintfed.org/internal/service/admininvite"
@@ -110,6 +111,7 @@ var _ = kessoku.Inject[*app](
 		kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel { return m })),
 		kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)),
 		kessoku.Bind[instanceactor.InstanceActorGetter](kessoku.Provide(instanceactorm.NewModel)),
+		kessoku.Bind[story.StoryGetter](kessoku.Provide(storym.NewModel)),
 	),
 	kessoku.Provide(server.NewAPIServices),
 	kessoku.Provide(newapp),

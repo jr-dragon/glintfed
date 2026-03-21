@@ -48,7 +48,7 @@ func TestStory_Url_And_Permalink(t *testing.T) {
 			Where(story.ID(s.ID)).
 			Only(ctx)
 		require.NoError(t, err)
-		
+
 		assert.Nil(t, sWithoutEdge.Edges.Profile)
 
 		// 這會觸發 s.QueryProfile().FirstX()

@@ -1,6 +1,7 @@
 package story
 
 import (
+	"context"
 	"crypto/subtle"
 	"encoding/json"
 	"log/slog"
@@ -12,8 +13,6 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"glintfed.org/ent"
-	"glintfed.org/ent/profile"
-	"glintfed.org/ent/story"
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
@@ -23,16 +22,21 @@ type Service interface {
 	GetActivityObject(w http.ResponseWriter, r *http.Request)
 }
 
-func New(cfg *data.Config, client *data.Client) Service {
+//go:generate go tool moq -rm -out mock_story_getter.go . StoryGetter
+type StoryGetter interface {
+	GetByUsernameAndID(ctx context.Context, username string, id uint64) (*ent.Story, error)
+}
+
+func New(cfg *data.Config, sg StoryGetter) Service {
 	return &svc{
-		cfg:    cfg,
-		client: client,
+		cfg: cfg,
+		sg:  sg,
 	}
 }
 
 type svc struct {
-	cfg    *data.Config
-	client *data.Client
+	cfg *data.Config
+	sg  StoryGetter
 }
 
 type GetActivityObjectResponse struct {
@@ -82,17 +86,7 @@ func (s *svc) GetActivityObject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	st, err := s.client.Ent.Profile.Query().
-		Where(
-			profile.Username(username),
-			profile.DomainIsNil(),
-		).
-		QueryStories().
-		Where(
-			story.ID(uint64(id)),
-			story.Active(true),
-		).
-		First(r.Context())
+	st, err := s.sg.GetByUsernameAndID(r.Context(), username, uint64(id))
 	if err != nil {
 		if ent.IsNotFound(err) {
 			http.NotFound(w, r)
