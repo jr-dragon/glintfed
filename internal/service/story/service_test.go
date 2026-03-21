@@ -29,15 +29,15 @@ func TestService_GetActivityObject(t *testing.T) {
 
 	now := time.Now()
 	st := &ent.Story{
-		ID:            123,
-		BearcapToken:  "valid-token",
-		ExpiresAt:     now.Add(24 * time.Hour),
-		CreatedAt:     now.Add(-5 * time.Minute),
-		Type:          "photo",
-		Mime:          "image/jpeg",
-		Duration:      15,
-		CanReply:      true,
-		CanReact:      true,
+		ID:           123,
+		BearcapToken: "valid-token",
+		ExpiresAt:    now.Add(24 * time.Hour),
+		CreatedAt:    now.Add(-5 * time.Minute),
+		Type:         "photo",
+		Mime:         "image/jpeg",
+		Duration:     15,
+		CanReply:     true,
+		CanReact:     true,
 	}
 	// Setup profile edge
 	st.Edges.Profile = &ent.Profile{
@@ -82,7 +82,7 @@ func TestService_GetActivityObject(t *testing.T) {
 	t.Run("stories disabled", func(t *testing.T) {
 		disabledCfg := *cfg
 		disabledCfg.App.Instance.Stories.Enabled = false
-		
+
 		svc := New(&disabledCfg, &StoryGetterMock{})
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest(http.MethodGet, "/stories/testuser/123", nil)
@@ -91,7 +91,7 @@ func TestService_GetActivityObject(t *testing.T) {
 		rctx.URLParams.Add("username", "testuser")
 		rctx.URLParams.Add("id", "123")
 		r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, rctx))
-		
+
 		svc.GetActivityObject(w, r)
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
@@ -100,12 +100,12 @@ func TestService_GetActivityObject(t *testing.T) {
 		svc := New(cfg, &StoryGetterMock{})
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest(http.MethodGet, "/stories/testuser/123", nil)
-		
+
 		rctx := chi.NewRouteContext()
 		rctx.URLParams.Add("username", "testuser")
 		rctx.URLParams.Add("id", "123")
 		r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, rctx))
-		
+
 		svc.GetActivityObject(w, r)
 		assert.Equal(t, http.StatusFound, w.Code)
 		assert.Equal(t, "/stories/testuser", w.Header().Get("Location"))
