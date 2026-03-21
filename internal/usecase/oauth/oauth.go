@@ -6,6 +6,12 @@ import (
 	"glintfed.org/internal/lib/errs"
 )
 
+type Usecase struct{}
+
+func NewUsecase() *Usecase {
+	return &Usecase{}
+}
+
 // TokenResult contains the OAuth token details issued after successful authentication.
 type TokenResult struct {
 	AccessToken  string
@@ -17,6 +23,6 @@ type TokenResult struct {
 
 // CreateTokens creates an OAuth access token and a refresh token for the given user ID
 // with the specified scopes, and returns the resulting token details.
-func CreateTokens(ctx context.Context, userID uint64, scopes []string) (*TokenResult, error) {
+func (uc *Usecase) CreateTokens(ctx context.Context, userID uint64, scopes []string) (*TokenResult, error) {
 	return nil, errs.Todo
 }

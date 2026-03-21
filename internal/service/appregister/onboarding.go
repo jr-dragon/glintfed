@@ -64,17 +64,17 @@ func (s *svc) Onboarding(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.validate.Struct(req); err != nil {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Dynamic length constraints sourced from config.
 	if len(req.Password) < s.cfg.App.MinPasswordLength {
-		http.Error(w, fmt.Sprintf("password must be at least %d characters", s.cfg.App.MinPasswordLength), http.StatusUnprocessableEntity)
+		http.Error(w, fmt.Sprintf("password must be at least %d characters", s.cfg.App.MinPasswordLength), http.StatusBadRequest)
 		return
 	}
 	if s.cfg.App.MaxNameLength > 0 && len(req.Name) > s.cfg.App.MaxNameLength {
-		http.Error(w, "name is too long", http.StatusUnprocessableEntity)
+		http.Error(w, "name is too long", http.StatusBadRequest)
 		return
 	}
 
