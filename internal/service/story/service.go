@@ -82,33 +82,23 @@ func (s *svc) GetActivityObject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := s.client.Ent.Profile.Query().
-		Where(profile.Username(username), profile.DomainIsNil()).
-		Only(r.Context())
-	if err != nil {
-		if ent.IsNotFound(err) {
-			http.NotFound(w, r)
-		} else {
-			slog.ErrorContext(r.Context(), "failed to get profile", logs.ErrAttr(err))
-			http.Error(w, "", http.StatusInternalServerError)
-		}
-		return
-	}
-
-	st, err := s.client.Ent.Story.Query().
+	st, err := s.client.Ent.Profile.Query().
+		Where(
+			profile.Username(username),
+			profile.DomainIsNil(),
+		).
+		QueryStories().
 		Where(
 			story.ID(uint64(id)),
-			story.ProfileID(p.ID),
 			story.Active(true),
 		).
-		Only(r.Context())
+		First(r.Context())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			http.NotFound(w, r)
 		} else {
 			slog.ErrorContext(r.Context(), "failed to get story", logs.ErrAttr(err))
 			http.Error(w, "", http.StatusInternalServerError)
-			return
 		}
 		return
 	}
@@ -136,7 +126,7 @@ func (s *svc) GetActivityObject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Transform to ActivityPub object
-	obj := s.transform(p, st)
+	obj := s.buildGetActivityObjectRepsonse(st)
 
 	w.Header().Set("Content-Type", "application/activity+json")
 	if err := json.NewEncoder(w).Encode(obj); err != nil {
@@ -144,7 +134,7 @@ func (s *svc) GetActivityObject(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *svc) transform(p *ent.Profile, st *ent.Story) GetActivityObjectResponse {
+func (s *svc) buildGetActivityObjectRepsonse(st *ent.Story) GetActivityObjectResponse {
 	var attachmentType string
 	switch st.Type {
 	case "photo":
@@ -169,7 +159,7 @@ func (s *svc) transform(p *ent.Profile, st *ent.Story) GetActivityObjectResponse
 		CanReact:     st.CanReact,
 		Attachment: StoryAttachmentResponse{
 			Type:      attachmentType,
-			URL:       st.MediaURL,
+			URL:       st.Path, // TODO: storage path
 			MediaType: st.Mime,
 		},
 	}

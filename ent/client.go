@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"glintfed.org/ent/accountinterstitial"
 	"glintfed.org/ent/accountlog"
 	"glintfed.org/ent/activity"
@@ -11171,6 +11172,22 @@ func (c *ProfileClient) GetX(ctx context.Context, id uint64) *Profile {
 	return obj
 }
 
+// QueryStories queries the stories edge of a Profile.
+func (c *ProfileClient) QueryStories(_m *Profile) *StoryQuery {
+	query := (&StoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, id),
+			sqlgraph.To(story.Table, story.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.StoriesTable, profile.StoriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ProfileClient) Hooks() []Hook {
 	return c.hooks.Profile
@@ -13164,6 +13181,22 @@ func (c *StoryClient) GetX(ctx context.Context, id uint64) *Story {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryProfile queries the profile edge of a Story.
+func (c *StoryClient) QueryProfile(_m *Story) *ProfileQuery {
+	query := (&ProfileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(story.Table, story.FieldID, id),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, story.ProfileTable, story.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

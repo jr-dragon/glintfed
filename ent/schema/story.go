@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -48,7 +49,13 @@ func (Story) Fields() []ent.Field {
 
 // Edges of the Story.
 func (Story) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("profile", Profile.Type).
+			Ref("stories").
+			Field("profile_id").
+			Unique().
+			Required(),
+	}
 }
 
 // Annotations of the Story.

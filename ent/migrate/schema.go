@@ -1879,7 +1879,6 @@ var (
 	// StoriesColumns holds the columns for the "stories" table.
 	StoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
-		{Name: "profile_id", Type: field.TypeUint64},
 		{Name: "type", Type: field.TypeString, Nullable: true},
 		{Name: "size", Type: field.TypeUint32, Nullable: true},
 		{Name: "mime", Type: field.TypeString, Nullable: true},
@@ -1904,12 +1903,21 @@ var (
 		{Name: "object_id", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "object_uri", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "bearcap_token", Type: field.TypeString, Nullable: true},
+		{Name: "profile_id", Type: field.TypeUint64},
 	}
 	// StoriesTable holds the schema information for the "stories" table.
 	StoriesTable = &schema.Table{
 		Name:       "stories",
 		Columns:    StoriesColumns,
 		PrimaryKey: []*schema.Column{StoriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stories_profiles_stories",
+				Columns:    []*schema.Column{StoriesColumns[25]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// StoryItemsColumns holds the columns for the "story_items" table.
 	StoryItemsColumns = []*schema.Column{
@@ -2566,6 +2574,7 @@ func init() {
 	StatusViewsTable.Annotation = &entsql.Annotation{
 		Table: "status_views",
 	}
+	StoriesTable.ForeignKeys[0].RefTable = ProfilesTable
 	StoriesTable.Annotation = &entsql.Annotation{
 		Table: "stories",
 	}

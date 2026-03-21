@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"glintfed.org/ent/profile"
+	"glintfed.org/ent/story"
 )
 
 // ProfileCreate is the builder for creating a Profile entity.
@@ -558,6 +559,21 @@ func (_c *ProfileCreate) SetID(v uint64) *ProfileCreate {
 	return _c
 }
 
+// AddStoryIDs adds the "stories" edge to the Story entity by IDs.
+func (_c *ProfileCreate) AddStoryIDs(ids ...uint64) *ProfileCreate {
+	_c.mutation.AddStoryIDs(ids...)
+	return _c
+}
+
+// AddStories adds the "stories" edges to the Story entity.
+func (_c *ProfileCreate) AddStories(v ...*Story) *ProfileCreate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddStoryIDs(ids...)
+}
+
 // Mutation returns the ProfileMutation object of the builder.
 func (_c *ProfileCreate) Mutation() *ProfileMutation {
 	return _c.mutation
@@ -848,6 +864,22 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Indexable(); ok {
 		_spec.SetField(profile.FieldIndexable, field.TypeBool, value)
 		_node.Indexable = value
+	}
+	if nodes := _c.mutation.StoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.StoriesTable,
+			Columns: []string{profile.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
