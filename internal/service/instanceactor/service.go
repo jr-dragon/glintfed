@@ -58,8 +58,12 @@ func (s *svc) Profile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewEncoder(w).Encode(ia.GetActor(parsed.String(), parsed.Host)); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		slog.ErrorContext(r.Context(), "failed to encode instance actor", logs.ErrAttr(err))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/activity+json")
 }
 
 func (s *svc) Inbox(w http.ResponseWriter, r *http.Request) {

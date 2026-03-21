@@ -77618,6 +77618,9 @@ type ProfileMutation struct {
 	addmoved_to_profile_id *int64
 	indexable              *bool
 	clearedFields          map[string]struct{}
+	stories                map[uint64]struct{}
+	removedstories         map[uint64]struct{}
+	clearedstories         bool
 	done                   bool
 	oldValue               func(context.Context) (*Profile, error)
 	predicates             []predicate.Profile
@@ -79590,6 +79593,60 @@ func (m *ProfileMutation) ResetIndexable() {
 	m.indexable = nil
 }
 
+// AddStoryIDs adds the "stories" edge to the Story entity by ids.
+func (m *ProfileMutation) AddStoryIDs(ids ...uint64) {
+	if m.stories == nil {
+		m.stories = make(map[uint64]struct{})
+	}
+	for i := range ids {
+		m.stories[ids[i]] = struct{}{}
+	}
+}
+
+// ClearStories clears the "stories" edge to the Story entity.
+func (m *ProfileMutation) ClearStories() {
+	m.clearedstories = true
+}
+
+// StoriesCleared reports if the "stories" edge to the Story entity was cleared.
+func (m *ProfileMutation) StoriesCleared() bool {
+	return m.clearedstories
+}
+
+// RemoveStoryIDs removes the "stories" edge to the Story entity by IDs.
+func (m *ProfileMutation) RemoveStoryIDs(ids ...uint64) {
+	if m.removedstories == nil {
+		m.removedstories = make(map[uint64]struct{})
+	}
+	for i := range ids {
+		delete(m.stories, ids[i])
+		m.removedstories[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedStories returns the removed IDs of the "stories" edge to the Story entity.
+func (m *ProfileMutation) RemovedStoriesIDs() (ids []uint64) {
+	for id := range m.removedstories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// StoriesIDs returns the "stories" edge IDs in the mutation.
+func (m *ProfileMutation) StoriesIDs() (ids []uint64) {
+	for id := range m.stories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetStories resets all changes to the "stories" edge.
+func (m *ProfileMutation) ResetStories() {
+	m.stories = nil
+	m.clearedstories = false
+	m.removedstories = nil
+}
+
 // Where appends a list predicates to the ProfileMutation builder.
 func (m *ProfileMutation) Where(ps ...predicate.Profile) {
 	m.predicates = append(m.predicates, ps...)
@@ -80598,49 +80655,85 @@ func (m *ProfileMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ProfileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.stories != nil {
+		edges = append(edges, profile.EdgeStories)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ProfileMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case profile.EdgeStories:
+		ids := make([]ent.Value, 0, len(m.stories))
+		for id := range m.stories {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ProfileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedstories != nil {
+		edges = append(edges, profile.EdgeStories)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ProfileMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case profile.EdgeStories:
+		ids := make([]ent.Value, 0, len(m.removedstories))
+		for id := range m.removedstories {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ProfileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedstories {
+		edges = append(edges, profile.EdgeStories)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ProfileMutation) EdgeCleared(name string) bool {
+	switch name {
+	case profile.EdgeStories:
+		return m.clearedstories
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ProfileMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Profile unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ProfileMutation) ResetEdge(name string) error {
+	switch name {
+	case profile.EdgeStories:
+		m.ResetStories()
+		return nil
+	}
 	return fmt.Errorf("unknown Profile edge %s", name)
 }
 
@@ -95073,8 +95166,6 @@ type StoryMutation struct {
 	op               Op
 	typ              string
 	id               *uint64
-	profile_id       *uint64
-	addprofile_id    *int64
 	_type            *string
 	size             *uint32
 	addsize          *int32
@@ -95104,6 +95195,8 @@ type StoryMutation struct {
 	object_uri       *string
 	bearcap_token    *string
 	clearedFields    map[string]struct{}
+	profile          *uint64
+	clearedprofile   bool
 	done             bool
 	oldValue         func(context.Context) (*Story, error)
 	predicates       []predicate.Story
@@ -95215,13 +95308,12 @@ func (m *StoryMutation) IDs(ctx context.Context) ([]uint64, error) {
 
 // SetProfileID sets the "profile_id" field.
 func (m *StoryMutation) SetProfileID(u uint64) {
-	m.profile_id = &u
-	m.addprofile_id = nil
+	m.profile = &u
 }
 
 // ProfileID returns the value of the "profile_id" field in the mutation.
 func (m *StoryMutation) ProfileID() (r uint64, exists bool) {
-	v := m.profile_id
+	v := m.profile
 	if v == nil {
 		return
 	}
@@ -95245,28 +95337,9 @@ func (m *StoryMutation) OldProfileID(ctx context.Context) (v uint64, err error) 
 	return oldValue.ProfileID, nil
 }
 
-// AddProfileID adds u to the "profile_id" field.
-func (m *StoryMutation) AddProfileID(u int64) {
-	if m.addprofile_id != nil {
-		*m.addprofile_id += u
-	} else {
-		m.addprofile_id = &u
-	}
-}
-
-// AddedProfileID returns the value that was added to the "profile_id" field in this mutation.
-func (m *StoryMutation) AddedProfileID() (r int64, exists bool) {
-	v := m.addprofile_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetProfileID resets all changes to the "profile_id" field.
 func (m *StoryMutation) ResetProfileID() {
-	m.profile_id = nil
-	m.addprofile_id = nil
+	m.profile = nil
 }
 
 // SetType sets the "type" field.
@@ -96423,6 +96496,33 @@ func (m *StoryMutation) ResetBearcapToken() {
 	delete(m.clearedFields, story.FieldBearcapToken)
 }
 
+// ClearProfile clears the "profile" edge to the Profile entity.
+func (m *StoryMutation) ClearProfile() {
+	m.clearedprofile = true
+	m.clearedFields[story.FieldProfileID] = struct{}{}
+}
+
+// ProfileCleared reports if the "profile" edge to the Profile entity was cleared.
+func (m *StoryMutation) ProfileCleared() bool {
+	return m.clearedprofile
+}
+
+// ProfileIDs returns the "profile" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ProfileID instead. It exists only for internal usage by the builders.
+func (m *StoryMutation) ProfileIDs() (ids []uint64) {
+	if id := m.profile; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetProfile resets all changes to the "profile" edge.
+func (m *StoryMutation) ResetProfile() {
+	m.profile = nil
+	m.clearedprofile = false
+}
+
 // Where appends a list predicates to the StoryMutation builder.
 func (m *StoryMutation) Where(ps ...predicate.Story) {
 	m.predicates = append(m.predicates, ps...)
@@ -96458,7 +96558,7 @@ func (m *StoryMutation) Type() string {
 // AddedFields().
 func (m *StoryMutation) Fields() []string {
 	fields := make([]string, 0, 25)
-	if m.profile_id != nil {
+	if m.profile != nil {
 		fields = append(fields, story.FieldProfileID)
 	}
 	if m._type != nil {
@@ -96842,9 +96942,6 @@ func (m *StoryMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *StoryMutation) AddedFields() []string {
 	var fields []string
-	if m.addprofile_id != nil {
-		fields = append(fields, story.FieldProfileID)
-	}
 	if m.addsize != nil {
 		fields = append(fields, story.FieldSize)
 	}
@@ -96865,8 +96962,6 @@ func (m *StoryMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *StoryMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case story.FieldProfileID:
-		return m.AddedProfileID()
 	case story.FieldSize:
 		return m.AddedSize()
 	case story.FieldDuration:
@@ -96884,13 +96979,6 @@ func (m *StoryMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *StoryMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case story.FieldProfileID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddProfileID(v)
-		return nil
 	case story.FieldSize:
 		v, ok := value.(int32)
 		if !ok {
@@ -97126,19 +97214,28 @@ func (m *StoryMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *StoryMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.profile != nil {
+		edges = append(edges, story.EdgeProfile)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *StoryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case story.EdgeProfile:
+		if id := m.profile; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *StoryMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -97150,25 +97247,42 @@ func (m *StoryMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *StoryMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedprofile {
+		edges = append(edges, story.EdgeProfile)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *StoryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case story.EdgeProfile:
+		return m.clearedprofile
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *StoryMutation) ClearEdge(name string) error {
+	switch name {
+	case story.EdgeProfile:
+		m.ClearProfile()
+		return nil
+	}
 	return fmt.Errorf("unknown Story unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *StoryMutation) ResetEdge(name string) error {
+	switch name {
+	case story.EdgeProfile:
+		m.ResetProfile()
+		return nil
+	}
 	return fmt.Errorf("unknown Story edge %s", name)
 }
 

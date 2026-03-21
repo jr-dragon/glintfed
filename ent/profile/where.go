@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"glintfed.org/ent/predicate"
 )
 
@@ -2407,6 +2408,29 @@ func IndexableEQ(v bool) predicate.Profile {
 // IndexableNEQ applies the NEQ predicate on the "indexable" field.
 func IndexableNEQ(v bool) predicate.Profile {
 	return predicate.Profile(sql.FieldNEQ(FieldIndexable, v))
+}
+
+// HasStories applies the HasEdge predicate on the "stories" edge.
+func HasStories() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StoriesTable, StoriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStoriesWith applies the HasEdge predicate on the "stories" edge with a given conditions (other predicates).
+func HasStoriesWith(preds ...predicate.Story) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := newStoriesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

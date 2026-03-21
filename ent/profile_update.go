@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"glintfed.org/ent/predicate"
 	"glintfed.org/ent/profile"
+	"glintfed.org/ent/story"
 )
 
 // ProfileUpdate is the builder for updating Profile entities.
@@ -753,9 +754,45 @@ func (_u *ProfileUpdate) SetNillableIndexable(v *bool) *ProfileUpdate {
 	return _u
 }
 
+// AddStoryIDs adds the "stories" edge to the Story entity by IDs.
+func (_u *ProfileUpdate) AddStoryIDs(ids ...uint64) *ProfileUpdate {
+	_u.mutation.AddStoryIDs(ids...)
+	return _u
+}
+
+// AddStories adds the "stories" edges to the Story entity.
+func (_u *ProfileUpdate) AddStories(v ...*Story) *ProfileUpdate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddStoryIDs(ids...)
+}
+
 // Mutation returns the ProfileMutation object of the builder.
 func (_u *ProfileUpdate) Mutation() *ProfileMutation {
 	return _u.mutation
+}
+
+// ClearStories clears all "stories" edges to the Story entity.
+func (_u *ProfileUpdate) ClearStories() *ProfileUpdate {
+	_u.mutation.ClearStories()
+	return _u
+}
+
+// RemoveStoryIDs removes the "stories" edge to Story entities by IDs.
+func (_u *ProfileUpdate) RemoveStoryIDs(ids ...uint64) *ProfileUpdate {
+	_u.mutation.RemoveStoryIDs(ids...)
+	return _u
+}
+
+// RemoveStories removes "stories" edges to Story entities.
+func (_u *ProfileUpdate) RemoveStories(v ...*Story) *ProfileUpdate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveStoryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1018,6 +1055,51 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Indexable(); ok {
 		_spec.SetField(profile.FieldIndexable, field.TypeBool, value)
+	}
+	if _u.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.StoriesTable,
+			Columns: []string{profile.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedStoriesIDs(); len(nodes) > 0 && !_u.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.StoriesTable,
+			Columns: []string{profile.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.StoriesTable,
+			Columns: []string{profile.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1764,9 +1846,45 @@ func (_u *ProfileUpdateOne) SetNillableIndexable(v *bool) *ProfileUpdateOne {
 	return _u
 }
 
+// AddStoryIDs adds the "stories" edge to the Story entity by IDs.
+func (_u *ProfileUpdateOne) AddStoryIDs(ids ...uint64) *ProfileUpdateOne {
+	_u.mutation.AddStoryIDs(ids...)
+	return _u
+}
+
+// AddStories adds the "stories" edges to the Story entity.
+func (_u *ProfileUpdateOne) AddStories(v ...*Story) *ProfileUpdateOne {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddStoryIDs(ids...)
+}
+
 // Mutation returns the ProfileMutation object of the builder.
 func (_u *ProfileUpdateOne) Mutation() *ProfileMutation {
 	return _u.mutation
+}
+
+// ClearStories clears all "stories" edges to the Story entity.
+func (_u *ProfileUpdateOne) ClearStories() *ProfileUpdateOne {
+	_u.mutation.ClearStories()
+	return _u
+}
+
+// RemoveStoryIDs removes the "stories" edge to Story entities by IDs.
+func (_u *ProfileUpdateOne) RemoveStoryIDs(ids ...uint64) *ProfileUpdateOne {
+	_u.mutation.RemoveStoryIDs(ids...)
+	return _u
+}
+
+// RemoveStories removes "stories" edges to Story entities.
+func (_u *ProfileUpdateOne) RemoveStories(v ...*Story) *ProfileUpdateOne {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveStoryIDs(ids...)
 }
 
 // Where appends a list predicates to the ProfileUpdate builder.
@@ -2059,6 +2177,51 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 	}
 	if value, ok := _u.mutation.Indexable(); ok {
 		_spec.SetField(profile.FieldIndexable, field.TypeBool, value)
+	}
+	if _u.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.StoriesTable,
+			Columns: []string{profile.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedStoriesIDs(); len(nodes) > 0 && !_u.mutation.StoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.StoriesTable,
+			Columns: []string{profile.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.StoriesTable,
+			Columns: []string{profile.StoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Profile{config: _u.config}
 	_spec.Assign = _node.assignValues

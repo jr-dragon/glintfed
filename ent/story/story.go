@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -63,8 +64,17 @@ const (
 	FieldObjectURI = "object_uri"
 	// FieldBearcapToken holds the string denoting the bearcap_token field in the database.
 	FieldBearcapToken = "bearcap_token"
+	// EdgeProfile holds the string denoting the profile edge name in mutations.
+	EdgeProfile = "profile"
 	// Table holds the table name of the story in the database.
 	Table = "stories"
+	// ProfileTable is the table that holds the profile relation/edge.
+	ProfileTable = "stories"
+	// ProfileInverseTable is the table name for the Profile entity.
+	// It exists in this package in order to avoid circular dependency with the "profile" package.
+	ProfileInverseTable = "profiles"
+	// ProfileColumn is the table column denoting the profile relation/edge.
+	ProfileColumn = "profile_id"
 )
 
 // Columns holds all SQL columns for story fields.
@@ -254,4 +264,18 @@ func ByObjectURI(opts ...sql.OrderTermOption) OrderOption {
 // ByBearcapToken orders the results by the bearcap_token field.
 func ByBearcapToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBearcapToken, opts...).ToFunc()
+}
+
+// ByProfileField orders the results by profile field.
+func ByProfileField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newProfileStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newProfileStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ProfileInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
+	)
 }

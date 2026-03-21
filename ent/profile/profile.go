@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -89,8 +90,17 @@ const (
 	FieldMovedToProfileID = "moved_to_profile_id"
 	// FieldIndexable holds the string denoting the indexable field in the database.
 	FieldIndexable = "indexable"
+	// EdgeStories holds the string denoting the stories edge name in mutations.
+	EdgeStories = "stories"
 	// Table holds the table name of the profile in the database.
 	Table = "profiles"
+	// StoriesTable is the table that holds the stories relation/edge.
+	StoriesTable = "stories"
+	// StoriesInverseTable is the table name for the Story entity.
+	// It exists in this package in order to avoid circular dependency with the "story" package.
+	StoriesInverseTable = "stories"
+	// StoriesColumn is the table column denoting the stories relation/edge.
+	StoriesColumn = "profile_id"
 )
 
 // Columns holds all SQL columns for profile fields.
@@ -369,4 +379,25 @@ func ByMovedToProfileID(opts ...sql.OrderTermOption) OrderOption {
 // ByIndexable orders the results by the indexable field.
 func ByIndexable(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIndexable, opts...).ToFunc()
+}
+
+// ByStoriesCount orders the results by stories count.
+func ByStoriesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStoriesStep(), opts...)
+	}
+}
+
+// ByStories orders the results by stories terms.
+func ByStories(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStoriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newStoriesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StoriesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StoriesTable, StoriesColumn),
+	)
 }

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"glintfed.org/ent/predicate"
+	"glintfed.org/ent/profile"
 	"glintfed.org/ent/story"
 )
 
@@ -30,7 +31,6 @@ func (_u *StoryUpdate) Where(ps ...predicate.Story) *StoryUpdate {
 
 // SetProfileID sets the "profile_id" field.
 func (_u *StoryUpdate) SetProfileID(v uint64) *StoryUpdate {
-	_u.mutation.ResetProfileID()
 	_u.mutation.SetProfileID(v)
 	return _u
 }
@@ -40,12 +40,6 @@ func (_u *StoryUpdate) SetNillableProfileID(v *uint64) *StoryUpdate {
 	if v != nil {
 		_u.SetProfileID(*v)
 	}
-	return _u
-}
-
-// AddProfileID adds value to the "profile_id" field.
-func (_u *StoryUpdate) AddProfileID(v int64) *StoryUpdate {
-	_u.mutation.AddProfileID(v)
 	return _u
 }
 
@@ -479,9 +473,20 @@ func (_u *StoryUpdate) ClearBearcapToken() *StoryUpdate {
 	return _u
 }
 
+// SetProfile sets the "profile" edge to the Profile entity.
+func (_u *StoryUpdate) SetProfile(v *Profile) *StoryUpdate {
+	return _u.SetProfileID(v.ID)
+}
+
 // Mutation returns the StoryMutation object of the builder.
 func (_u *StoryUpdate) Mutation() *StoryMutation {
 	return _u.mutation
+}
+
+// ClearProfile clears the "profile" edge to the Profile entity.
+func (_u *StoryUpdate) ClearProfile() *StoryUpdate {
+	_u.mutation.ClearProfile()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -520,7 +525,18 @@ func (_u *StoryUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *StoryUpdate) check() error {
+	if _u.mutation.ProfileCleared() && len(_u.mutation.ProfileIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Story.profile"`)
+	}
+	return nil
+}
+
 func (_u *StoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(story.Table, story.Columns, sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -528,12 +544,6 @@ func (_u *StoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := _u.mutation.ProfileID(); ok {
-		_spec.SetField(story.FieldProfileID, field.TypeUint64, value)
-	}
-	if value, ok := _u.mutation.AddedProfileID(); ok {
-		_spec.AddField(story.FieldProfileID, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(story.FieldType, field.TypeString, value)
@@ -664,6 +674,35 @@ func (_u *StoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.BearcapTokenCleared() {
 		_spec.ClearField(story.FieldBearcapToken, field.TypeString)
 	}
+	if _u.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   story.ProfileTable,
+			Columns: []string{story.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(profile.FieldID, field.TypeUint64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   story.ProfileTable,
+			Columns: []string{story.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(profile.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{story.Label}
@@ -686,7 +725,6 @@ type StoryUpdateOne struct {
 
 // SetProfileID sets the "profile_id" field.
 func (_u *StoryUpdateOne) SetProfileID(v uint64) *StoryUpdateOne {
-	_u.mutation.ResetProfileID()
 	_u.mutation.SetProfileID(v)
 	return _u
 }
@@ -696,12 +734,6 @@ func (_u *StoryUpdateOne) SetNillableProfileID(v *uint64) *StoryUpdateOne {
 	if v != nil {
 		_u.SetProfileID(*v)
 	}
-	return _u
-}
-
-// AddProfileID adds value to the "profile_id" field.
-func (_u *StoryUpdateOne) AddProfileID(v int64) *StoryUpdateOne {
-	_u.mutation.AddProfileID(v)
 	return _u
 }
 
@@ -1135,9 +1167,20 @@ func (_u *StoryUpdateOne) ClearBearcapToken() *StoryUpdateOne {
 	return _u
 }
 
+// SetProfile sets the "profile" edge to the Profile entity.
+func (_u *StoryUpdateOne) SetProfile(v *Profile) *StoryUpdateOne {
+	return _u.SetProfileID(v.ID)
+}
+
 // Mutation returns the StoryMutation object of the builder.
 func (_u *StoryUpdateOne) Mutation() *StoryMutation {
 	return _u.mutation
+}
+
+// ClearProfile clears the "profile" edge to the Profile entity.
+func (_u *StoryUpdateOne) ClearProfile() *StoryUpdateOne {
+	_u.mutation.ClearProfile()
+	return _u
 }
 
 // Where appends a list predicates to the StoryUpdate builder.
@@ -1189,7 +1232,18 @@ func (_u *StoryUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *StoryUpdateOne) check() error {
+	if _u.mutation.ProfileCleared() && len(_u.mutation.ProfileIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Story.profile"`)
+	}
+	return nil
+}
+
 func (_u *StoryUpdateOne) sqlSave(ctx context.Context) (_node *Story, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(story.Table, story.Columns, sqlgraph.NewFieldSpec(story.FieldID, field.TypeUint64))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -1214,12 +1268,6 @@ func (_u *StoryUpdateOne) sqlSave(ctx context.Context) (_node *Story, err error)
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := _u.mutation.ProfileID(); ok {
-		_spec.SetField(story.FieldProfileID, field.TypeUint64, value)
-	}
-	if value, ok := _u.mutation.AddedProfileID(); ok {
-		_spec.AddField(story.FieldProfileID, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(story.FieldType, field.TypeString, value)
@@ -1349,6 +1397,35 @@ func (_u *StoryUpdateOne) sqlSave(ctx context.Context) (_node *Story, err error)
 	}
 	if _u.mutation.BearcapTokenCleared() {
 		_spec.ClearField(story.FieldBearcapToken, field.TypeString)
+	}
+	if _u.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   story.ProfileTable,
+			Columns: []string{story.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(profile.FieldID, field.TypeUint64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   story.ProfileTable,
+			Columns: []string{story.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(profile.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Story{config: _u.config}
 	_spec.Assign = _node.assignValues

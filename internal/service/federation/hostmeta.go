@@ -49,7 +49,11 @@ func (s *svc) HostMeta(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/xrd+xml")
 	w.Write([]byte(xml.Header))
+
 	if err := xml.NewEncoder(w).Encode(xrd); err != nil {
-		slog.ErrorContext(r.Context(), "failed to encode host-meta xml", logs.ErrAttr(err))
+		slog.ErrorContext(r.Context(), "failed to encode host-meta xml", logs.ErrAttr(err), slog.Any("xrd", xrd))
+		http.Error(w, "", http.StatusInternalServerError)
+		return
 	}
+
 }

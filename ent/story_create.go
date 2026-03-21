@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"glintfed.org/ent/profile"
 	"glintfed.org/ent/story"
 )
 
@@ -352,6 +353,11 @@ func (_c *StoryCreate) SetID(v uint64) *StoryCreate {
 	return _c
 }
 
+// SetProfile sets the "profile" edge to the Profile entity.
+func (_c *StoryCreate) SetProfile(v *Profile) *StoryCreate {
+	return _c.SetProfileID(v.ID)
+}
+
 // Mutation returns the StoryMutation object of the builder.
 func (_c *StoryCreate) Mutation() *StoryMutation {
 	return _c.mutation
@@ -450,6 +456,9 @@ func (_c *StoryCreate) check() error {
 	if _, ok := _c.mutation.CanReact(); !ok {
 		return &ValidationError{Name: "can_react", err: errors.New(`ent: missing required field "Story.can_react"`)}
 	}
+	if len(_c.mutation.ProfileIDs()) == 0 {
+		return &ValidationError{Name: "profile", err: errors.New(`ent: missing required edge "Story.profile"`)}
+	}
 	return nil
 }
 
@@ -481,10 +490,6 @@ func (_c *StoryCreate) createSpec() (*Story, *sqlgraph.CreateSpec) {
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
-	}
-	if value, ok := _c.mutation.ProfileID(); ok {
-		_spec.SetField(story.FieldProfileID, field.TypeUint64, value)
-		_node.ProfileID = value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(story.FieldType, field.TypeString, value)
@@ -581,6 +586,23 @@ func (_c *StoryCreate) createSpec() (*Story, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.BearcapToken(); ok {
 		_spec.SetField(story.FieldBearcapToken, field.TypeString, value)
 		_node.BearcapToken = value
+	}
+	if nodes := _c.mutation.ProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   story.ProfileTable,
+			Columns: []string{story.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(profile.FieldID, field.TypeUint64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ProfileID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

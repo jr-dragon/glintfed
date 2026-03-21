@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"glintfed.org/ent/profile"
 	"glintfed.org/ent/story"
 )
 
@@ -68,7 +69,30 @@ type Story struct {
 	ObjectURI string `json:"object_uri,omitempty"`
 	// BearcapToken holds the value of the "bearcap_token" field.
 	BearcapToken string `json:"bearcap_token,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the StoryQuery when eager-loading is set.
+	Edges        StoryEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// StoryEdges holds the relations/edges for other nodes in the graph.
+type StoryEdges struct {
+	// Profile holds the value of the profile edge.
+	Profile *Profile `json:"profile,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ProfileOrErr returns the Profile value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e StoryEdges) ProfileOrErr() (*Profile, error) {
+	if e.Profile != nil {
+		return e.Profile, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: profile.Label}
+	}
+	return nil, &NotLoadedError{edge: "profile"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -270,6 +294,11 @@ func (_m *Story) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Story) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryProfile queries the "profile" edge of the Story entity.
+func (_m *Story) QueryProfile() *ProfileQuery {
+	return NewStoryClient(_m.config).QueryProfile(_m)
 }
 
 // Update returns a builder for updating this Story.

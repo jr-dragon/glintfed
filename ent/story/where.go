@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"glintfed.org/ent/predicate"
 )
 
@@ -192,26 +193,6 @@ func ProfileIDIn(vs ...uint64) predicate.Story {
 // ProfileIDNotIn applies the NotIn predicate on the "profile_id" field.
 func ProfileIDNotIn(vs ...uint64) predicate.Story {
 	return predicate.Story(sql.FieldNotIn(FieldProfileID, vs...))
-}
-
-// ProfileIDGT applies the GT predicate on the "profile_id" field.
-func ProfileIDGT(v uint64) predicate.Story {
-	return predicate.Story(sql.FieldGT(FieldProfileID, v))
-}
-
-// ProfileIDGTE applies the GTE predicate on the "profile_id" field.
-func ProfileIDGTE(v uint64) predicate.Story {
-	return predicate.Story(sql.FieldGTE(FieldProfileID, v))
-}
-
-// ProfileIDLT applies the LT predicate on the "profile_id" field.
-func ProfileIDLT(v uint64) predicate.Story {
-	return predicate.Story(sql.FieldLT(FieldProfileID, v))
-}
-
-// ProfileIDLTE applies the LTE predicate on the "profile_id" field.
-func ProfileIDLTE(v uint64) predicate.Story {
-	return predicate.Story(sql.FieldLTE(FieldProfileID, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.
@@ -1362,6 +1343,29 @@ func BearcapTokenEqualFold(v string) predicate.Story {
 // BearcapTokenContainsFold applies the ContainsFold predicate on the "bearcap_token" field.
 func BearcapTokenContainsFold(v string) predicate.Story {
 	return predicate.Story(sql.FieldContainsFold(FieldBearcapToken, v))
+}
+
+// HasProfile applies the HasEdge predicate on the "profile" edge.
+func HasProfile() predicate.Story {
+	return predicate.Story(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasProfileWith applies the HasEdge predicate on the "profile" edge with a given conditions (other predicates).
+func HasProfileWith(preds ...predicate.Profile) predicate.Story {
+	return predicate.Story(func(s *sql.Selector) {
+		step := newProfileStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

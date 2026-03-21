@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,15 +14,17 @@ import (
 	"entgo.io/ent/schema/field"
 	"glintfed.org/ent/predicate"
 	"glintfed.org/ent/profile"
+	"glintfed.org/ent/story"
 )
 
 // ProfileQuery is the builder for querying Profile entities.
 type ProfileQuery struct {
 	config
-	ctx        *QueryContext
-	order      []profile.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Profile
+	ctx         *QueryContext
+	order       []profile.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Profile
+	withStories *StoryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +59,28 @@ func (_q *ProfileQuery) Unique(unique bool) *ProfileQuery {
 func (_q *ProfileQuery) Order(o ...profile.OrderOption) *ProfileQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryStories chains the current query on the "stories" edge.
+func (_q *ProfileQuery) QueryStories() *StoryQuery {
+	query := (&StoryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, selector),
+			sqlgraph.To(story.Table, story.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.StoriesTable, profile.StoriesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Profile entity from the query.
@@ -245,15 +270,27 @@ func (_q *ProfileQuery) Clone() *ProfileQuery {
 		return nil
 	}
 	return &ProfileQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]profile.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Profile{}, _q.predicates...),
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]profile.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.Profile{}, _q.predicates...),
+		withStories: _q.withStories.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithStories tells the query-builder to eager-load the nodes that are connected to
+// the "stories" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProfileQuery) WithStories(opts ...func(*StoryQuery)) *ProfileQuery {
+	query := (&StoryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withStories = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +369,11 @@ func (_q *ProfileQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *ProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Profile, error) {
 	var (
-		nodes = []*Profile{}
-		_spec = _q.querySpec()
+		nodes       = []*Profile{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withStories != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Profile).scanValues(nil, columns)
@@ -341,6 +381,7 @@ func (_q *ProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prof
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Profile{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +393,45 @@ func (_q *ProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prof
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withStories; query != nil {
+		if err := _q.loadStories(ctx, query, nodes,
+			func(n *Profile) { n.Edges.Stories = []*Story{} },
+			func(n *Profile, e *Story) { n.Edges.Stories = append(n.Edges.Stories, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *ProfileQuery) loadStories(ctx context.Context, query *StoryQuery, nodes []*Profile, init func(*Profile), assign func(*Profile, *Story)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint64]*Profile)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(story.FieldProfileID)
+	}
+	query.Where(predicate.Story(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(profile.StoriesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ProfileID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "profile_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (_q *ProfileQuery) sqlCount(ctx context.Context) (int, error) {
