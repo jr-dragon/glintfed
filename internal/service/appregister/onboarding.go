@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"math/rand/v2"
 	"net"
 	"net/http"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"unicode"
 
 	"github.com/go-playground/validator/v10"
+	usermodel "glintfed.org/internal/model/user"
 	"glintfed.org/internal/lib/logs"
 	"glintfed.org/internal/service/internal"
 )
@@ -89,7 +89,7 @@ func (s *svc) Onboarding(w http.ResponseWriter, r *http.Request) {
 
 	if !exists {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusBadRequest)
 		if encErr := json.NewEncoder(w).Encode(map[string]string{
 			"status":  "error",
 			"message": "Invalid verification code, please try again later.",
@@ -104,7 +104,7 @@ func (s *svc) Onboarding(w http.ResponseWriter, r *http.Request) {
 		ip = r.RemoteAddr
 	}
 
-	user, err := s.uc.Create(ctx, CreateUserParams{
+	user, err := s.um.Create(ctx, usermodel.CreateUserParams{
 		Name:            req.Name,
 		Username:        req.Username,
 		Email:           email,
@@ -115,18 +115,6 @@ func (s *svc) Onboarding(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to create user", logs.ErrAttr(err))
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	// Wait for background jobs (e.g. profile creation) to complete before fetching
-	// the user's profile_id. This mirrors the original PHP implementation's
-	// sleep(random_int(8, 10)) followed by User::findOrFail($user->id).
-	time.Sleep(time.Duration(8+rand.IntN(3)) * time.Second)
-
-	user, err = s.ug.GetByID(ctx, user.ID)
-	if err != nil {
-		slog.ErrorContext(ctx, "failed to re-fetch user after onboarding sleep", logs.ErrAttr(err))
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}

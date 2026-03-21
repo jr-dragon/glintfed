@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 
 	"glintfed.org/ent"
 	"glintfed.org/internal/data"
+	usermodel "glintfed.org/internal/model/user"
 )
 
 type Service interface {
@@ -26,17 +26,11 @@ type AppRegisterModel interface {
 	DeleteByEmail(ctx context.Context, email string) error
 }
 
-//go:generate go tool moq -rm -out mock_user_creator.go . UserCreator
-type UserCreator interface {
+//go:generate go tool moq -rm -out mock_user_model.go . UserModel
+type UserModel interface {
 	// Create inserts a new user with the given parameters. The implementation is responsible
 	// for hashing the plaintext password before storing it.
-	Create(ctx context.Context, params CreateUserParams) (*ent.User, error)
-}
-
-//go:generate go tool moq -rm -out mock_user_getter.go . UserGetter
-type UserGetter interface {
-	// GetByID returns the user with the given ID.
-	GetByID(ctx context.Context, id uint64) (*ent.User, error)
+	Create(ctx context.Context, params usermodel.CreateUserParams) (*ent.User, error)
 }
 
 //go:generate go tool moq -rm -out mock_oauth_model.go . OAuthModel
@@ -53,17 +47,6 @@ type AccountGetter interface {
 	GetByProfileID(ctx context.Context, profileID uint64) (json.RawMessage, error)
 }
 
-// CreateUserParams holds the fields required to create a new user during app registration.
-type CreateUserParams struct {
-	Name            string
-	Username        string
-	Email           string
-	Password        string // plaintext; the model layer is responsible for hashing
-	AppRegisterIP   string
-	RegisterSource  string
-	EmailVerifiedAt time.Time
-}
-
 // OAuthTokenResult contains the OAuth token details returned after successful onboarding.
 type OAuthTokenResult struct {
 	AccessToken  string
@@ -73,7 +56,7 @@ type OAuthTokenResult struct {
 	ExpiresIn    int64
 }
 
-func New(cfg *data.Config, arm AppRegisterModel, uc UserCreator, ug UserGetter, om OAuthModel, ag AccountGetter) Service {
+func New(cfg *data.Config, arm AppRegisterModel, um UserModel, om OAuthModel, ag AccountGetter) Service {
 	v := validator.New()
 	// Register custom tag "username" implementing PHP's validateUsernameRule logic.
 	_ = v.RegisterValidation("username", validateUsernameTag)
@@ -82,8 +65,7 @@ func New(cfg *data.Config, arm AppRegisterModel, uc UserCreator, ug UserGetter, 
 		cfg:      cfg,
 		validate: v,
 		arm:      arm,
-		uc:       uc,
-		ug:       ug,
+		um:       um,
 		om:       om,
 		ag:       ag,
 	}
@@ -93,8 +75,7 @@ type svc struct {
 	cfg      *data.Config
 	validate *validator.Validate
 	arm      AppRegisterModel
-	uc       UserCreator
-	ug       UserGetter
+	um       UserModel
 	om       OAuthModel
 	ag       AccountGetter
 }
