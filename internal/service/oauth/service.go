@@ -3,6 +3,7 @@ package oauth
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/ory/fosite"
 
@@ -24,18 +25,30 @@ type UserAuthenticator interface {
 }
 
 type svc struct {
-	provider fosite.OAuth2Provider
-	store    *fositestore.Store
-	auth     UserAuthenticator
-	appURL   string
+	provider        fosite.OAuth2Provider
+	store           *fositestore.Store
+	auth            UserAuthenticator
+	appURL          string
+	accessTokenTTL  time.Duration
+	refreshTokenTTL time.Duration
 }
 
 // New creates a new OAuth service.
 func New(provider fosite.OAuth2Provider, store *fositestore.Store, auth UserAuthenticator, cfg *data.Config) Service {
+	accessTTL := time.Duration(cfg.App.Auth.OAuth.AccessTokenLifespanDays) * 24 * time.Hour
+	if accessTTL <= 0 {
+		accessTTL = 365 * 24 * time.Hour
+	}
+	refreshTTL := time.Duration(cfg.App.Auth.OAuth.RefreshTokenLifespanDays) * 24 * time.Hour
+	if refreshTTL <= 0 {
+		refreshTTL = 400 * 24 * time.Hour
+	}
 	return &svc{
-		provider: provider,
-		store:    store,
-		auth:     auth,
-		appURL:   cfg.App.Url,
+		provider:        provider,
+		store:           store,
+		auth:            auth,
+		appURL:          cfg.App.Url,
+		accessTokenTTL:  accessTTL,
+		refreshTokenTTL: refreshTTL,
 	}
 }

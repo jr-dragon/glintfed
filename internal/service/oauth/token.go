@@ -83,14 +83,13 @@ func (s *svc) handlePasswordGrant(w http.ResponseWriter, r *http.Request) {
 
 	subject := fmt.Sprintf("%d", userID)
 	now := time.Now()
-	ttl := 365 * 24 * time.Hour
 
 	session := &fosite.DefaultSession{
 		Subject:  subject,
 		Username: username,
 		ExpiresAt: map[fosite.TokenType]time.Time{
-			fosite.AccessToken:  now.Add(ttl),
-			fosite.RefreshToken: now.Add(ttl + 35*24*time.Hour),
+			fosite.AccessToken:  now.Add(s.accessTokenTTL),
+			fosite.RefreshToken: now.Add(s.refreshTokenTTL),
 		},
 	}
 
@@ -115,7 +114,7 @@ func (s *svc) handlePasswordGrant(w http.ResponseWriter, r *http.Request) {
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"token_type":    "Bearer",
-		"expires_in":    int64(ttl.Seconds()),
+		"expires_in":    int64(s.accessTokenTTL.Seconds()),
 		"scope":         scopeStr,
 	}
 
