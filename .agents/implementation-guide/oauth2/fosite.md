@@ -7,309 +7,312 @@
 ```
 Client App
     │
-    ├─ POST /oauth/token (任何 grant type，包含 password)
+    ├─ POST /oauth/token (password / refresh_token / client_credentials)
     │       ↓
-    │   glintfed fosite handler
-    │       ↓
-    │   fosite core（驗證 grant、簽發 token）
-    │       ↓
-    │   FositeStore（實作 fosite storage interfaces，底層為 ent）
+    │   svc.Token
+    │       ├─ grant_type=password → handlePasswordGrant（service 層手動處理，不走 fosite ROPC）
+    │       └─ 其他 grant type → provider.NewAccessRequest / NewAccessResponse
     │
     └─ GET  /oauth/authorize (authorization_code)
             ↓
-        glintfed fosite handler
-            ↓
-        Login UI（glintfed 自行渲染或由 client app 重導）
-            ↓
-        fosite.NewAuthorizeResponse（完成 authorize）
-            ↓
-        redirect to client with code
+        svc.Authorize（目前回傳 ErrAccessDenied；Login UI 尚未實作）
 ```
+
+### 關鍵設計決策
+
+- **HMAC-only token**：使用 `oauth2.HMACSHAStrategy`，token 為不透明的 HMAC 字串，不使用 JWT/RSA。
+- **密碼 grant 手動處理**：`handlePasswordGrant` 在 service 層直接驗證帳密，繞過 fosite 的 ROPC handler（`OAuth2ResourceOwnerPasswordFactory` 未納入 `compose.Compose`）。
+- **Pixelfed schema 相容**：ent schema 與 pixelfed 的 Laravel Passport MySQL schema 完全相同，方便使用者從 pixelfed 遷移至 glintfed。不儲存 session blob，session 改由 DB 欄位重建。
+- **直接核發 token**：`CreatePersonalAccessTokens` 方法讓 Usecase 可在不走 HTTP authorize flow 的情況下直接簽發 access token + refresh token（對應 pixelfed 的 `$user->createToken(...)`）。
 
 ---
 
-## 新增 Go 依賴
+## Go 依賴
 
 ```bash
 go get github.com/ory/fosite
-go get github.com/ory/fosite/compose
-go get github.com/go-jose/go-jose/v3
 ```
 
-> fosite 使用 `go-jose` 做 JWT 簽署，需確認 Go 版本相容性。
+> fosite 不需要 `go-jose`，因為實作中只使用 HMAC 策略。
 
 ---
 
 ## 核心概念
 
-fosite 要求實作兩個主要 interface：
+fosite 要求實作 storage interfaces：
 
 1. **`fosite.Storage`**：儲存 OAuth2 clients、authorize codes、access tokens、refresh tokens、PKCE sessions。
 2. **`fosite.OAuth2Provider`**：由 `compose.Compose(...)` 建立，注入 storage 與各 grant handler。
 
-所有 OAuth2 資料儲存在 glintfed 的主資料庫（SQLite/PostgreSQL），透過 ent 存取。
+Session 不以 JSON blob 存入 DB，而是在查詢時由 `user_id`、`scopes`、`expires_at` 欄位重建，以相容 pixelfed 的 schema。
 
 ---
 
-## Ent Schema 新增
+## Ent Schema
 
-需新增以下 ent schema（對應 Laravel Passport 的 5 張 migration table）：
+所有 schema 與 pixelfed 的 Laravel Passport MySQL schema 完全相容：
 
-### `ent/schema/oauthauthorizationcode.go`
-
-```go
-// Fields: id, client_id, user_id, scopes (JSON), redirect_uri, code_challenge,
-//         code_challenge_method, session (JSON/blob), revoked, expires_at, created_at
-```
-
-### `ent/schema/oauthaccesstoken.go`
+### `ent/schema/oauthaccesstoken.go` → `oauth_access_tokens`
 
 ```go
-// Fields: id (signature), client_id, user_id, scopes (JSON),
-//         session (JSON/blob), revoked, expires_at, created_at
+field.String("id").MaxLen(100).Unique()
+field.Uint64("user_id").Optional()           // client_credentials 時可為空
+field.Uint64("client_id")
+field.String("name").MaxLen(191).Optional()
+field.Text("scopes").Optional()              // JSON text: ["read","write"]
+field.Bool("revoked")
+field.Time("created_at").Default(time.Now).Immutable()
+field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now)
+field.Time("expires_at").Optional()
+// table: oauth_access_tokens; index: user_id
 ```
 
-### `ent/schema/oauthrefreshtoken.go`
+### `ent/schema/oauthauthorizationcode.go` → `oauth_auth_codes`
 
 ```go
-// Fields: id (signature), access_token_id, client_id, user_id, scopes (JSON),
-//         session (JSON/blob), revoked, expires_at, created_at
+field.String("id").MaxLen(100).Unique()
+field.Uint64("user_id")                      // NOT NULL（authorize code 必有使用者）
+field.Uint64("client_id")
+field.Text("scopes").Optional()
+field.Bool("revoked")
+field.Time("expires_at").Optional()
+// index: user_id
 ```
 
-### `ent/schema/oauthpkce.go`
+### `ent/schema/oauthrefreshtoken.go` → `oauth_refresh_tokens`
 
 ```go
-// Fields: id (authorize_code_id), code_challenge, code_challenge_method,
-//         session (JSON/blob), revoked, expires_at
+field.String("id").MaxLen(100).Unique()
+field.String("access_token_id").MaxLen(100)  // 關聯 oauth_access_tokens.id
+field.Bool("revoked")
+field.Time("expires_at").Optional()
+// index: access_token_id
 ```
 
-現有的 `ent/schema/oauthclient.go` 需擴充以支援 fosite 所需欄位（`public` flag、`allowed_cors_origins` 等）。
+### `ent/schema/oauthpersonalaccessclient.go` → `oauth_personal_access_clients`
+
+```go
+field.Uint64("id").Unique()
+field.Uint64("client_id")
+field.Time("created_at").Default(time.Now).Immutable()
+field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now)
+```
+
+### `ent/schema/oauthpkce.go`（glintfed-only，pixelfed 無此表）
+
+```go
+// 儲存 PKCE session blob，僅 glintfed 使用
+```
+
+### 現有 `ent/schema/oauthclient.go`
+
+沿用 pixelfed schema，無需新增額外欄位。`FositeClient` 會從現有欄位（`password_client`、`personal_access_client`、`redirect`、`revoked`）推導出 fosite 所需的 metadata。
 
 執行 `make gen` 重新產生 ent code。
 
 ---
 
-## 實作步驟
+## 實作
 
 ### Step 1：FositeStore（`internal/lib/fositestore/`）
 
-實作 fosite 所有 storage interfaces，底層使用 ent。這是工程量最大的部份。
-
-**`internal/lib/fositestore/store.go`**
+**`store.go`**
 
 ```go
-package fositestore
-
-import (
-    "glintfed.org/ent"
-    fosite "github.com/ory/fosite"
-)
-
-// Store 實作 fosite 所有 storage interface：
-//   - fosite.Storage
-//   - oauth2.CoreStorage (AuthorizeCodeStorage + AccessTokenStorage + RefreshTokenStorage)
-//   - pkce.PKCERequestStorage
-//
-// 每個 interface 對應一個 ent entity。
+// Store 實作 fosite storage interfaces，底層使用 ent ORM。
 type Store struct {
-    db *ent.Client
+    db       *ent.Client
+    strategy *oauth2.HMACSHAStrategy
 }
 
-func NewStore(db *ent.Client) *Store {
-    return &Store{db: db}
+// New 建立 Store，並從 config 的 HMACSecret 初始化 HMAC 策略。
+func New(client *data.Client, cfg *data.Config) *Store {
+    globalSecret := []byte(cfg.App.Auth.OAuth.HMACSecret)
+    fositeCfg := &fosite.Config{GlobalSecret: globalSecret}
+    strategy := compose.NewOAuth2HMACStrategy(fositeCfg)
+    return &Store{db: client.Ent, strategy: strategy}
 }
 
-// 確保 Store 實作了所有必要 interface（編譯期檢查）
-var (
-    _ fosite.Storage = (*Store)(nil)
-    _ interface {
-        fosite.ClientManager
-        fosite.AuthorizeCodeStorage
-        fosite.AccessTokenStorage
-        fosite.RefreshTokenStorage
-    } = (*Store)(nil)
-)
+// Strategy 回傳底層 HMAC 策略，供 NewOAuth2Provider 使用。
+func (s *Store) Strategy() *oauth2.HMACSHAStrategy { return s.strategy }
+
+// CreatePersonalAccessTokens 直接簽發 access token + refresh token，
+// 繞過標準 OAuth2 HTTP flow（對應 pixelfed 的 $user->createToken(...)）。
+// 關鍵：呼叫 CreateRefreshTokenSession 前先 req.SetID(atSig)，
+// 讓 req.GetID() 作為 refresh token 的 access_token_id。
+func (s *Store) CreatePersonalAccessTokens(ctx context.Context, req fosite.Requester) (accessToken, refreshToken string, err error) {
+    at, atSig, err := s.strategy.GenerateAccessToken(ctx, req)
+    rt, rtSig, err := s.strategy.GenerateRefreshToken(ctx, req)
+    s.CreateAccessTokenSession(ctx, atSig, req)
+    req.SetID(atSig)  // 設定 req ID = access token 的 signature
+    s.CreateRefreshTokenSession(ctx, rtSig, req)
+    return at, rt, nil
+}
+
+// RevokeAccessToken / RevokeRefreshToken / RotateRefreshToken
+// 均透過 UpdateOneID(...).SetRevoked(true) 實作。
 ```
 
-**`internal/lib/fositestore/client.go`（ClientManager）**
+**`session.go`**
 
 ```go
-// GetClient
-//
-//  SELECT * FROM oauth_clients WHERE id = ? LIMIT 1
-func (s *Store) GetClient(ctx context.Context, id string) (fosite.Client, error) {
-    client, err := s.db.OauthClient.Get(ctx, parseUint64(id))
-    if ent.IsNotFound(err) {
-        return nil, fosite.ErrNotFound
-    }
-    if err != nil {
-        return nil, err
-    }
-    return toFositeClient(client), nil
-}
+// marshalScopes 將 scopes 序列化為 pixelfed 的 JSON text 格式：["read","write"]
+func marshalScopes(scopes []string) string
+
+// unmarshalScopes 解析 pixelfed 的 JSON text scopes 欄位
+func unmarshalScopes(text string) []string
 ```
 
-**`internal/lib/fositestore/authorize_code.go`**
+**`client.go`**
+
+```go
+// FositeClient 包裝 *ent.OauthClient，實作 fosite.Client interface。
+// 不儲存額外欄位，所有 fosite metadata 從現有 pixelfed 欄位推導：
+//   - GetGrantTypes()：從 PasswordClient bool 決定是否包含 "password"
+//   - GetScopes()：固定回傳 ["read","write","follow","push"]
+//   - IsPublic()：等於 PersonalAccessClient bool
+//   - GetRedirectURIs()：Split(Redirect, "\n")
+//   - GetID()：strconv.FormatUint(c.ID, 10)
+//
+// GetClient 解析 string ID → uint64，並在 c.Revoked 時回傳 ErrInvalidClient。
+```
+
+**`access_token.go`**
+
+```go
+// CreateAccessTokenSession
+//   - client_id 必須能解析為 uint64，否則回傳錯誤
+//   - subject 為空（client_credentials）時跳過 user_id 設定
+//   - subject 非空時必須能解析為 uint64，否則回傳錯誤
+//
+// GetAccessTokenSession
+//   - 從 user_id、scopes、expires_at 重建 fosite.DefaultSession（無 blob）
+//
+// DeleteAccessTokens(clientID string)
+//   - 先將 clientID string 解析為 uint64，否則回傳錯誤
+```
+
+**`authorize_code.go`**
 
 ```go
 // CreateAuthorizeCodeSession
+//   - client_id 與 user_id（NOT NULL）均須能解析為 uint64，否則回傳錯誤
 //
-//  INSERT INTO oauth_authorization_codes ...
-func (s *Store) CreateAuthorizeCodeSession(ctx context.Context, code string, req fosite.Requester) error { ... }
-
 // GetAuthorizeCodeSession
+//   - 從 user_id、scopes、expires_at 重建 session
+//   - revoked=true 時回傳 fosite.ErrInvalidatedAuthorizeCode
 //
-//  SELECT * FROM oauth_authorization_codes WHERE id = ? LIMIT 1
-func (s *Store) GetAuthorizeCodeSession(ctx context.Context, code string, session fosite.Session) (fosite.Requester, error) { ... }
-
-// InvalidateAuthorizeCodeSession
-//
-//  UPDATE oauth_authorization_codes SET revoked = true WHERE id = ?
-func (s *Store) InvalidateAuthorizeCodeSession(ctx context.Context, code string) error { ... }
+// InvalidateAuthorizeCodeSession：UpdateOneID(...).SetRevoked(true)
 ```
 
-> 依此模式實作 `access_token.go`、`refresh_token.go`、`pkce.go`。每個 method 都加 SQL godoc comment，符合 glintfed 慣例。
+**`refresh_token.go`**
+
+```go
+// CreateRefreshTokenSession
+//   - 使用 req.GetID() 作為 access_token_id（由 CreatePersonalAccessTokens 設定）
+//
+// GetRefreshTokenSession
+//   - JOIN oauth_access_tokens 取得 user_id、client_id、scopes
+//   - 從這些欄位重建 session（無 blob）
+//
+// DeleteRefreshTokens(clientID string)
+//   - 先將 clientID 解析為 uint64，否則回傳錯誤
+//   - 查詢所有 access token ID，再批次 revoke refresh tokens
+```
 
 ---
 
-### Step 2：fosite Provider 建立（`internal/lib/fositestore/provider.go`）
+### Step 2：fosite Provider（`internal/lib/fositestore/provider.go`）
 
 ```go
-package fositestore
-
-import (
-    "github.com/ory/fosite"
-    "github.com/ory/fosite/compose"
-    "github.com/ory/fosite/token/jwt"
-)
-
-// NewOAuth2Provider 建立 fosite OAuth2Provider，啟用所有需要的 grant types。
-func NewOAuth2Provider(store *Store, secret []byte) fosite.OAuth2Provider {
-    cfg := &fosite.Config{
-        AccessTokenLifespan:   365 * 24 * time.Hour,
-        RefreshTokenLifespan:  400 * 24 * time.Hour,
-        AuthorizeCodeLifespan: 10 * time.Minute,
-        GlobalSecret:          secret,
-        // 允許 OOB redirect URI
-        AllowedPromptValues: []string{"login", "none", "consent"},
+// NewOAuth2Provider 建立 fosite.OAuth2Provider。
+// TTL 從 config 讀取（預設 access=365天、refresh=400天）。
+// 使用 HMAC-only 策略（store.Strategy()），不使用 JWT/RSA。
+// 注意：不包含 OAuth2ResourceOwnerPasswordFactory，
+//       password grant 改由 service 層手動處理。
+func NewOAuth2Provider(store *Store, cfg *data.Config) fosite.OAuth2Provider {
+    fositeCfg := &fosite.Config{
+        AccessTokenLifespan:        time.Duration(tokenDays) * 24 * time.Hour,
+        RefreshTokenLifespan:       time.Duration(refreshDays) * 24 * time.Hour,
+        AuthorizeCodeLifespan:      10 * time.Minute,
+        SendDebugMessagesToClients: false,
     }
 
-    privateKey := loadOrGenerateRSAKey() // 從 config 讀取或自動產生
+    strategy := &compose.CommonStrategy{CoreStrategy: store.Strategy()}
 
     return compose.Compose(
-        cfg,
+        fositeCfg,
         store,
-        &compose.CommonStrategy{
-            CoreStrategy: compose.NewOAuth2JWTStrategy(jwt.NewRS256JWTStrategy(privateKey), compose.NewOAuth2HMACStrategy(cfg), cfg),
-        },
-        compose.OAuth2AuthorizeExplicitFactory,       // authorization_code grant
-        compose.OAuth2ResourceOwnerPasswordFactory,   // password grant（ROPC）
-        compose.OAuth2ClientCredentialsGrantFactory,  // client_credentials grant
-        compose.OAuth2RefreshTokenGrantFactory,       // refresh_token grant
-        compose.OAuth2TokenRevocationFactory,         // token revocation
-        compose.OAuth2TokenIntrospectionFactory,      // token introspection
-        compose.OAuth2PKCEFactory,                    // PKCE
+        strategy,
+        compose.OAuth2AuthorizeExplicitFactory,      // authorization_code
+        compose.OAuth2ClientCredentialsGrantFactory, // client_credentials
+        compose.OAuth2RefreshTokenGrantFactory,      // refresh_token
+        compose.OAuth2TokenRevocationFactory,        // POST /oauth/revoke
+        compose.OAuth2TokenIntrospectionFactory,     // token introspection（middleware 使用）
+        compose.OAuth2PKCEFactory,                   // PKCE
+        // OAuth2ResourceOwnerPasswordFactory 刻意不納入，
+        // password grant 在 service 層以 handlePasswordGrant 手動處理。
     )
 }
 ```
 
 ---
 
-### Step 3：OAuthUsecase 實作（`internal/usecase/oauth/oauth.go`）
+### Step 3：OAuth Usecase（`internal/usecase/oauth/oauth.go`）
+
+負責在不走 HTTP flow 的情況下直接簽發 token（例如 AppRegister onboarding）：
 
 ```go
-package oauth
-
-import (
-    "context"
-    "fmt"
-    "net/http"
-    "time"
-
-    "github.com/ory/fosite"
-    "glintfed.org/internal/lib/fositestore"
-)
-
 type Usecase struct {
-    provider fosite.OAuth2Provider
     store    *fositestore.Store
-    clientID string // 系統預設 client（對應 pixelfed 的 personal_access_client）
+    clientID string        // PersonalClientID（config.App.Auth.OAuth.PersonalClientID）
+    tokenTTL time.Duration // AccessTokenLifespanDays，預設 365 天
 }
 
-func NewUsecase(provider fosite.OAuth2Provider, store *fositestore.Store, clientID string) *Usecase {
-    return &Usecase{provider: provider, store: store, clientID: clientID}
-}
+func NewUsecase(store *fositestore.Store, cfg *data.Config) *Usecase
 
-// CreateTokens 直接在 store 層建立 access token + refresh token，
-// 繞過 OAuth2 authorize flow，對應 pixelfed 的 $user->createToken(...)。
-//
-// 這與 fosite 的 AccessTokenStorage.CreateAccessTokenSession 直接互動。
+// CreateTokens 對應 pixelfed 的 $user->createToken('Pixelfed App', scopes)
 func (uc *Usecase) CreateTokens(ctx context.Context, userID uint64, scopes []string) (*TokenResult, error) {
-    subject := fmt.Sprintf("%d", userID)
+    subject := strconv.FormatUint(userID, 10)  // 使用 strconv，不用 fmt.Sprintf
 
-    // 取得系統預設 client
     client, err := uc.store.GetClient(ctx, uc.clientID)
-    if err != nil {
-        return nil, err
-    }
 
     session := &fosite.DefaultSession{
-        Subject: subject,
-        Claims: &jwt.IDTokenClaims{
-            Subject:   subject,
-            ExpiresAt: time.Now().Add(365 * 24 * time.Hour),
-            IssuedAt:  time.Now(),
+        Subject:  subject,
+        Username: subject,
+        ExpiresAt: map[fosite.TokenType]time.Time{
+            fosite.AccessToken:  now.Add(uc.tokenTTL),
+            fosite.RefreshToken: now.Add(uc.tokenTTL + 35*24*time.Hour),
         },
     }
 
-    // 建立一個 synthetic OAuth2 request
-    req := fosite.NewAccessRequest(session)
-    req.SetClient(client)
-    req.SetRequestedScopes(fosite.Arguments(scopes))
-    req.GrantScope(scopes...)
+    req := fosite.NewRequest()
+    // 設定 client、scopes、session 後呼叫：
+    accessToken, refreshToken, err := uc.store.CreatePersonalAccessTokens(ctx, req)
 
-    // 直接寫入 store，取得 access token signature
-    accessToken, accessSig, err := uc.provider.(*compose.Fosite).
-        Config.GetAccessTokenStrategy(ctx).
-        GenerateAccessToken(ctx, req)
-    // ...
-
-    // 此處需直接呼叫 store.CreateAccessTokenSession / CreateRefreshTokenSession
-    // 詳見 fosite internal token creation pattern
+    // 回傳 ClientSecret = string(fositeClient.GetHashedSecret())
     return &TokenResult{
         AccessToken:  accessToken,
         RefreshToken: refreshToken,
         ClientID:     uc.clientID,
-        ClientSecret: client.(*fositestore.FositeClient).Secret,
-        ExpiresIn:    int64(365 * 24 * 60 * 60),
+        ClientSecret: string(fositeClient.GetHashedSecret()),
+        ExpiresIn:    int64(uc.tokenTTL.Seconds()),
     }, nil
 }
 ```
-
-> **實作說明**：fosite 沒有公開「直接核發 token 給 subject」的便利方法，因為這繞過了標準 OAuth2 flow。最乾淨的實作方式是：在 `Usecase` 中直接操作 `fositestore.Store`（`CreateAccessTokenSession` + `CreateRefreshTokenSession`），手動建構 `fosite.Requester`，不透過 provider 的 HTTP handler。這與 Passport 的 `$user->createToken()` 在語意上完全等價。
 
 ---
 
 ### Step 4：OAuth Service（`internal/service/oauth/`）
 
-fosite 提供 HTTP handler helper，讓 service 層非常薄。
-
-**`internal/service/oauth/service.go`**
+**`service.go`**
 
 ```go
-package oauth
-
-import (
-    "net/http"
-    "github.com/ory/fosite"
-    "glintfed.org/internal/lib/fositestore"
-)
-
 type Service interface {
-    Authorize(w http.ResponseWriter, r *http.Request)  // GET /oauth/authorize
-    Token(w http.ResponseWriter, r *http.Request)      // POST /oauth/token
-    Revoke(w http.ResponseWriter, r *http.Request)     // POST /oauth/revoke
-    Introspect(w http.ResponseWriter, r *http.Request) // POST /oauth/introspect
+    Authorize(w http.ResponseWriter, r *http.Request) // GET /oauth/authorize
+    Token(w http.ResponseWriter, r *http.Request)     // POST /oauth/token
+    Revoke(w http.ResponseWriter, r *http.Request)    // POST /oauth/revoke
+    // 注意：無 Introspect（僅供 middleware 內部使用）
 }
 
 //go:generate go tool moq -rm -out mock_user_authenticator.go . UserAuthenticator
@@ -318,213 +321,177 @@ type UserAuthenticator interface {
 }
 
 type svc struct {
-    provider fosite.OAuth2Provider
-    auth     UserAuthenticator
+    provider        fosite.OAuth2Provider
+    store           *fositestore.Store
+    auth            UserAuthenticator
+    appURL          string
+    accessTokenTTL  time.Duration // 從 config 讀取，預設 365 天
+    refreshTokenTTL time.Duration // 從 config 讀取，預設 400 天
 }
+
+func New(provider fosite.OAuth2Provider, store *fositestore.Store, auth UserAuthenticator, cfg *data.Config) Service
 ```
 
-**`internal/service/oauth/token.go`**
+**`token.go`**
 
 ```go
 func (s *svc) Token(w http.ResponseWriter, r *http.Request) {
-    ctx, span := internal.T.Start(r.Context(), "OAuth.Token")
-    defer span.End()
-
-    // fosite 的 password grant 需要提供 ResourceOwnerPasswordCredentialsGrantHandler
-    // 該 handler 會呼叫一個 ResourceOwnerPasswordCredentialsGrantHandler.HandleTokenEndpointRequest
-    // 需傳入能驗證帳密的 session
-    // 在 compose 階段注入自訂的 ResourceOwnerPasswordCredentialsGrantHandler
-
-    ctx = context.WithValue(ctx, fositestore.CtxKeyAuthenticator, s.auth)
-
+    // password grant 由 handlePasswordGrant 手動處理（不走 fosite）
+    if r.FormValue("grant_type") == "password" {
+        s.handlePasswordGrant(w, r.WithContext(ctx))
+        return
+    }
+    // 其他 grant type 交給 fosite
     accessReq, err := s.provider.NewAccessRequest(ctx, r, &fosite.DefaultSession{})
-    if err != nil {
-        s.provider.WriteAccessError(ctx, w, accessReq, err)
-        return
-    }
-
     accessResp, err := s.provider.NewAccessResponse(ctx, accessReq)
-    if err != nil {
-        s.provider.WriteAccessError(ctx, w, accessReq, err)
-        return
-    }
-
     s.provider.WriteAccessResponse(ctx, w, accessReq, accessResp)
 }
+
+func (s *svc) handlePasswordGrant(w http.ResponseWriter, r *http.Request) {
+    // 1. 驗證 username/password → auth.Authenticate
+    // 2. 解析 scope、client_id
+    // 3. 建立 fosite.DefaultSession（ExpiresAt 使用 s.accessTokenTTL / s.refreshTokenTTL）
+    // 4. 呼叫 store.CreatePersonalAccessTokens
+    // 5. 回傳 JSON：access_token, refresh_token, token_type, expires_in, scope
+    //    expires_in = int64(s.accessTokenTTL.Seconds())
+    subject := strconv.FormatUint(userID, 10)  // 使用 strconv
+}
 ```
 
-**`internal/service/oauth/authorize.go`（處理 OOB）**
+**`authorize.go`**
 
 ```go
+// 目前 Authorize 回傳 ErrAccessDenied（Login UI 尚未實作）。
+// TODO: 加入使用者驗證 / session 檢查，完成 authorization_code flow。
 func (s *svc) Authorize(w http.ResponseWriter, r *http.Request) {
-    ctx, span := internal.T.Start(r.Context(), "OAuth.Authorize")
-    defer span.End()
-
-    // 偵測 OOB redirect_uri，fosite 不認識 urn:ietf:wg:oauth:2.0:oob
-    // 需在 FositeClient 的 RedirectURIs 中預先加入此 URI，
-    // 並在 fosite Config 中加入 RedirectSecureChecker 的豁免
-    redirectURI := r.URL.Query().Get("redirect_uri")
-    isOOB := redirectURI == "urn:ietf:wg:oauth:2.0:oob"
-
     authReq, err := s.provider.NewAuthorizeRequest(ctx, r)
-    if err != nil {
-        s.provider.WriteAuthorizeError(ctx, w, authReq, err)
-        return
-    }
-
-    // 對於 authorization_code flow，通常需要 login session
-    // pixelfed 的 mobile app flow 在此處重導到登入頁面
-    // 對於已有 session 的使用者，直接 accept
-    session := buildSession(r) // 從 cookie/session store 取得已登入使用者資訊
-    response, err := s.provider.NewAuthorizeResponse(ctx, authReq, session)
-    if err != nil {
-        s.provider.WriteAuthorizeError(ctx, w, authReq, err)
-        return
-    }
-
-    if isOOB {
-        code := response.GetCode()
-        w.Header().Set("Content-Type", "text/html")
-        fmt.Fprintf(w, `<pre>%s</pre>`, code)
-        return
-    }
-
-    s.provider.WriteAuthorizeResponse(ctx, w, authReq, response)
+    s.provider.WriteAuthorizeError(ctx, w, authReq,
+        fosite.ErrAccessDenied.WithDescription("user authentication not implemented"))
 }
 ```
 
 ---
 
-### Step 5：Password Grant — 自訂帳密驗證
-
-fosite 的 `OAuth2ResourceOwnerPasswordFactory` 需要一個實作 `fosite.ResourceOwnerPasswordCredentialsGrantHandler` 的 handler，其中需要能驗證帳密。
-
-**方式**：在 `compose.Compose(...)` 之後，將 store 中的 `PasswordHandler` 注入 `UserAuthenticator`：
+### Step 5：Token 驗證 Middleware（`internal/server/middleware/oauth.go`）
 
 ```go
-// internal/lib/fositestore/password_handler.go
-
-type PasswordGrantHandler struct {
-    fosite.HandleHelper
-    auth UserAuthenticator
-}
-
-// ValidateResourceOwnerCredentials 驗證 username + password
-func (h *PasswordGrantHandler) ValidateResourceOwnerCredentials(
-    ctx context.Context, username, password string, request fosite.AccessRequester,
-) error {
-    userID, err := h.auth.Authenticate(ctx, username, password)
-    if err != nil {
-        return fosite.ErrNotFound.WithWrap(err)
-    }
-    request.GetSession().SetSubject(fmt.Sprintf("%d", userID))
-    return nil
-}
-```
-
----
-
-### Step 6：Token 驗證 Middleware
-
-因為 fosite 嵌入在同一程序，token 驗證完全在本地完成，不需要任何網路呼叫：
-
-```go
-// internal/service/middleware/auth.go
-
+// OAuth2Auth 驗證 Bearer token，成功後將 subject 與 scopes 注入 context。
 func OAuth2Auth(provider fosite.OAuth2Provider) func(http.Handler) http.Handler {
     return func(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            ctx := r.Context()
-            tokenReq, err := provider.IntrospectToken(ctx, fosite.AccessTokenFromRequest(r), fosite.AccessToken, &fosite.DefaultSession{})
+            token := extractBearerToken(r)  // strings.CutPrefix("Bearer ", ...)
+            if token == "" {
+                http.Error(w, `{"error":"missing_token"}`, http.StatusUnauthorized)
+                return
+            }
+            _, ar, err := provider.IntrospectToken(
+                r.Context(), token, fosite.AccessToken, &fosite.DefaultSession{},
+            )
             if err != nil {
                 http.Error(w, `{"error":"unauthorized"}`, http.StatusUnauthorized)
                 return
             }
-            ctx = context.WithValue(ctx, ctxKeySubject, tokenReq.GetSession().GetSubject())
-            ctx = context.WithValue(ctx, ctxKeyScopes, tokenReq.GetGrantedScopes())
+            ctx := context.WithValue(r.Context(), CtxKeySubject, ar.GetSession().GetSubject())
+            ctx = context.WithValue(ctx, CtxKeyScopes, ar.GetGrantedScopes())
             next.ServeHTTP(w, r.WithContext(ctx))
         })
     }
 }
+
+// SubjectFromContext / ScopesFromContext 供 handler 取用認證資訊。
 ```
 
 ---
 
-### Step 7：Config 變更
-
-### `internal/data/config.go`
+### Step 6：Config（`internal/data/config.go`）
 
 ```go
-type AuthConfig struct {
-    EnableRegistration bool         `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
-    EnableOAuth        bool         `mapstructure:"enable_oauth" env:"OAUTH_ENABLED"`
-    InAppRegistration  bool         `mapstructure:"in_app_registration" env:"APP_REGISTER"`
-    OAuth              OAuthConfig  `mapstructure:"oauth"`
-}
-
 type OAuthConfig struct {
-    // RSA private key PEM 路徑，用於簽署 JWT access token
-    PrivateKeyPath      string `mapstructure:"private_key_path" env:"OAUTH_PRIVATE_KEY_PATH"`
-    // HMAC secret，用於 HMAC-based token（fallback）
-    HMACSecret          string `mapstructure:"hmac_secret" env:"OAUTH_HMAC_SECRET"`
-    // 預設 personal access client ID（AppRegister onboarding 用）
-    PersonalClientID    string `mapstructure:"personal_client_id" env:"OAUTH_PERSONAL_CLIENT_ID"`
-    AccessTokenLifespan int    `mapstructure:"access_token_lifespan_days" env:"OAUTH_TOKEN_EXPIRATION"`
-    RefreshTokenLifespan int   `mapstructure:"refresh_token_lifespan_days" env:"OAUTH_REFRESH_EXPIRATION"`
+    HMACSecret               string `mapstructure:"hmac_secret"               env:"OAUTH_HMAC_SECRET"`
+    PersonalClientID         string `mapstructure:"personal_client_id"         env:"OAUTH_PERSONAL_CLIENT_ID"`
+    AccessTokenLifespanDays  int    `mapstructure:"access_token_lifespan_days" env:"OAUTH_TOKEN_EXPIRATION"`
+    RefreshTokenLifespanDays int    `mapstructure:"refresh_token_lifespan_days" env:"OAUTH_REFRESH_EXPIRATION"`
 }
+// 注意：無 PrivateKeyPath（HMAC-only，不使用 JWT/RSA）
 ```
 
 ---
 
-### Step 8：Route 註冊（`internal/server/api.go`）
+### Step 7：Route 註冊（`internal/server/api.go`）
 
 ```go
-// OAuth Routes（Mastodon-compatible）
 mux.Get("/oauth/authorize", svcs.OAuth.Authorize)
-mux.Post("/oauth/token", svcs.OAuth.Token)
-mux.Post("/oauth/revoke", svcs.OAuth.Revoke)
-mux.Post("/oauth/introspect", svcs.OAuth.Introspect)  // 可選，供管理工具使用
+mux.Post("/oauth/token",    svcs.OAuth.Token)
+mux.Post("/oauth/revoke",   svcs.OAuth.Revoke)
+// 無 /oauth/introspect route（introspection 僅在 middleware 內部使用）
 ```
 
 ---
 
-### Step 9：DI 註冊（`cmd/api/kessoku.go`）
+### Step 8：DI 註冊（`cmd/api/kessoku.go`）
 
 ```go
-// fosite store
-kessoku.Provide(func(client *data.Client) *fositestore.Store {
-    return fositestore.NewStore(client.Ent)
-}),
-
-// fosite provider
-kessoku.Provide(func(cfg *data.Config, store *fositestore.Store) fosite.OAuth2Provider {
-    return fositestore.NewOAuth2Provider(store, []byte(cfg.App.Auth.OAuth.HMACSecret))
-}),
+// fositestore
+kessoku.Provide(fositestore.New),
+kessoku.Provide(fositestore.NewOAuth2Provider),
 
 // OAuth service
 kessoku.Bind[oauthsvc.Service](kessoku.Provide(oauthsvc.New)),
 
-// OAuth usecase（取代現有的 oauth.NewUsecase stub）
-kessoku.Bind[appregister.OAuthUsecase](kessoku.Provide(oauthuc.NewUsecase)),
+// UserAuthenticator 綁定到 *user.Model（實作 Authenticate 方法）
+kessoku.Bind[oauthsvc.UserAuthenticator](kessoku.Provide(func(m *usermodel.Model) oauthsvc.UserAuthenticator {
+    return m
+})),
+
+// OAuth usecase（供 AppRegister onboarding 使用）
+kessoku.Bind[appregistersvc.OAuthUsecase](kessoku.Provide(oauthuc.NewUsecase)),
+```
+
+---
+
+## 資料流：password grant
+
+```
+POST /oauth/token
+  grant_type=password&username=foo&password=bar&client_id=1&scope=read+write
+    │
+    ▼ svc.Token 偵測到 grant_type=password → handlePasswordGrant
+    │
+    ├─ auth.Authenticate(ctx, "foo", "bar") → userID uint64
+    ├─ store.GetClient(ctx, "1") → FositeClient
+    ├─ 建立 fosite.DefaultSession{Subject: strconv.FormatUint(userID,10), ExpiresAt: ...}
+    ├─ 建立 fosite.Request{ID, Client, Session, Scopes}
+    ├─ store.CreatePersonalAccessTokens(ctx, req)
+    │     ├─ strategy.GenerateAccessToken  → at + atSig
+    │     ├─ strategy.GenerateRefreshToken → rt + rtSig
+    │     ├─ CreateAccessTokenSession(ctx, atSig, req)
+    │     ├─ req.SetID(atSig)
+    │     └─ CreateRefreshTokenSession(ctx, rtSig, req)  // req.GetID() = atSig
+    └─ JSON response: {access_token, refresh_token, token_type, expires_in, scope}
+```
+
+## 資料流：AppRegister onboarding
+
+```
+POST /api/v1/apps/register/onboarding
+    │
+    ▼ svc.Onboarding
+    ├─ 驗證 verify_code
+    ├─ um.Create(ctx, ...)  → user
+    ├─ ouc.CreateTokens(ctx, user.ID, scopes)  [OAuthUsecase]
+    │     └─ 同上 CreatePersonalAccessTokens 流程
+    └─ JSON response: {status, token_type, access_token, refresh_token,
+                       client_id, client_secret, expires_in, scope, user, ...}
 ```
 
 ---
 
 ## 測試策略
 
-- **Store 層**：使用 `data.NewTestClient(t)`（in-memory SQLite）做完整整合測試，不需要 mock
-- **Usecase 層**：`FositeStore` 用 in-memory SQLite；無需 mock 外部服務
-- **Service 層**：mock `UserAuthenticator`；`fosite.OAuth2Provider` 可以用真實的 in-memory 版本（fosite 提供 `storage/memory`）
-- **E2E**：直接對 `/oauth/token` 發送 HTTP 請求，驗證 token 格式與 introspection 結果
-
-```go
-// 測試 password grant
-func TestTokenPasswordGrant(t *testing.T) {
-    // setup in-memory fosite + store
-    // POST /oauth/token grant_type=password
-    // assert 200 + valid access_token
-}
-```
+- **Store 層**：使用 `data.NewTestClient(t)`（in-memory SQLite）做整合測試，不需要 mock
+- **Usecase 層**：`fositestore.Store` 搭配 in-memory SQLite；無需 mock 外部服務
+- **Service 層**：mock `UserAuthenticator`；`fosite.OAuth2Provider` 使用真實 in-memory 版本（`fositestore.New` + SQLite）
+- **Middleware**：直接用 `httptest` 搭配真實 provider 測試 token 驗證
 
 ---
 
@@ -532,10 +499,9 @@ func TestTokenPasswordGrant(t *testing.T) {
 
 | 項目 | 說明 |
 |------|------|
-| fosite Storage 實作量大 | 需實作約 15–20 個 interface method，每個都要對應 ent query；是此方案的主要工程量 |
-| Session 序列化 | fosite session 以 JSON blob 存入 DB，欄位設計需謹慎；migration 後難以修改 |
-| `grant_type=password` | 完整支援，但 ROPC 在 OAuth 2.1 中已廢棄，若未來客戶端升級可能需要遷移 |
-| OOB redirect URI | fosite 的 redirect URI 驗證器需客製化，允許 `urn:ietf:wg:oauth:2.0:oob` 通過白名單檢查 |
-| Login/Consent UI | authorization_code flow 仍需要 UI，但 pixelfed mobile app 主要走 password grant，短期內影響較小 |
-| Key rotation | RSA key 輪替需要對應策略（雙 key 期間的 token 仍需可驗證） |
-| fosite 文件品質 | 官方文件較少，主要依賴原始碼與 hydra 的實作作為參考 |
+| `grant_type=password` (ROPC) | 手動處理，完整支援。ROPC 在 OAuth 2.1 已廢棄，未來客戶端升級時需遷移 |
+| Login/Consent UI | `Authorize` 目前回傳 `ErrAccessDenied`。authorization_code flow 需實作 Login UI 後才能完整運作 |
+| HMAC secret 輪替 | 輪替 `HMACSecret` 會使所有現有 token 失效；需搭配 key rotation 策略（雙 secret 期間的 token 仍需可驗證） |
+| OOB redirect URI | `urn:ietf:wg:oauth:2.0:oob` 的支援（pixelfed mobile app 使用）需客製化 fosite redirect URI 驗證邏輯 |
+| fosite 文件品質 | 官方文件較少，主要依賴原始碼與 ory/hydra 的實作作為參考 |
+| Session 重建限制 | 因無 session blob，refresh token 換新 access token 時，新 access token 的 session 資訊來自 DB JOIN，無法保留原始請求的額外 claim |
