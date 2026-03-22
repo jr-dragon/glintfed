@@ -133,11 +133,11 @@ func (s *svc) Outbox(w http.ResponseWriter, r *http.Request) {
 				"suspended":       "toot:suspended",
 			},
 		},
-		"id":         urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbot"),
+		"id":         urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbox"),
 		"type":       "OrderedCollection",
 		"totalItems": 0,
-		"first":      urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbox?page=true"),
-		"last":       urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbox?min_id=0&page=true"),
+		"first":      urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbox") + "?page=true",
+		"last":       urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbox") + "?min_id=0&page=true",
 	}
 
 	w.Header().Set("Content-Type", "application/activity+json")
