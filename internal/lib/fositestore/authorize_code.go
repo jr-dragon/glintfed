@@ -2,6 +2,7 @@ package fositestore
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/ory/fosite"
@@ -13,8 +14,15 @@ import (
 //
 //	INSERT INTO oauth_auth_codes (id, user_id, client_id, scopes, revoked, expires_at) VALUES (...)
 func (s *Store) CreateAuthorizeCodeSession(ctx context.Context, code string, req fosite.Requester) error {
-	clientID, _ := strconv.ParseUint(req.GetClient().GetID(), 10, 64)
-	userID, _ := strconv.ParseUint(req.GetSession().GetSubject(), 10, 64)
+	clientID, err := strconv.ParseUint(req.GetClient().GetID(), 10, 64)
+	if err != nil {
+		return fmt.Errorf("fositestore: invalid client_id %q: %w", req.GetClient().GetID(), err)
+	}
+	// oauth_auth_codes.user_id is NOT NULL; subject must always be a valid uint64.
+	userID, err := strconv.ParseUint(req.GetSession().GetSubject(), 10, 64)
+	if err != nil {
+		return fmt.Errorf("fositestore: invalid subject %q: %w", req.GetSession().GetSubject(), err)
+	}
 
 	c := s.db.OauthAuthorizationCode.Create().
 		SetID(code).
@@ -27,7 +35,7 @@ func (s *Store) CreateAuthorizeCodeSession(ctx context.Context, code string, req
 		c = c.SetExpiresAt(t)
 	}
 
-	_, err := c.Save(ctx)
+	_, err = c.Save(ctx)
 	return err
 }
 

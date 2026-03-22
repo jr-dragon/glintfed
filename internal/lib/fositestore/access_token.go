@@ -2,6 +2,7 @@ package fositestore
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/ory/fosite"
@@ -14,8 +15,10 @@ import (
 //
 //	INSERT INTO oauth_access_tokens (id, user_id, client_id, name, scopes, revoked, expires_at) VALUES (...)
 func (s *Store) CreateAccessTokenSession(ctx context.Context, signature string, req fosite.Requester) error {
-	clientID, _ := strconv.ParseUint(req.GetClient().GetID(), 10, 64)
-	userID, _ := strconv.ParseUint(req.GetSession().GetSubject(), 10, 64)
+	clientID, err := strconv.ParseUint(req.GetClient().GetID(), 10, 64)
+	if err != nil {
+		return fmt.Errorf("fositestore: invalid client_id %q: %w", req.GetClient().GetID(), err)
+	}
 
 	c := s.db.OauthAccessToken.Create().
 		SetID(signature).
@@ -23,7 +26,12 @@ func (s *Store) CreateAccessTokenSession(ctx context.Context, signature string, 
 		SetScopes(marshalScopes(req.GetGrantedScopes())).
 		SetRevoked(false)
 
-	if userID > 0 {
+	// subject is empty for client_credentials flow (no user); non-empty must be a valid uint64.
+	if sub := req.GetSession().GetSubject(); sub != "" {
+		userID, err := strconv.ParseUint(sub, 10, 64)
+		if err != nil {
+			return fmt.Errorf("fositestore: invalid subject %q: %w", sub, err)
+		}
 		c = c.SetUserID(userID)
 	}
 
@@ -31,7 +39,7 @@ func (s *Store) CreateAccessTokenSession(ctx context.Context, signature string, 
 		c = c.SetExpiresAt(t)
 	}
 
-	_, err := c.Save(ctx)
+	_, err = c.Save(ctx)
 	return err
 }
 
@@ -87,8 +95,11 @@ func (s *Store) DeleteAccessTokenSession(ctx context.Context, signature string) 
 //
 //	DELETE FROM oauth_access_tokens WHERE client_id = ?
 func (s *Store) DeleteAccessTokens(ctx context.Context, clientID string) error {
-	cid, _ := strconv.ParseUint(clientID, 10, 64)
-	_, err := s.db.OauthAccessToken.Delete().
+	cid, err := strconv.ParseUint(clientID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("fositestore: invalid client_id %q: %w", clientID, err)
+	}
+	_, err = s.db.OauthAccessToken.Delete().
 		Where(oauthaccesstoken.ClientID(cid)).
 		Exec(ctx)
 	return err

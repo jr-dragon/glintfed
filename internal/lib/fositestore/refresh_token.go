@@ -2,6 +2,7 @@ package fositestore
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/ory/fosite"
@@ -94,7 +95,10 @@ func (s *Store) DeleteRefreshTokenSession(ctx context.Context, signature string)
 //	  SELECT id FROM oauth_access_tokens WHERE client_id = ?
 //	)
 func (s *Store) DeleteRefreshTokens(ctx context.Context, clientID string) error {
-	cid, _ := strconv.ParseUint(clientID, 10, 64)
+	cid, err := strconv.ParseUint(clientID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("fositestore: invalid client_id %q: %w", clientID, err)
+	}
 	ats, err := s.db.OauthAccessToken.Query().
 		Where(oauthaccesstoken.ClientID(cid)).
 		Select(oauthaccesstoken.FieldID).
