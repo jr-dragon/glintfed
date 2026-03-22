@@ -13,13 +13,13 @@ import (
 )
 
 // CreateRefreshTokenSession stores a new refresh token session.
-// req.GetID() is used as access_token_id; callers must set req.SetID(atSignature) before calling.
+// accessSignature is the signature of the associated access token.
 //
 //	INSERT INTO oauth_refresh_tokens (id, access_token_id, revoked, expires_at) VALUES (...)
-func (s *Store) CreateRefreshTokenSession(ctx context.Context, signature string, req fosite.Requester) error {
+func (s *Store) CreateRefreshTokenSession(ctx context.Context, signature string, accessSignature string, req fosite.Requester) error {
 	c := s.db.OauthRefreshToken.Create().
 		SetID(signature).
-		SetAccessTokenID(req.GetID()).
+		SetAccessTokenID(accessSignature).
 		SetRevoked(false)
 
 	if t := req.GetSession().GetExpiresAt(fosite.RefreshToken); !t.IsZero() {

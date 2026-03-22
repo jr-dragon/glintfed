@@ -86,9 +86,9 @@ func (s *Store) CreatePersonalAccessTokens(ctx context.Context, req fosite.Reque
 	if err = s.CreateAccessTokenSession(ctx, atSig, req); err != nil {
 		return "", "", err
 	}
-	// Set req ID to atSig so CreateRefreshTokenSession can use req.GetID() as access_token_id.
+	// Set req ID to atSig so callers can inspect the access token signature via req.GetID().
 	req.SetID(atSig)
-	if err = s.CreateRefreshTokenSession(ctx, rtSig, req); err != nil {
+	if err = s.CreateRefreshTokenSession(ctx, rtSig, atSig, req); err != nil {
 		return "", "", err
 	}
 	return at, rt, nil
