@@ -9,7 +9,7 @@ import (
 const ProfileBase = "/i/actor"
 
 func (ia *InstanceActor) Permalink(baseUrl string, suffixes ...string) string {
-	res, err := url.JoinPath(baseUrl, ProfileBase, strings.Join(suffixes, ""))
+	res, err := url.JoinPath(baseUrl, ProfileBase)
 	if err != nil {
 		slog.Error("failed to join path",
 			slog.String("baseUrl", baseUrl),
@@ -18,7 +18,7 @@ func (ia *InstanceActor) Permalink(baseUrl string, suffixes ...string) string {
 		)
 	}
 
-	return res
+	return res + strings.Join(suffixes, "")
 }
 
 func (ia *InstanceActor) GetActor(url, domain string) map[string]any {

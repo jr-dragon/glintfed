@@ -28,7 +28,7 @@ func (p *Profile) Permalink(baseUrl string, suffixes ...string) string {
 		return p.RemoteURL
 	}
 
-	res, err := url.JoinPath(baseUrl, "users", p.Username, strings.Join(suffixes, ""))
+	res, err := url.JoinPath(baseUrl, "users", p.Username)
 	if err != nil {
 		slog.Error("failed to join path",
 			slog.String("baseUrl", baseUrl),
@@ -37,5 +37,5 @@ func (p *Profile) Permalink(baseUrl string, suffixes ...string) string {
 		)
 	}
 
-	return res
+	return res + strings.Join(suffixes, "")
 }

@@ -28,7 +28,7 @@ func TestProfile_Url(t *testing.T) {
 		p := &Profile{
 			Username: "alice",
 		}
-		assert.Equal(t, appurl+"/alice/posts/1", p.Url(appurl, "/posts", "/1"))
+		assert.Equal(t, appurl+"/alice/posts/1.png", p.Url(appurl, "/posts", "/1", ".png"))
 	})
 }
 
@@ -52,6 +52,6 @@ func TestProfile_Permalink(t *testing.T) {
 		p := &Profile{
 			Username: "alice",
 		}
-		assert.Equal(t, appurl+"/users/alice/posts/1", p.Permalink(appurl, "/posts", "/1"))
+		assert.Equal(t, appurl+"/users/alice/posts/1.png", p.Permalink(appurl, "/posts", "/1", ".png"))
 	})
 }
