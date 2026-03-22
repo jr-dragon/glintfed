@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -144,7 +145,7 @@ func (s *svc) Onboarding(w http.ResponseWriter, r *http.Request) {
 		ClientSecret: tokens.ClientSecret,
 		Scope:        scopes,
 		User: onboardingUserResponse{
-			PID:      fmt.Sprintf("%d", user.ProfileID),
+			PID:      strconv.FormatUint(user.ProfileID, 10),
 			Username: user.Username,
 		},
 	}

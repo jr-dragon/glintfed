@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/ory/fosite"
@@ -81,7 +82,7 @@ func (s *svc) handlePasswordGrant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subject := fmt.Sprintf("%d", userID)
+	subject := strconv.FormatUint(userID, 10)
 	now := time.Now()
 
 	session := &fosite.DefaultSession{

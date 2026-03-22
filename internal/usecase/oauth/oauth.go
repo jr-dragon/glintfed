@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/ory/fosite"
@@ -45,7 +46,7 @@ type TokenResult struct {
 // without going through the standard OAuth2 authorization flow.
 // This corresponds to pixelfed's $user->createToken('Pixelfed App', scopes).
 func (uc *Usecase) CreateTokens(ctx context.Context, userID uint64, scopes []string) (*TokenResult, error) {
-	subject := fmt.Sprintf("%d", userID)
+	subject := strconv.FormatUint(userID, 10)
 
 	client, err := uc.store.GetClient(ctx, uc.clientID)
 	if err != nil {
