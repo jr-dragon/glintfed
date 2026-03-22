@@ -3,7 +3,6 @@ package instanceactor
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -11,6 +10,7 @@ import (
 	"glintfed.org/ent"
 	"glintfed.org/internal/data"
 	"glintfed.org/internal/lib/logs"
+	"glintfed.org/internal/lib/urls"
 	"glintfed.org/internal/service/internal"
 )
 
@@ -133,11 +133,11 @@ func (s *svc) Outbox(w http.ResponseWriter, r *http.Request) {
 				"suspended":       "toot:suspended",
 			},
 		},
-		"id":         fmt.Sprintf("%s/i/actor/outbox", s.cfg.App.Url),
+		"id":         urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbot"),
 		"type":       "OrderedCollection",
 		"totalItems": 0,
-		"first":      fmt.Sprintf("%s/i/actor/outbox?page=true", s.cfg.App.Url),
-		"last":       fmt.Sprintf("%s/i/actor/outbox?min_id=0&page=true", s.cfg.App.Url),
+		"first":      urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbox?page=true"),
+		"last":       urls.MustJoinPath(s.cfg.App.Url, "/i/actor/outbox?min_id=0&page=true"),
 	}
 
 	w.Header().Set("Content-Type", "application/activity+json")
