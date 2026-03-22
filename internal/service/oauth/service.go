@@ -35,11 +35,11 @@ type svc struct {
 
 // New creates a new OAuth service.
 func New(provider fosite.OAuth2Provider, store *fositestore.Store, auth UserAuthenticator, cfg *data.Config) Service {
-	accessTTL := time.Duration(cfg.App.Auth.OAuth.AccessTokenLifespanDays) * 24 * time.Hour
+	accessTTL := cfg.App.Auth.OAuth.AccessTokenLifespan
 	if accessTTL <= 0 {
 		accessTTL = 365 * 24 * time.Hour
 	}
-	refreshTTL := time.Duration(cfg.App.Auth.OAuth.RefreshTokenLifespanDays) * 24 * time.Hour
+	refreshTTL := cfg.App.Auth.OAuth.RefreshTokenLifespan
 	if refreshTTL <= 0 {
 		refreshTTL = 400 * 24 * time.Hour
 	}

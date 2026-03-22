@@ -19,7 +19,7 @@ func TestUsecase_CreateTokens(t *testing.T) {
 	cfg := &data.Config{}
 	cfg.App.Auth.OAuth.HMACSecret = "test-hmac-secret-32-bytes-long!!"
 	cfg.App.Auth.OAuth.PersonalClientID = "1"
-	cfg.App.Auth.OAuth.AccessTokenLifespanDays = 30
+	cfg.App.Auth.OAuth.AccessTokenLifespan = 30 * 24 * time.Hour
 
 	store := fositestore.New(client, cfg)
 
@@ -43,7 +43,7 @@ func TestUsecase_CreateTokens(t *testing.T) {
 		assert.NotEmpty(t, result.AccessToken)
 		assert.NotEmpty(t, result.RefreshToken)
 		assert.Equal(t, "1", result.ClientID)
-		assert.Equal(t, int64(30*24*60*60), result.ExpiresIn)
+		assert.Equal(t, int64((30 * 24 * time.Hour).Seconds()), result.ExpiresIn)
 		assert.Equal(t, "personal-secret", result.ClientSecret)
 	})
 
@@ -70,11 +70,11 @@ func TestUsecase_DefaultTTL(t *testing.T) {
 	client, _, err := data.NewTestClient(t)
 	require.NoError(t, err)
 
-	// Zero AccessTokenLifespanDays should fall back to 365 days.
+	// Zero AccessTokenLifespan should fall back to 365 days.
 	cfg := &data.Config{}
 	cfg.App.Auth.OAuth.HMACSecret = "test-hmac-secret-32-bytes-long!!"
 	cfg.App.Auth.OAuth.PersonalClientID = "1"
-	cfg.App.Auth.OAuth.AccessTokenLifespanDays = 0
+	cfg.App.Auth.OAuth.AccessTokenLifespan = 0
 
 	store := fositestore.New(client, cfg)
 	uc := NewUsecase(store, cfg)

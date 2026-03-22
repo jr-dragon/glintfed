@@ -22,7 +22,7 @@ type Usecase struct {
 
 // NewUsecase creates a new Usecase using configuration for the personal client ID and token TTL.
 func NewUsecase(store *fositestore.Store, cfg *data.Config) *Usecase {
-	ttl := time.Duration(cfg.App.Auth.OAuth.AccessTokenLifespanDays) * 24 * time.Hour
+	ttl := cfg.App.Auth.OAuth.AccessTokenLifespan
 	if ttl <= 0 {
 		ttl = 365 * 24 * time.Hour
 	}

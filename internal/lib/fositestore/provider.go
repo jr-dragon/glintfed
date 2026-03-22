@@ -12,19 +12,19 @@ import (
 // NewOAuth2Provider builds a fosite.OAuth2Provider using the given Store and config.
 // The Store already holds the HMAC strategy derived from the config secret.
 func NewOAuth2Provider(store *Store, cfg *data.Config) fosite.OAuth2Provider {
-	tokenDays := cfg.App.Auth.OAuth.AccessTokenLifespanDays
-	refreshDays := cfg.App.Auth.OAuth.RefreshTokenLifespanDays
+	tokenTTL := cfg.App.Auth.OAuth.AccessTokenLifespan
+	refreshTTL := cfg.App.Auth.OAuth.RefreshTokenLifespan
 
-	if tokenDays <= 0 {
-		tokenDays = 365
+	if tokenTTL <= 0 {
+		tokenTTL = 365 * 24 * time.Hour
 	}
-	if refreshDays <= 0 {
-		refreshDays = 400
+	if refreshTTL <= 0 {
+		refreshTTL = 400 * 24 * time.Hour
 	}
 
 	fositeCfg := &fosite.Config{
-		AccessTokenLifespan:        time.Duration(tokenDays) * 24 * time.Hour,
-		RefreshTokenLifespan:       time.Duration(refreshDays) * 24 * time.Hour,
+		AccessTokenLifespan:        tokenTTL,
+		RefreshTokenLifespan:       refreshTTL,
 		AuthorizeCodeLifespan:      10 * time.Minute,
 		SendDebugMessagesToClients: false,
 	}

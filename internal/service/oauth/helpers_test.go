@@ -30,8 +30,8 @@ func newTestEnv(t *testing.T) *testEnv {
 	cfg := &data.Config{}
 	cfg.App.Url = "https://example.com"
 	cfg.App.Auth.OAuth.HMACSecret = "test-hmac-secret-32-bytes-long!!"
-	cfg.App.Auth.OAuth.AccessTokenLifespanDays = 365
-	cfg.App.Auth.OAuth.RefreshTokenLifespanDays = 400
+	cfg.App.Auth.OAuth.AccessTokenLifespan = 365 * 24 * time.Hour
+	cfg.App.Auth.OAuth.RefreshTokenLifespan = 400 * 24 * time.Hour
 
 	store := fositestore.New(client, cfg)
 	provider := fositestore.NewOAuth2Provider(store, cfg)

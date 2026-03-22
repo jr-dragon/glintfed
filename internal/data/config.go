@@ -1,6 +1,8 @@
 package data
 
 import (
+	"time"
+
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yaml"
 )
@@ -52,11 +54,12 @@ type AuthConfig struct {
 }
 
 // OAuthConfig holds configuration for the embedded OAuth2 server.
+// AccessTokenLifespan and RefreshTokenLifespan accept Go duration strings (e.g. "8760h" for 365 days).
 type OAuthConfig struct {
-	HMACSecret               string `mapstructure:"hmac_secret" env:"OAUTH_HMAC_SECRET"`
-	PersonalClientID         string `mapstructure:"personal_client_id" env:"OAUTH_PERSONAL_CLIENT_ID"`
-	AccessTokenLifespanDays  int    `mapstructure:"access_token_lifespan_days" env:"OAUTH_TOKEN_EXPIRATION"`
-	RefreshTokenLifespanDays int    `mapstructure:"refresh_token_lifespan_days" env:"OAUTH_REFRESH_EXPIRATION"`
+	HMACSecret           string        `mapstructure:"hmac_secret"           env:"OAUTH_HMAC_SECRET"`
+	PersonalClientID     string        `mapstructure:"personal_client_id"    env:"OAUTH_PERSONAL_CLIENT_ID"`
+	AccessTokenLifespan  time.Duration `mapstructure:"access_token_lifespan" env:"OAUTH_TOKEN_EXPIRATION"`
+	RefreshTokenLifespan time.Duration `mapstructure:"refresh_token_lifespan" env:"OAUTH_REFRESH_EXPIRATION"`
 }
 
 type UploaderConfig struct {
