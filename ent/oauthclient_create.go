@@ -86,6 +86,44 @@ func (_c *OauthClientCreate) SetPasswordClient(v bool) *OauthClientCreate {
 	return _c
 }
 
+// SetPublic sets the "public" field.
+func (_c *OauthClientCreate) SetPublic(v bool) *OauthClientCreate {
+	_c.mutation.SetPublic(v)
+	return _c
+}
+
+// SetNillablePublic sets the "public" field if the given value is not nil.
+func (_c *OauthClientCreate) SetNillablePublic(v *bool) *OauthClientCreate {
+	if v != nil {
+		_c.SetPublic(*v)
+	}
+	return _c
+}
+
+// SetGrantTypes sets the "grant_types" field.
+func (_c *OauthClientCreate) SetGrantTypes(v []string) *OauthClientCreate {
+	_c.mutation.SetGrantTypes(v)
+	return _c
+}
+
+// SetResponseTypes sets the "response_types" field.
+func (_c *OauthClientCreate) SetResponseTypes(v []string) *OauthClientCreate {
+	_c.mutation.SetResponseTypes(v)
+	return _c
+}
+
+// SetScopes sets the "scopes" field.
+func (_c *OauthClientCreate) SetScopes(v []string) *OauthClientCreate {
+	_c.mutation.SetScopes(v)
+	return _c
+}
+
+// SetAudience sets the "audience" field.
+func (_c *OauthClientCreate) SetAudience(v []string) *OauthClientCreate {
+	_c.mutation.SetAudience(v)
+	return _c
+}
+
 // SetRevoked sets the "revoked" field.
 func (_c *OauthClientCreate) SetRevoked(v bool) *OauthClientCreate {
 	_c.mutation.SetRevoked(v)
@@ -161,6 +199,26 @@ func (_c *OauthClientCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *OauthClientCreate) defaults() {
+	if _, ok := _c.mutation.Public(); !ok {
+		v := oauthclient.DefaultPublic
+		_c.mutation.SetPublic(v)
+	}
+	if _, ok := _c.mutation.GrantTypes(); !ok {
+		v := oauthclient.DefaultGrantTypes
+		_c.mutation.SetGrantTypes(v)
+	}
+	if _, ok := _c.mutation.ResponseTypes(); !ok {
+		v := oauthclient.DefaultResponseTypes
+		_c.mutation.SetResponseTypes(v)
+	}
+	if _, ok := _c.mutation.Scopes(); !ok {
+		v := oauthclient.DefaultScopes
+		_c.mutation.SetScopes(v)
+	}
+	if _, ok := _c.mutation.Audience(); !ok {
+		v := oauthclient.DefaultAudience
+		_c.mutation.SetAudience(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := oauthclient.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -189,6 +247,21 @@ func (_c *OauthClientCreate) check() error {
 	}
 	if _, ok := _c.mutation.PasswordClient(); !ok {
 		return &ValidationError{Name: "password_client", err: errors.New(`ent: missing required field "OauthClient.password_client"`)}
+	}
+	if _, ok := _c.mutation.Public(); !ok {
+		return &ValidationError{Name: "public", err: errors.New(`ent: missing required field "OauthClient.public"`)}
+	}
+	if _, ok := _c.mutation.GrantTypes(); !ok {
+		return &ValidationError{Name: "grant_types", err: errors.New(`ent: missing required field "OauthClient.grant_types"`)}
+	}
+	if _, ok := _c.mutation.ResponseTypes(); !ok {
+		return &ValidationError{Name: "response_types", err: errors.New(`ent: missing required field "OauthClient.response_types"`)}
+	}
+	if _, ok := _c.mutation.Scopes(); !ok {
+		return &ValidationError{Name: "scopes", err: errors.New(`ent: missing required field "OauthClient.scopes"`)}
+	}
+	if _, ok := _c.mutation.Audience(); !ok {
+		return &ValidationError{Name: "audience", err: errors.New(`ent: missing required field "OauthClient.audience"`)}
 	}
 	if _, ok := _c.mutation.Revoked(); !ok {
 		return &ValidationError{Name: "revoked", err: errors.New(`ent: missing required field "OauthClient.revoked"`)}
@@ -258,6 +331,26 @@ func (_c *OauthClientCreate) createSpec() (*OauthClient, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PasswordClient(); ok {
 		_spec.SetField(oauthclient.FieldPasswordClient, field.TypeBool, value)
 		_node.PasswordClient = value
+	}
+	if value, ok := _c.mutation.Public(); ok {
+		_spec.SetField(oauthclient.FieldPublic, field.TypeBool, value)
+		_node.Public = value
+	}
+	if value, ok := _c.mutation.GrantTypes(); ok {
+		_spec.SetField(oauthclient.FieldGrantTypes, field.TypeJSON, value)
+		_node.GrantTypes = value
+	}
+	if value, ok := _c.mutation.ResponseTypes(); ok {
+		_spec.SetField(oauthclient.FieldResponseTypes, field.TypeJSON, value)
+		_node.ResponseTypes = value
+	}
+	if value, ok := _c.mutation.Scopes(); ok {
+		_spec.SetField(oauthclient.FieldScopes, field.TypeJSON, value)
+		_node.Scopes = value
+	}
+	if value, ok := _c.mutation.Audience(); ok {
+		_spec.SetField(oauthclient.FieldAudience, field.TypeJSON, value)
+		_node.Audience = value
 	}
 	if value, ok := _c.mutation.Revoked(); ok {
 		_spec.SetField(oauthclient.FieldRevoked, field.TypeBool, value)

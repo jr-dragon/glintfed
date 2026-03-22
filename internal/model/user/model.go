@@ -2,11 +2,14 @@ package user
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"glintfed.org/ent"
+	"glintfed.org/ent/user"
 	"glintfed.org/internal/data"
 )
 
@@ -50,6 +53,31 @@ func (m *Model) Create(ctx context.Context, params CreateUserParams) (*ent.User,
 		SetNillableRegisterSource(nullableString(params.RegisterSource)).
 		SetEmailVerifiedAt(params.EmailVerifiedAt).
 		Save(ctx)
+}
+
+// ErrInvalidCredentials is returned when username/password verification fails.
+var ErrInvalidCredentials = errors.New("invalid username or password")
+
+// Authenticate
+//
+//	SELECT * FROM users WHERE (username = ? OR email = ?) LIMIT 1
+func (m *Model) Authenticate(ctx context.Context, username, password string) (uint64, error) {
+	u, err := m.UserClient.Query().
+		Where(user.Or(
+			user.Username(username),
+			user.Email(username),
+		)).
+		First(ctx)
+	if ent.IsNotFound(err) {
+		return 0, fmt.Errorf("%w", ErrInvalidCredentials)
+	}
+	if err != nil {
+		return 0, err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
+		return 0, fmt.Errorf("%w", ErrInvalidCredentials)
+	}
+	return u.ID, nil
 }
 
 func nullableString(s string) *string {

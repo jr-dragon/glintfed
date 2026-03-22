@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/mazrean/kessoku"
 	"glintfed.org/internal/data"
+	"glintfed.org/internal/lib/fositestore"
 	"glintfed.org/internal/model/appregister"
 	"glintfed.org/internal/model/instance"
 	"glintfed.org/internal/model/instanceactor"
@@ -47,12 +48,13 @@ import (
 	instanceactor0 "glintfed.org/internal/service/instanceactor"
 	"glintfed.org/internal/service/landing"
 	media0 "glintfed.org/internal/service/media"
+	"glintfed.org/internal/service/oauth"
 	"glintfed.org/internal/service/pixelfeddirectory"
 	"glintfed.org/internal/service/statusedit"
 	"glintfed.org/internal/service/stories/storyapiv1"
 	story0 "glintfed.org/internal/service/story"
 	"glintfed.org/internal/service/userappsettings"
-	"glintfed.org/internal/usecase/oauth"
+	oauth0 "glintfed.org/internal/usecase/oauth"
 	"glintfed.org/internal/usecase/worker"
 )
 
@@ -90,36 +92,42 @@ func InitApp(config *data.Config, client *data.Client) *app {
 	service29 := kessoku.Bind[notifications.Service](kessoku.Provide(notifications.New)).Fn()()
 	service30 := kessoku.Bind[admin.Service](kessoku.Provide(admin.New)).Fn()()
 	service31 := kessoku.Bind[group.Service](kessoku.Provide(group.New)).Fn()()
-	usecase := kessoku.Bind[appregister0.OAuthUsecase](kessoku.Provide(oauth.NewUsecase)).Fn()()
+	store := kessoku.Provide(fositestore.New).Fn()(client, config)
 	model := kessoku.Bind[federation.InstanceModel](kessoku.Provide(instance.NewModel)).Fn()(client)
 	model0 := kessoku.Bind[federation.StatusModel](kessoku.Provide(status.NewModel)).Fn()(client)
 	model1 := kessoku.Bind[instanceactor0.InstanceActorGetter](kessoku.Provide(instanceactor.NewModel)).Fn()(client)
 	model2 := kessoku.Bind[story0.StoryGetter](kessoku.Provide(story.NewModel)).Fn()(client)
 	model3 := kessoku.Bind[media0.MediaGetter](kessoku.Provide(media.NewModel)).Fn()(client)
 	model4 := kessoku.Bind[appregister0.AppRegisterModel](kessoku.Provide(appregister.NewModel)).Fn()(client)
-	model5 := kessoku.Provide(profile.NewModel).Fn()(client)
-	model6 := kessoku.Provide(user.NewModel).Fn()(client)
+	model5 := kessoku.Provide(user.NewModel).Fn()(client)
+	model6 := kessoku.Provide(profile.NewModel).Fn()(client)
 	deletePipeline := kessoku.Bind[worker.ProfileRemover](kessoku.Provide(worker.NewDeletePipeline)).Fn()(client)
 	activityHandler := kessoku.Bind[worker.ActivityDispatcher](kessoku.Provide(worker.NewActivityHandler)).Fn()(client)
+	oauth2Provider := kessoku.Provide(fositestore.NewOAuth2Provider).Fn()(store, config)
+	usecase := kessoku.Bind[appregister0.OAuthUsecase](kessoku.Provide(oauth0.NewUsecase)).Fn()(store, config)
 	service32 := kessoku.Bind[instanceactor0.Service](kessoku.Provide(instanceactor0.New)).Fn()(config, model1)
 	service33 := kessoku.Bind[story0.Service](kessoku.Provide(story0.New)).Fn()(config, model2)
 	service34 := kessoku.Bind[media0.Service](kessoku.Provide(media0.New)).Fn()(config, model3)
-	profileModel := kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel {
-		return m
-	})).Fn()(model5)
-	profileGetter := kessoku.Bind[worker.ProfileGetter](kessoku.Provide(func(m *profile.Model) worker.ProfileGetter {
+	userAuthenticator := kessoku.Bind[oauth.UserAuthenticator](kessoku.Provide(func(m *user.Model) oauth.UserAuthenticator {
 		return m
 	})).Fn()(model5)
 	userModel := kessoku.Bind[federation.UserModel](kessoku.Provide(func(m *user.Model) federation.UserModel {
 		return m
-	})).Fn()(model6)
+	})).Fn()(model5)
 	userModel0 := kessoku.Bind[appregister0.UserModel](kessoku.Provide(func(m *user.Model) appregister0.UserModel {
 		return m
+	})).Fn()(model5)
+	profileModel := kessoku.Bind[federation.ProfileModel](kessoku.Provide(func(m *profile.Model) federation.ProfileModel {
+		return m
 	})).Fn()(model6)
+	profileGetter := kessoku.Bind[worker.ProfileGetter](kessoku.Provide(func(m *profile.Model) worker.ProfileGetter {
+		return m
+	})).Fn()(model6)
+	service35 := kessoku.Bind[oauth.Service](kessoku.Provide(oauth.New)).Fn()(oauth2Provider, store, userAuthenticator, config)
+	service36 := kessoku.Bind[appregister0.Service](kessoku.Provide(appregister0.New)).Fn()(config, model4, userModel0, usecase)
 	inboxUsecase := kessoku.Bind[federation.WorkerUsecase](kessoku.Provide(worker.NewInboxUsecase)).Fn()(client, profileGetter, deletePipeline, activityHandler)
-	service35 := kessoku.Bind[appregister0.Service](kessoku.Provide(appregister0.New)).Fn()(config, model4, userModel0, usecase)
-	service36 := kessoku.Bind[federation.Service](kessoku.Provide(federation.New)).Fn()(config, model, profileModel, model0, userModel, inboxUsecase)
-	services := kessoku.Provide(server.NewAPIServices).Fn()(service, service36, service32, service33, service34, service35, service0, service1, service2, service3, service4, service5, service6, service7, service8, service9, service10, service11, service12, service13, service14, service15, service16, service17, service18, service19, service20, service21, service22, service23, service24, service25, service26, service27, service28, service29, service30, service31)
+	service37 := kessoku.Bind[federation.Service](kessoku.Provide(federation.New)).Fn()(config, model, profileModel, model0, userModel, inboxUsecase)
+	services := kessoku.Provide(server.NewAPIServices).Fn()(service, service35, service37, service32, service33, service34, service36, service0, service1, service2, service3, service4, service5, service6, service7, service8, service9, service10, service11, service12, service13, service14, service15, service16, service17, service18, service19, service20, service21, service22, service23, service24, service25, service26, service27, service28, service29, service30, service31)
 	app0 := kessoku.Provide(newapp).Fn()(config, services)
 	return app0
 }

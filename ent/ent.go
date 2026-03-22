@@ -80,7 +80,11 @@ import (
 	"glintfed.org/ent/modlog"
 	"glintfed.org/ent/newsroom"
 	"glintfed.org/ent/notification"
+	"glintfed.org/ent/oauthaccesstoken"
+	"glintfed.org/ent/oauthauthorizationcode"
 	"glintfed.org/ent/oauthclient"
+	"glintfed.org/ent/oauthpkce"
+	"glintfed.org/ent/oauthrefreshtoken"
 	"glintfed.org/ent/page"
 	"glintfed.org/ent/parentalcontrols"
 	"glintfed.org/ent/place"
@@ -246,7 +250,11 @@ func checkColumn(t, c string) error {
 			moderatedprofile.Table:        moderatedprofile.ValidColumn,
 			newsroom.Table:                newsroom.ValidColumn,
 			notification.Table:            notification.ValidColumn,
+			oauthaccesstoken.Table:        oauthaccesstoken.ValidColumn,
+			oauthauthorizationcode.Table:  oauthauthorizationcode.ValidColumn,
 			oauthclient.Table:             oauthclient.ValidColumn,
+			oauthpkce.Table:               oauthpkce.ValidColumn,
+			oauthrefreshtoken.Table:       oauthrefreshtoken.ValidColumn,
 			page.Table:                    page.ValidColumn,
 			parentalcontrols.Table:        parentalcontrols.ValidColumn,
 			place.Table:                   place.ValidColumn,

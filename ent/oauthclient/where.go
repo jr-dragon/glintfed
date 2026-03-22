@@ -89,6 +89,11 @@ func PasswordClient(v bool) predicate.OauthClient {
 	return predicate.OauthClient(sql.FieldEQ(FieldPasswordClient, v))
 }
 
+// Public applies equality check predicate on the "public" field. It's identical to PublicEQ.
+func Public(v bool) predicate.OauthClient {
+	return predicate.OauthClient(sql.FieldEQ(FieldPublic, v))
+}
+
 // Revoked applies equality check predicate on the "revoked" field. It's identical to RevokedEQ.
 func Revoked(v bool) predicate.OauthClient {
 	return predicate.OauthClient(sql.FieldEQ(FieldRevoked, v))
@@ -452,6 +457,16 @@ func PasswordClientEQ(v bool) predicate.OauthClient {
 // PasswordClientNEQ applies the NEQ predicate on the "password_client" field.
 func PasswordClientNEQ(v bool) predicate.OauthClient {
 	return predicate.OauthClient(sql.FieldNEQ(FieldPasswordClient, v))
+}
+
+// PublicEQ applies the EQ predicate on the "public" field.
+func PublicEQ(v bool) predicate.OauthClient {
+	return predicate.OauthClient(sql.FieldEQ(FieldPublic, v))
+}
+
+// PublicNEQ applies the NEQ predicate on the "public" field.
+func PublicNEQ(v bool) predicate.OauthClient {
+	return predicate.OauthClient(sql.FieldNEQ(FieldPublic, v))
 }
 
 // RevokedEQ applies the EQ predicate on the "revoked" field.

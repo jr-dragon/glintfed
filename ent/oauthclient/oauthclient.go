@@ -27,6 +27,16 @@ const (
 	FieldPersonalAccessClient = "personal_access_client"
 	// FieldPasswordClient holds the string denoting the password_client field in the database.
 	FieldPasswordClient = "password_client"
+	// FieldPublic holds the string denoting the public field in the database.
+	FieldPublic = "public"
+	// FieldGrantTypes holds the string denoting the grant_types field in the database.
+	FieldGrantTypes = "grant_types"
+	// FieldResponseTypes holds the string denoting the response_types field in the database.
+	FieldResponseTypes = "response_types"
+	// FieldScopes holds the string denoting the scopes field in the database.
+	FieldScopes = "scopes"
+	// FieldAudience holds the string denoting the audience field in the database.
+	FieldAudience = "audience"
 	// FieldRevoked holds the string denoting the revoked field in the database.
 	FieldRevoked = "revoked"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -47,6 +57,11 @@ var Columns = []string{
 	FieldRedirect,
 	FieldPersonalAccessClient,
 	FieldPasswordClient,
+	FieldPublic,
+	FieldGrantTypes,
+	FieldResponseTypes,
+	FieldScopes,
+	FieldAudience,
 	FieldRevoked,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -65,6 +80,16 @@ func ValidColumn(column string) bool {
 var (
 	// SecretValidator is a validator for the "secret" field. It is called by the builders before save.
 	SecretValidator func(string) error
+	// DefaultPublic holds the default value on creation for the "public" field.
+	DefaultPublic bool
+	// DefaultGrantTypes holds the default value on creation for the "grant_types" field.
+	DefaultGrantTypes []string
+	// DefaultResponseTypes holds the default value on creation for the "response_types" field.
+	DefaultResponseTypes []string
+	// DefaultScopes holds the default value on creation for the "scopes" field.
+	DefaultScopes []string
+	// DefaultAudience holds the default value on creation for the "audience" field.
+	DefaultAudience []string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -114,6 +139,11 @@ func ByPersonalAccessClient(opts ...sql.OrderTermOption) OrderOption {
 // ByPasswordClient orders the results by the password_client field.
 func ByPasswordClient(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPasswordClient, opts...).ToFunc()
+}
+
+// ByPublic orders the results by the public field.
+func ByPublic(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublic, opts...).ToFunc()
 }
 
 // ByRevoked orders the results by the revoked field.

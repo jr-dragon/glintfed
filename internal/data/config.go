@@ -45,9 +45,18 @@ type AppConfig struct {
 }
 
 type AuthConfig struct {
-	EnableRegistration bool `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
-	EnableOAuth        bool `mapstructure:"enable_oauth" env:"OAUTH_ENABLED"`
-	InAppRegistration  bool `mapstructure:"in_app_registration" env:"APP_REGISTER"`
+	EnableRegistration bool        `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
+	EnableOAuth        bool        `mapstructure:"enable_oauth" env:"OAUTH_ENABLED"`
+	InAppRegistration  bool        `mapstructure:"in_app_registration" env:"APP_REGISTER"`
+	OAuth              OAuthConfig `mapstructure:"oauth"`
+}
+
+// OAuthConfig holds configuration for the embedded OAuth2 server.
+type OAuthConfig struct {
+	HMACSecret               string `mapstructure:"hmac_secret" env:"OAUTH_HMAC_SECRET"`
+	PersonalClientID         string `mapstructure:"personal_client_id" env:"OAUTH_PERSONAL_CLIENT_ID"`
+	AccessTokenLifespanDays  int    `mapstructure:"access_token_lifespan_days" env:"OAUTH_TOKEN_EXPIRATION"`
+	RefreshTokenLifespanDays int    `mapstructure:"refresh_token_lifespan_days" env:"OAUTH_REFRESH_EXPIRATION"`
 }
 
 type UploaderConfig struct {
