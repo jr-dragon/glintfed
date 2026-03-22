@@ -86,6 +86,7 @@ import (
 	"glintfed.org/ent/oauthaccesstoken"
 	"glintfed.org/ent/oauthauthorizationcode"
 	"glintfed.org/ent/oauthclient"
+	"glintfed.org/ent/oauthpersonalaccessclient"
 	"glintfed.org/ent/oauthpkce"
 	"glintfed.org/ent/oauthrefreshtoken"
 	"glintfed.org/ent/page"
@@ -274,6 +275,8 @@ type Client struct {
 	OauthAuthorizationCode *OauthAuthorizationCodeClient
 	// OauthClient is the client for interacting with the OauthClient builders.
 	OauthClient *OauthClientClient
+	// OauthPersonalAccessClient is the client for interacting with the OauthPersonalAccessClient builders.
+	OauthPersonalAccessClient *OauthPersonalAccessClientClient
 	// OauthPkce is the client for interacting with the OauthPkce builders.
 	OauthPkce *OauthPkceClient
 	// OauthRefreshToken is the client for interacting with the OauthRefreshToken builders.
@@ -434,6 +437,7 @@ func (c *Client) init() {
 	c.OauthAccessToken = NewOauthAccessTokenClient(c.config)
 	c.OauthAuthorizationCode = NewOauthAuthorizationCodeClient(c.config)
 	c.OauthClient = NewOauthClientClient(c.config)
+	c.OauthPersonalAccessClient = NewOauthPersonalAccessClientClient(c.config)
 	c.OauthPkce = NewOauthPkceClient(c.config)
 	c.OauthRefreshToken = NewOauthRefreshTokenClient(c.config)
 	c.Page = NewPageClient(c.config)
@@ -563,118 +567,119 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AccountInterstitial:     NewAccountInterstitialClient(cfg),
-		AccountLog:              NewAccountLogClient(cfg),
-		Activity:                NewActivityClient(cfg),
-		AdminInvite:             NewAdminInviteClient(cfg),
-		AdminShadowFilter:       NewAdminShadowFilterClient(cfg),
-		AppRegister:             NewAppRegisterClient(cfg),
-		AutospamCustomTokens:    NewAutospamCustomTokensClient(cfg),
-		Avatar:                  NewAvatarClient(cfg),
-		Bookmark:                NewBookmarkClient(cfg),
-		Circle:                  NewCircleClient(cfg),
-		CircleProfile:           NewCircleProfileClient(cfg),
-		Collection:              NewCollectionClient(cfg),
-		CollectionItem:          NewCollectionItemClient(cfg),
-		Comment:                 NewCommentClient(cfg),
-		ConfigCache:             NewConfigCacheClient(cfg),
-		Contact:                 NewContactClient(cfg),
-		Conversation:            NewConversationClient(cfg),
-		CuratedRegister:         NewCuratedRegisterClient(cfg),
-		CuratedRegisterActivity: NewCuratedRegisterActivityClient(cfg),
-		CuratedRegisterTemplate: NewCuratedRegisterTemplateClient(cfg),
-		CustomEmoji:             NewCustomEmojiClient(cfg),
-		CustomFilter:            NewCustomFilterClient(cfg),
-		CustomFilterKeyword:     NewCustomFilterKeywordClient(cfg),
-		CustomFilterStatus:      NewCustomFilterStatusClient(cfg),
-		DefaultDomainBlock:      NewDefaultDomainBlockClient(cfg),
-		DirectMessage:           NewDirectMessageClient(cfg),
-		DiscoverCategory:        NewDiscoverCategoryClient(cfg),
-		DiscoverCategoryHashtag: NewDiscoverCategoryHashtagClient(cfg),
-		EmailVerification:       NewEmailVerificationClient(cfg),
-		FailedJob:               NewFailedJobClient(cfg),
-		FollowRequest:           NewFollowRequestClient(cfg),
-		Follower:                NewFollowerClient(cfg),
-		Group:                   NewGroupClient(cfg),
-		GroupActivityGraph:      NewGroupActivityGraphClient(cfg),
-		GroupBlock:              NewGroupBlockClient(cfg),
-		GroupCategory:           NewGroupCategoryClient(cfg),
-		GroupComment:            NewGroupCommentClient(cfg),
-		GroupEvent:              NewGroupEventClient(cfg),
-		GroupHashtag:            NewGroupHashtagClient(cfg),
-		GroupInteraction:        NewGroupInteractionClient(cfg),
-		GroupInvitation:         NewGroupInvitationClient(cfg),
-		GroupLike:               NewGroupLikeClient(cfg),
-		GroupLimit:              NewGroupLimitClient(cfg),
-		GroupMedia:              NewGroupMediaClient(cfg),
-		GroupMember:             NewGroupMemberClient(cfg),
-		GroupPost:               NewGroupPostClient(cfg),
-		GroupPostHashtag:        NewGroupPostHashtagClient(cfg),
-		GroupReport:             NewGroupReportClient(cfg),
-		GroupRole:               NewGroupRoleClient(cfg),
-		GroupStore:              NewGroupStoreClient(cfg),
-		Hashtag:                 NewHashtagClient(cfg),
-		HashtagFollow:           NewHashtagFollowClient(cfg),
-		HashtagRelated:          NewHashtagRelatedClient(cfg),
-		ImportData:              NewImportDataClient(cfg),
-		ImportJob:               NewImportJobClient(cfg),
-		ImportPost:              NewImportPostClient(cfg),
-		Instance:                NewInstanceClient(cfg),
-		InstanceActor:           NewInstanceActorClient(cfg),
-		Like:                    NewLikeClient(cfg),
-		LiveStream:              NewLiveStreamClient(cfg),
-		Media:                   NewMediaClient(cfg),
-		MediaBlocklist:          NewMediaBlocklistClient(cfg),
-		MediaTag:                NewMediaTagClient(cfg),
-		Mention:                 NewMentionClient(cfg),
-		ModLog:                  NewModLogClient(cfg),
-		ModeratedProfile:        NewModeratedProfileClient(cfg),
-		Newsroom:                NewNewsroomClient(cfg),
-		Notification:            NewNotificationClient(cfg),
-		OauthAccessToken:        NewOauthAccessTokenClient(cfg),
-		OauthAuthorizationCode:  NewOauthAuthorizationCodeClient(cfg),
-		OauthClient:             NewOauthClientClient(cfg),
-		OauthPkce:               NewOauthPkceClient(cfg),
-		OauthRefreshToken:       NewOauthRefreshTokenClient(cfg),
-		Page:                    NewPageClient(cfg),
-		ParentalControls:        NewParentalControlsClient(cfg),
-		Place:                   NewPlaceClient(cfg),
-		Poll:                    NewPollClient(cfg),
-		PollVote:                NewPollVoteClient(cfg),
-		Portfolio:               NewPortfolioClient(cfg),
-		Profile:                 NewProfileClient(cfg),
-		ProfileAlias:            NewProfileAliasClient(cfg),
-		ProfileMigration:        NewProfileMigrationClient(cfg),
-		ProfileSponsor:          NewProfileSponsorClient(cfg),
-		RemoteAuth:              NewRemoteAuthClient(cfg),
-		RemoteAuthInstance:      NewRemoteAuthInstanceClient(cfg),
-		RemoteReport:            NewRemoteReportClient(cfg),
-		Report:                  NewReportClient(cfg),
-		ReportComment:           NewReportCommentClient(cfg),
-		ReportLog:               NewReportLogClient(cfg),
-		Status:                  NewStatusClient(cfg),
-		StatusArchived:          NewStatusArchivedClient(cfg),
-		StatusEdit:              NewStatusEditClient(cfg),
-		StatusHashtag:           NewStatusHashtagClient(cfg),
-		StatusView:              NewStatusViewClient(cfg),
-		Story:                   NewStoryClient(cfg),
-		StoryItem:               NewStoryItemClient(cfg),
-		StoryReaction:           NewStoryReactionClient(cfg),
-		StoryView:               NewStoryViewClient(cfg),
-		UIKit:                   NewUIKitClient(cfg),
-		User:                    NewUserClient(cfg),
-		UserAppSettings:         NewUserAppSettingsClient(cfg),
-		UserDevice:              NewUserDeviceClient(cfg),
-		UserDomainBlock:         NewUserDomainBlockClient(cfg),
-		UserEmailForgot:         NewUserEmailForgotClient(cfg),
-		UserFilter:              NewUserFilterClient(cfg),
-		UserInvite:              NewUserInviteClient(cfg),
-		UserOidcMapping:         NewUserOidcMappingClient(cfg),
-		UserPronoun:             NewUserPronounClient(cfg),
-		UserRoles:               NewUserRolesClient(cfg),
-		UserSetting:             NewUserSettingClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		AccountInterstitial:       NewAccountInterstitialClient(cfg),
+		AccountLog:                NewAccountLogClient(cfg),
+		Activity:                  NewActivityClient(cfg),
+		AdminInvite:               NewAdminInviteClient(cfg),
+		AdminShadowFilter:         NewAdminShadowFilterClient(cfg),
+		AppRegister:               NewAppRegisterClient(cfg),
+		AutospamCustomTokens:      NewAutospamCustomTokensClient(cfg),
+		Avatar:                    NewAvatarClient(cfg),
+		Bookmark:                  NewBookmarkClient(cfg),
+		Circle:                    NewCircleClient(cfg),
+		CircleProfile:             NewCircleProfileClient(cfg),
+		Collection:                NewCollectionClient(cfg),
+		CollectionItem:            NewCollectionItemClient(cfg),
+		Comment:                   NewCommentClient(cfg),
+		ConfigCache:               NewConfigCacheClient(cfg),
+		Contact:                   NewContactClient(cfg),
+		Conversation:              NewConversationClient(cfg),
+		CuratedRegister:           NewCuratedRegisterClient(cfg),
+		CuratedRegisterActivity:   NewCuratedRegisterActivityClient(cfg),
+		CuratedRegisterTemplate:   NewCuratedRegisterTemplateClient(cfg),
+		CustomEmoji:               NewCustomEmojiClient(cfg),
+		CustomFilter:              NewCustomFilterClient(cfg),
+		CustomFilterKeyword:       NewCustomFilterKeywordClient(cfg),
+		CustomFilterStatus:        NewCustomFilterStatusClient(cfg),
+		DefaultDomainBlock:        NewDefaultDomainBlockClient(cfg),
+		DirectMessage:             NewDirectMessageClient(cfg),
+		DiscoverCategory:          NewDiscoverCategoryClient(cfg),
+		DiscoverCategoryHashtag:   NewDiscoverCategoryHashtagClient(cfg),
+		EmailVerification:         NewEmailVerificationClient(cfg),
+		FailedJob:                 NewFailedJobClient(cfg),
+		FollowRequest:             NewFollowRequestClient(cfg),
+		Follower:                  NewFollowerClient(cfg),
+		Group:                     NewGroupClient(cfg),
+		GroupActivityGraph:        NewGroupActivityGraphClient(cfg),
+		GroupBlock:                NewGroupBlockClient(cfg),
+		GroupCategory:             NewGroupCategoryClient(cfg),
+		GroupComment:              NewGroupCommentClient(cfg),
+		GroupEvent:                NewGroupEventClient(cfg),
+		GroupHashtag:              NewGroupHashtagClient(cfg),
+		GroupInteraction:          NewGroupInteractionClient(cfg),
+		GroupInvitation:           NewGroupInvitationClient(cfg),
+		GroupLike:                 NewGroupLikeClient(cfg),
+		GroupLimit:                NewGroupLimitClient(cfg),
+		GroupMedia:                NewGroupMediaClient(cfg),
+		GroupMember:               NewGroupMemberClient(cfg),
+		GroupPost:                 NewGroupPostClient(cfg),
+		GroupPostHashtag:          NewGroupPostHashtagClient(cfg),
+		GroupReport:               NewGroupReportClient(cfg),
+		GroupRole:                 NewGroupRoleClient(cfg),
+		GroupStore:                NewGroupStoreClient(cfg),
+		Hashtag:                   NewHashtagClient(cfg),
+		HashtagFollow:             NewHashtagFollowClient(cfg),
+		HashtagRelated:            NewHashtagRelatedClient(cfg),
+		ImportData:                NewImportDataClient(cfg),
+		ImportJob:                 NewImportJobClient(cfg),
+		ImportPost:                NewImportPostClient(cfg),
+		Instance:                  NewInstanceClient(cfg),
+		InstanceActor:             NewInstanceActorClient(cfg),
+		Like:                      NewLikeClient(cfg),
+		LiveStream:                NewLiveStreamClient(cfg),
+		Media:                     NewMediaClient(cfg),
+		MediaBlocklist:            NewMediaBlocklistClient(cfg),
+		MediaTag:                  NewMediaTagClient(cfg),
+		Mention:                   NewMentionClient(cfg),
+		ModLog:                    NewModLogClient(cfg),
+		ModeratedProfile:          NewModeratedProfileClient(cfg),
+		Newsroom:                  NewNewsroomClient(cfg),
+		Notification:              NewNotificationClient(cfg),
+		OauthAccessToken:          NewOauthAccessTokenClient(cfg),
+		OauthAuthorizationCode:    NewOauthAuthorizationCodeClient(cfg),
+		OauthClient:               NewOauthClientClient(cfg),
+		OauthPersonalAccessClient: NewOauthPersonalAccessClientClient(cfg),
+		OauthPkce:                 NewOauthPkceClient(cfg),
+		OauthRefreshToken:         NewOauthRefreshTokenClient(cfg),
+		Page:                      NewPageClient(cfg),
+		ParentalControls:          NewParentalControlsClient(cfg),
+		Place:                     NewPlaceClient(cfg),
+		Poll:                      NewPollClient(cfg),
+		PollVote:                  NewPollVoteClient(cfg),
+		Portfolio:                 NewPortfolioClient(cfg),
+		Profile:                   NewProfileClient(cfg),
+		ProfileAlias:              NewProfileAliasClient(cfg),
+		ProfileMigration:          NewProfileMigrationClient(cfg),
+		ProfileSponsor:            NewProfileSponsorClient(cfg),
+		RemoteAuth:                NewRemoteAuthClient(cfg),
+		RemoteAuthInstance:        NewRemoteAuthInstanceClient(cfg),
+		RemoteReport:              NewRemoteReportClient(cfg),
+		Report:                    NewReportClient(cfg),
+		ReportComment:             NewReportCommentClient(cfg),
+		ReportLog:                 NewReportLogClient(cfg),
+		Status:                    NewStatusClient(cfg),
+		StatusArchived:            NewStatusArchivedClient(cfg),
+		StatusEdit:                NewStatusEditClient(cfg),
+		StatusHashtag:             NewStatusHashtagClient(cfg),
+		StatusView:                NewStatusViewClient(cfg),
+		Story:                     NewStoryClient(cfg),
+		StoryItem:                 NewStoryItemClient(cfg),
+		StoryReaction:             NewStoryReactionClient(cfg),
+		StoryView:                 NewStoryViewClient(cfg),
+		UIKit:                     NewUIKitClient(cfg),
+		User:                      NewUserClient(cfg),
+		UserAppSettings:           NewUserAppSettingsClient(cfg),
+		UserDevice:                NewUserDeviceClient(cfg),
+		UserDomainBlock:           NewUserDomainBlockClient(cfg),
+		UserEmailForgot:           NewUserEmailForgotClient(cfg),
+		UserFilter:                NewUserFilterClient(cfg),
+		UserInvite:                NewUserInviteClient(cfg),
+		UserOidcMapping:           NewUserOidcMappingClient(cfg),
+		UserPronoun:               NewUserPronounClient(cfg),
+		UserRoles:                 NewUserRolesClient(cfg),
+		UserSetting:               NewUserSettingClient(cfg),
 	}, nil
 }
 
@@ -692,118 +697,119 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AccountInterstitial:     NewAccountInterstitialClient(cfg),
-		AccountLog:              NewAccountLogClient(cfg),
-		Activity:                NewActivityClient(cfg),
-		AdminInvite:             NewAdminInviteClient(cfg),
-		AdminShadowFilter:       NewAdminShadowFilterClient(cfg),
-		AppRegister:             NewAppRegisterClient(cfg),
-		AutospamCustomTokens:    NewAutospamCustomTokensClient(cfg),
-		Avatar:                  NewAvatarClient(cfg),
-		Bookmark:                NewBookmarkClient(cfg),
-		Circle:                  NewCircleClient(cfg),
-		CircleProfile:           NewCircleProfileClient(cfg),
-		Collection:              NewCollectionClient(cfg),
-		CollectionItem:          NewCollectionItemClient(cfg),
-		Comment:                 NewCommentClient(cfg),
-		ConfigCache:             NewConfigCacheClient(cfg),
-		Contact:                 NewContactClient(cfg),
-		Conversation:            NewConversationClient(cfg),
-		CuratedRegister:         NewCuratedRegisterClient(cfg),
-		CuratedRegisterActivity: NewCuratedRegisterActivityClient(cfg),
-		CuratedRegisterTemplate: NewCuratedRegisterTemplateClient(cfg),
-		CustomEmoji:             NewCustomEmojiClient(cfg),
-		CustomFilter:            NewCustomFilterClient(cfg),
-		CustomFilterKeyword:     NewCustomFilterKeywordClient(cfg),
-		CustomFilterStatus:      NewCustomFilterStatusClient(cfg),
-		DefaultDomainBlock:      NewDefaultDomainBlockClient(cfg),
-		DirectMessage:           NewDirectMessageClient(cfg),
-		DiscoverCategory:        NewDiscoverCategoryClient(cfg),
-		DiscoverCategoryHashtag: NewDiscoverCategoryHashtagClient(cfg),
-		EmailVerification:       NewEmailVerificationClient(cfg),
-		FailedJob:               NewFailedJobClient(cfg),
-		FollowRequest:           NewFollowRequestClient(cfg),
-		Follower:                NewFollowerClient(cfg),
-		Group:                   NewGroupClient(cfg),
-		GroupActivityGraph:      NewGroupActivityGraphClient(cfg),
-		GroupBlock:              NewGroupBlockClient(cfg),
-		GroupCategory:           NewGroupCategoryClient(cfg),
-		GroupComment:            NewGroupCommentClient(cfg),
-		GroupEvent:              NewGroupEventClient(cfg),
-		GroupHashtag:            NewGroupHashtagClient(cfg),
-		GroupInteraction:        NewGroupInteractionClient(cfg),
-		GroupInvitation:         NewGroupInvitationClient(cfg),
-		GroupLike:               NewGroupLikeClient(cfg),
-		GroupLimit:              NewGroupLimitClient(cfg),
-		GroupMedia:              NewGroupMediaClient(cfg),
-		GroupMember:             NewGroupMemberClient(cfg),
-		GroupPost:               NewGroupPostClient(cfg),
-		GroupPostHashtag:        NewGroupPostHashtagClient(cfg),
-		GroupReport:             NewGroupReportClient(cfg),
-		GroupRole:               NewGroupRoleClient(cfg),
-		GroupStore:              NewGroupStoreClient(cfg),
-		Hashtag:                 NewHashtagClient(cfg),
-		HashtagFollow:           NewHashtagFollowClient(cfg),
-		HashtagRelated:          NewHashtagRelatedClient(cfg),
-		ImportData:              NewImportDataClient(cfg),
-		ImportJob:               NewImportJobClient(cfg),
-		ImportPost:              NewImportPostClient(cfg),
-		Instance:                NewInstanceClient(cfg),
-		InstanceActor:           NewInstanceActorClient(cfg),
-		Like:                    NewLikeClient(cfg),
-		LiveStream:              NewLiveStreamClient(cfg),
-		Media:                   NewMediaClient(cfg),
-		MediaBlocklist:          NewMediaBlocklistClient(cfg),
-		MediaTag:                NewMediaTagClient(cfg),
-		Mention:                 NewMentionClient(cfg),
-		ModLog:                  NewModLogClient(cfg),
-		ModeratedProfile:        NewModeratedProfileClient(cfg),
-		Newsroom:                NewNewsroomClient(cfg),
-		Notification:            NewNotificationClient(cfg),
-		OauthAccessToken:        NewOauthAccessTokenClient(cfg),
-		OauthAuthorizationCode:  NewOauthAuthorizationCodeClient(cfg),
-		OauthClient:             NewOauthClientClient(cfg),
-		OauthPkce:               NewOauthPkceClient(cfg),
-		OauthRefreshToken:       NewOauthRefreshTokenClient(cfg),
-		Page:                    NewPageClient(cfg),
-		ParentalControls:        NewParentalControlsClient(cfg),
-		Place:                   NewPlaceClient(cfg),
-		Poll:                    NewPollClient(cfg),
-		PollVote:                NewPollVoteClient(cfg),
-		Portfolio:               NewPortfolioClient(cfg),
-		Profile:                 NewProfileClient(cfg),
-		ProfileAlias:            NewProfileAliasClient(cfg),
-		ProfileMigration:        NewProfileMigrationClient(cfg),
-		ProfileSponsor:          NewProfileSponsorClient(cfg),
-		RemoteAuth:              NewRemoteAuthClient(cfg),
-		RemoteAuthInstance:      NewRemoteAuthInstanceClient(cfg),
-		RemoteReport:            NewRemoteReportClient(cfg),
-		Report:                  NewReportClient(cfg),
-		ReportComment:           NewReportCommentClient(cfg),
-		ReportLog:               NewReportLogClient(cfg),
-		Status:                  NewStatusClient(cfg),
-		StatusArchived:          NewStatusArchivedClient(cfg),
-		StatusEdit:              NewStatusEditClient(cfg),
-		StatusHashtag:           NewStatusHashtagClient(cfg),
-		StatusView:              NewStatusViewClient(cfg),
-		Story:                   NewStoryClient(cfg),
-		StoryItem:               NewStoryItemClient(cfg),
-		StoryReaction:           NewStoryReactionClient(cfg),
-		StoryView:               NewStoryViewClient(cfg),
-		UIKit:                   NewUIKitClient(cfg),
-		User:                    NewUserClient(cfg),
-		UserAppSettings:         NewUserAppSettingsClient(cfg),
-		UserDevice:              NewUserDeviceClient(cfg),
-		UserDomainBlock:         NewUserDomainBlockClient(cfg),
-		UserEmailForgot:         NewUserEmailForgotClient(cfg),
-		UserFilter:              NewUserFilterClient(cfg),
-		UserInvite:              NewUserInviteClient(cfg),
-		UserOidcMapping:         NewUserOidcMappingClient(cfg),
-		UserPronoun:             NewUserPronounClient(cfg),
-		UserRoles:               NewUserRolesClient(cfg),
-		UserSetting:             NewUserSettingClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		AccountInterstitial:       NewAccountInterstitialClient(cfg),
+		AccountLog:                NewAccountLogClient(cfg),
+		Activity:                  NewActivityClient(cfg),
+		AdminInvite:               NewAdminInviteClient(cfg),
+		AdminShadowFilter:         NewAdminShadowFilterClient(cfg),
+		AppRegister:               NewAppRegisterClient(cfg),
+		AutospamCustomTokens:      NewAutospamCustomTokensClient(cfg),
+		Avatar:                    NewAvatarClient(cfg),
+		Bookmark:                  NewBookmarkClient(cfg),
+		Circle:                    NewCircleClient(cfg),
+		CircleProfile:             NewCircleProfileClient(cfg),
+		Collection:                NewCollectionClient(cfg),
+		CollectionItem:            NewCollectionItemClient(cfg),
+		Comment:                   NewCommentClient(cfg),
+		ConfigCache:               NewConfigCacheClient(cfg),
+		Contact:                   NewContactClient(cfg),
+		Conversation:              NewConversationClient(cfg),
+		CuratedRegister:           NewCuratedRegisterClient(cfg),
+		CuratedRegisterActivity:   NewCuratedRegisterActivityClient(cfg),
+		CuratedRegisterTemplate:   NewCuratedRegisterTemplateClient(cfg),
+		CustomEmoji:               NewCustomEmojiClient(cfg),
+		CustomFilter:              NewCustomFilterClient(cfg),
+		CustomFilterKeyword:       NewCustomFilterKeywordClient(cfg),
+		CustomFilterStatus:        NewCustomFilterStatusClient(cfg),
+		DefaultDomainBlock:        NewDefaultDomainBlockClient(cfg),
+		DirectMessage:             NewDirectMessageClient(cfg),
+		DiscoverCategory:          NewDiscoverCategoryClient(cfg),
+		DiscoverCategoryHashtag:   NewDiscoverCategoryHashtagClient(cfg),
+		EmailVerification:         NewEmailVerificationClient(cfg),
+		FailedJob:                 NewFailedJobClient(cfg),
+		FollowRequest:             NewFollowRequestClient(cfg),
+		Follower:                  NewFollowerClient(cfg),
+		Group:                     NewGroupClient(cfg),
+		GroupActivityGraph:        NewGroupActivityGraphClient(cfg),
+		GroupBlock:                NewGroupBlockClient(cfg),
+		GroupCategory:             NewGroupCategoryClient(cfg),
+		GroupComment:              NewGroupCommentClient(cfg),
+		GroupEvent:                NewGroupEventClient(cfg),
+		GroupHashtag:              NewGroupHashtagClient(cfg),
+		GroupInteraction:          NewGroupInteractionClient(cfg),
+		GroupInvitation:           NewGroupInvitationClient(cfg),
+		GroupLike:                 NewGroupLikeClient(cfg),
+		GroupLimit:                NewGroupLimitClient(cfg),
+		GroupMedia:                NewGroupMediaClient(cfg),
+		GroupMember:               NewGroupMemberClient(cfg),
+		GroupPost:                 NewGroupPostClient(cfg),
+		GroupPostHashtag:          NewGroupPostHashtagClient(cfg),
+		GroupReport:               NewGroupReportClient(cfg),
+		GroupRole:                 NewGroupRoleClient(cfg),
+		GroupStore:                NewGroupStoreClient(cfg),
+		Hashtag:                   NewHashtagClient(cfg),
+		HashtagFollow:             NewHashtagFollowClient(cfg),
+		HashtagRelated:            NewHashtagRelatedClient(cfg),
+		ImportData:                NewImportDataClient(cfg),
+		ImportJob:                 NewImportJobClient(cfg),
+		ImportPost:                NewImportPostClient(cfg),
+		Instance:                  NewInstanceClient(cfg),
+		InstanceActor:             NewInstanceActorClient(cfg),
+		Like:                      NewLikeClient(cfg),
+		LiveStream:                NewLiveStreamClient(cfg),
+		Media:                     NewMediaClient(cfg),
+		MediaBlocklist:            NewMediaBlocklistClient(cfg),
+		MediaTag:                  NewMediaTagClient(cfg),
+		Mention:                   NewMentionClient(cfg),
+		ModLog:                    NewModLogClient(cfg),
+		ModeratedProfile:          NewModeratedProfileClient(cfg),
+		Newsroom:                  NewNewsroomClient(cfg),
+		Notification:              NewNotificationClient(cfg),
+		OauthAccessToken:          NewOauthAccessTokenClient(cfg),
+		OauthAuthorizationCode:    NewOauthAuthorizationCodeClient(cfg),
+		OauthClient:               NewOauthClientClient(cfg),
+		OauthPersonalAccessClient: NewOauthPersonalAccessClientClient(cfg),
+		OauthPkce:                 NewOauthPkceClient(cfg),
+		OauthRefreshToken:         NewOauthRefreshTokenClient(cfg),
+		Page:                      NewPageClient(cfg),
+		ParentalControls:          NewParentalControlsClient(cfg),
+		Place:                     NewPlaceClient(cfg),
+		Poll:                      NewPollClient(cfg),
+		PollVote:                  NewPollVoteClient(cfg),
+		Portfolio:                 NewPortfolioClient(cfg),
+		Profile:                   NewProfileClient(cfg),
+		ProfileAlias:              NewProfileAliasClient(cfg),
+		ProfileMigration:          NewProfileMigrationClient(cfg),
+		ProfileSponsor:            NewProfileSponsorClient(cfg),
+		RemoteAuth:                NewRemoteAuthClient(cfg),
+		RemoteAuthInstance:        NewRemoteAuthInstanceClient(cfg),
+		RemoteReport:              NewRemoteReportClient(cfg),
+		Report:                    NewReportClient(cfg),
+		ReportComment:             NewReportCommentClient(cfg),
+		ReportLog:                 NewReportLogClient(cfg),
+		Status:                    NewStatusClient(cfg),
+		StatusArchived:            NewStatusArchivedClient(cfg),
+		StatusEdit:                NewStatusEditClient(cfg),
+		StatusHashtag:             NewStatusHashtagClient(cfg),
+		StatusView:                NewStatusViewClient(cfg),
+		Story:                     NewStoryClient(cfg),
+		StoryItem:                 NewStoryItemClient(cfg),
+		StoryReaction:             NewStoryReactionClient(cfg),
+		StoryView:                 NewStoryViewClient(cfg),
+		UIKit:                     NewUIKitClient(cfg),
+		User:                      NewUserClient(cfg),
+		UserAppSettings:           NewUserAppSettingsClient(cfg),
+		UserDevice:                NewUserDeviceClient(cfg),
+		UserDomainBlock:           NewUserDomainBlockClient(cfg),
+		UserEmailForgot:           NewUserEmailForgotClient(cfg),
+		UserFilter:                NewUserFilterClient(cfg),
+		UserInvite:                NewUserInviteClient(cfg),
+		UserOidcMapping:           NewUserOidcMappingClient(cfg),
+		UserPronoun:               NewUserPronounClient(cfg),
+		UserRoles:                 NewUserRolesClient(cfg),
+		UserSetting:               NewUserSettingClient(cfg),
 	}, nil
 }
 
@@ -849,14 +855,15 @@ func (c *Client) Use(hooks ...Hook) {
 		c.ImportPost, c.Instance, c.InstanceActor, c.Like, c.LiveStream, c.Media,
 		c.MediaBlocklist, c.MediaTag, c.Mention, c.ModLog, c.ModeratedProfile,
 		c.Newsroom, c.Notification, c.OauthAccessToken, c.OauthAuthorizationCode,
-		c.OauthClient, c.OauthPkce, c.OauthRefreshToken, c.Page, c.ParentalControls,
-		c.Place, c.Poll, c.PollVote, c.Portfolio, c.Profile, c.ProfileAlias,
-		c.ProfileMigration, c.ProfileSponsor, c.RemoteAuth, c.RemoteAuthInstance,
-		c.RemoteReport, c.Report, c.ReportComment, c.ReportLog, c.Status,
-		c.StatusArchived, c.StatusEdit, c.StatusHashtag, c.StatusView, c.Story,
-		c.StoryItem, c.StoryReaction, c.StoryView, c.UIKit, c.User, c.UserAppSettings,
-		c.UserDevice, c.UserDomainBlock, c.UserEmailForgot, c.UserFilter, c.UserInvite,
-		c.UserOidcMapping, c.UserPronoun, c.UserRoles, c.UserSetting,
+		c.OauthClient, c.OauthPersonalAccessClient, c.OauthPkce, c.OauthRefreshToken,
+		c.Page, c.ParentalControls, c.Place, c.Poll, c.PollVote, c.Portfolio,
+		c.Profile, c.ProfileAlias, c.ProfileMigration, c.ProfileSponsor, c.RemoteAuth,
+		c.RemoteAuthInstance, c.RemoteReport, c.Report, c.ReportComment, c.ReportLog,
+		c.Status, c.StatusArchived, c.StatusEdit, c.StatusHashtag, c.StatusView,
+		c.Story, c.StoryItem, c.StoryReaction, c.StoryView, c.UIKit, c.User,
+		c.UserAppSettings, c.UserDevice, c.UserDomainBlock, c.UserEmailForgot,
+		c.UserFilter, c.UserInvite, c.UserOidcMapping, c.UserPronoun, c.UserRoles,
+		c.UserSetting,
 	} {
 		n.Use(hooks...)
 	}
@@ -882,14 +889,15 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.ImportPost, c.Instance, c.InstanceActor, c.Like, c.LiveStream, c.Media,
 		c.MediaBlocklist, c.MediaTag, c.Mention, c.ModLog, c.ModeratedProfile,
 		c.Newsroom, c.Notification, c.OauthAccessToken, c.OauthAuthorizationCode,
-		c.OauthClient, c.OauthPkce, c.OauthRefreshToken, c.Page, c.ParentalControls,
-		c.Place, c.Poll, c.PollVote, c.Portfolio, c.Profile, c.ProfileAlias,
-		c.ProfileMigration, c.ProfileSponsor, c.RemoteAuth, c.RemoteAuthInstance,
-		c.RemoteReport, c.Report, c.ReportComment, c.ReportLog, c.Status,
-		c.StatusArchived, c.StatusEdit, c.StatusHashtag, c.StatusView, c.Story,
-		c.StoryItem, c.StoryReaction, c.StoryView, c.UIKit, c.User, c.UserAppSettings,
-		c.UserDevice, c.UserDomainBlock, c.UserEmailForgot, c.UserFilter, c.UserInvite,
-		c.UserOidcMapping, c.UserPronoun, c.UserRoles, c.UserSetting,
+		c.OauthClient, c.OauthPersonalAccessClient, c.OauthPkce, c.OauthRefreshToken,
+		c.Page, c.ParentalControls, c.Place, c.Poll, c.PollVote, c.Portfolio,
+		c.Profile, c.ProfileAlias, c.ProfileMigration, c.ProfileSponsor, c.RemoteAuth,
+		c.RemoteAuthInstance, c.RemoteReport, c.Report, c.ReportComment, c.ReportLog,
+		c.Status, c.StatusArchived, c.StatusEdit, c.StatusHashtag, c.StatusView,
+		c.Story, c.StoryItem, c.StoryReaction, c.StoryView, c.UIKit, c.User,
+		c.UserAppSettings, c.UserDevice, c.UserDomainBlock, c.UserEmailForgot,
+		c.UserFilter, c.UserInvite, c.UserOidcMapping, c.UserPronoun, c.UserRoles,
+		c.UserSetting,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -1040,6 +1048,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OauthAuthorizationCode.mutate(ctx, m)
 	case *OauthClientMutation:
 		return c.OauthClient.mutate(ctx, m)
+	case *OauthPersonalAccessClientMutation:
+		return c.OauthPersonalAccessClient.mutate(ctx, m)
 	case *OauthPkceMutation:
 		return c.OauthPkce.mutate(ctx, m)
 	case *OauthRefreshTokenMutation:
@@ -10566,6 +10576,139 @@ func (c *OauthClientClient) mutate(ctx context.Context, m *OauthClientMutation) 
 	}
 }
 
+// OauthPersonalAccessClientClient is a client for the OauthPersonalAccessClient schema.
+type OauthPersonalAccessClientClient struct {
+	config
+}
+
+// NewOauthPersonalAccessClientClient returns a client for the OauthPersonalAccessClient from the given config.
+func NewOauthPersonalAccessClientClient(c config) *OauthPersonalAccessClientClient {
+	return &OauthPersonalAccessClientClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauthpersonalaccessclient.Hooks(f(g(h())))`.
+func (c *OauthPersonalAccessClientClient) Use(hooks ...Hook) {
+	c.hooks.OauthPersonalAccessClient = append(c.hooks.OauthPersonalAccessClient, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauthpersonalaccessclient.Intercept(f(g(h())))`.
+func (c *OauthPersonalAccessClientClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OauthPersonalAccessClient = append(c.inters.OauthPersonalAccessClient, interceptors...)
+}
+
+// Create returns a builder for creating a OauthPersonalAccessClient entity.
+func (c *OauthPersonalAccessClientClient) Create() *OauthPersonalAccessClientCreate {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpCreate)
+	return &OauthPersonalAccessClientCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OauthPersonalAccessClient entities.
+func (c *OauthPersonalAccessClientClient) CreateBulk(builders ...*OauthPersonalAccessClientCreate) *OauthPersonalAccessClientCreateBulk {
+	return &OauthPersonalAccessClientCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OauthPersonalAccessClientClient) MapCreateBulk(slice any, setFunc func(*OauthPersonalAccessClientCreate, int)) *OauthPersonalAccessClientCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OauthPersonalAccessClientCreateBulk{err: fmt.Errorf("calling to OauthPersonalAccessClientClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OauthPersonalAccessClientCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OauthPersonalAccessClientCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OauthPersonalAccessClient.
+func (c *OauthPersonalAccessClientClient) Update() *OauthPersonalAccessClientUpdate {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpUpdate)
+	return &OauthPersonalAccessClientUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OauthPersonalAccessClientClient) UpdateOne(_m *OauthPersonalAccessClient) *OauthPersonalAccessClientUpdateOne {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpUpdateOne, withOauthPersonalAccessClient(_m))
+	return &OauthPersonalAccessClientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OauthPersonalAccessClientClient) UpdateOneID(id uint64) *OauthPersonalAccessClientUpdateOne {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpUpdateOne, withOauthPersonalAccessClientID(id))
+	return &OauthPersonalAccessClientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OauthPersonalAccessClient.
+func (c *OauthPersonalAccessClientClient) Delete() *OauthPersonalAccessClientDelete {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpDelete)
+	return &OauthPersonalAccessClientDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OauthPersonalAccessClientClient) DeleteOne(_m *OauthPersonalAccessClient) *OauthPersonalAccessClientDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OauthPersonalAccessClientClient) DeleteOneID(id uint64) *OauthPersonalAccessClientDeleteOne {
+	builder := c.Delete().Where(oauthpersonalaccessclient.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OauthPersonalAccessClientDeleteOne{builder}
+}
+
+// Query returns a query builder for OauthPersonalAccessClient.
+func (c *OauthPersonalAccessClientClient) Query() *OauthPersonalAccessClientQuery {
+	return &OauthPersonalAccessClientQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOauthPersonalAccessClient},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OauthPersonalAccessClient entity by its id.
+func (c *OauthPersonalAccessClientClient) Get(ctx context.Context, id uint64) (*OauthPersonalAccessClient, error) {
+	return c.Query().Where(oauthpersonalaccessclient.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OauthPersonalAccessClientClient) GetX(ctx context.Context, id uint64) *OauthPersonalAccessClient {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OauthPersonalAccessClientClient) Hooks() []Hook {
+	return c.hooks.OauthPersonalAccessClient
+}
+
+// Interceptors returns the client interceptors.
+func (c *OauthPersonalAccessClientClient) Interceptors() []Interceptor {
+	return c.inters.OauthPersonalAccessClient
+}
+
+func (c *OauthPersonalAccessClientClient) mutate(ctx context.Context, m *OauthPersonalAccessClientMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OauthPersonalAccessClientCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OauthPersonalAccessClientUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OauthPersonalAccessClientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OauthPersonalAccessClientDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OauthPersonalAccessClient mutation op: %q", m.Op())
+	}
+}
+
 // OauthPkceClient is a client for the OauthPkce schema.
 type OauthPkceClient struct {
 	config
@@ -15801,14 +15944,14 @@ type (
 		HashtagRelated, ImportData, ImportJob, ImportPost, Instance, InstanceActor,
 		Like, LiveStream, Media, MediaBlocklist, MediaTag, Mention, ModLog,
 		ModeratedProfile, Newsroom, Notification, OauthAccessToken,
-		OauthAuthorizationCode, OauthClient, OauthPkce, OauthRefreshToken, Page,
-		ParentalControls, Place, Poll, PollVote, Portfolio, Profile, ProfileAlias,
-		ProfileMigration, ProfileSponsor, RemoteAuth, RemoteAuthInstance, RemoteReport,
-		Report, ReportComment, ReportLog, Status, StatusArchived, StatusEdit,
-		StatusHashtag, StatusView, Story, StoryItem, StoryReaction, StoryView, UIKit,
-		User, UserAppSettings, UserDevice, UserDomainBlock, UserEmailForgot,
-		UserFilter, UserInvite, UserOidcMapping, UserPronoun, UserRoles,
-		UserSetting []ent.Hook
+		OauthAuthorizationCode, OauthClient, OauthPersonalAccessClient, OauthPkce,
+		OauthRefreshToken, Page, ParentalControls, Place, Poll, PollVote, Portfolio,
+		Profile, ProfileAlias, ProfileMigration, ProfileSponsor, RemoteAuth,
+		RemoteAuthInstance, RemoteReport, Report, ReportComment, ReportLog, Status,
+		StatusArchived, StatusEdit, StatusHashtag, StatusView, Story, StoryItem,
+		StoryReaction, StoryView, UIKit, User, UserAppSettings, UserDevice,
+		UserDomainBlock, UserEmailForgot, UserFilter, UserInvite, UserOidcMapping,
+		UserPronoun, UserRoles, UserSetting []ent.Hook
 	}
 	inters struct {
 		AccountInterstitial, AccountLog, Activity, AdminInvite, AdminShadowFilter,
@@ -15824,13 +15967,13 @@ type (
 		HashtagRelated, ImportData, ImportJob, ImportPost, Instance, InstanceActor,
 		Like, LiveStream, Media, MediaBlocklist, MediaTag, Mention, ModLog,
 		ModeratedProfile, Newsroom, Notification, OauthAccessToken,
-		OauthAuthorizationCode, OauthClient, OauthPkce, OauthRefreshToken, Page,
-		ParentalControls, Place, Poll, PollVote, Portfolio, Profile, ProfileAlias,
-		ProfileMigration, ProfileSponsor, RemoteAuth, RemoteAuthInstance, RemoteReport,
-		Report, ReportComment, ReportLog, Status, StatusArchived, StatusEdit,
-		StatusHashtag, StatusView, Story, StoryItem, StoryReaction, StoryView, UIKit,
-		User, UserAppSettings, UserDevice, UserDomainBlock, UserEmailForgot,
-		UserFilter, UserInvite, UserOidcMapping, UserPronoun, UserRoles,
-		UserSetting []ent.Interceptor
+		OauthAuthorizationCode, OauthClient, OauthPersonalAccessClient, OauthPkce,
+		OauthRefreshToken, Page, ParentalControls, Place, Poll, PollVote, Portfolio,
+		Profile, ProfileAlias, ProfileMigration, ProfileSponsor, RemoteAuth,
+		RemoteAuthInstance, RemoteReport, Report, ReportComment, ReportLog, Status,
+		StatusArchived, StatusEdit, StatusHashtag, StatusView, Story, StoryItem,
+		StoryReaction, StoryView, UIKit, User, UserAppSettings, UserDevice,
+		UserDomainBlock, UserEmailForgot, UserFilter, UserInvite, UserOidcMapping,
+		UserPronoun, UserRoles, UserSetting []ent.Interceptor
 	}
 )

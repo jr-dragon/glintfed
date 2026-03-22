@@ -20,53 +20,15 @@ type OauthRefreshTokenCreate struct {
 	hooks    []Hook
 }
 
-// SetRequestID sets the "request_id" field.
-func (_c *OauthRefreshTokenCreate) SetRequestID(v string) *OauthRefreshTokenCreate {
-	_c.mutation.SetRequestID(v)
+// SetAccessTokenID sets the "access_token_id" field.
+func (_c *OauthRefreshTokenCreate) SetAccessTokenID(v string) *OauthRefreshTokenCreate {
+	_c.mutation.SetAccessTokenID(v)
 	return _c
 }
 
-// SetClientID sets the "client_id" field.
-func (_c *OauthRefreshTokenCreate) SetClientID(v string) *OauthRefreshTokenCreate {
-	_c.mutation.SetClientID(v)
-	return _c
-}
-
-// SetSubject sets the "subject" field.
-func (_c *OauthRefreshTokenCreate) SetSubject(v string) *OauthRefreshTokenCreate {
-	_c.mutation.SetSubject(v)
-	return _c
-}
-
-// SetScopes sets the "scopes" field.
-func (_c *OauthRefreshTokenCreate) SetScopes(v []string) *OauthRefreshTokenCreate {
-	_c.mutation.SetScopes(v)
-	return _c
-}
-
-// SetSession sets the "session" field.
-func (_c *OauthRefreshTokenCreate) SetSession(v []byte) *OauthRefreshTokenCreate {
-	_c.mutation.SetSession(v)
-	return _c
-}
-
-// SetActive sets the "active" field.
-func (_c *OauthRefreshTokenCreate) SetActive(v bool) *OauthRefreshTokenCreate {
-	_c.mutation.SetActive(v)
-	return _c
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *OauthRefreshTokenCreate) SetNillableActive(v *bool) *OauthRefreshTokenCreate {
-	if v != nil {
-		_c.SetActive(*v)
-	}
-	return _c
-}
-
-// SetRequestedAt sets the "requested_at" field.
-func (_c *OauthRefreshTokenCreate) SetRequestedAt(v time.Time) *OauthRefreshTokenCreate {
-	_c.mutation.SetRequestedAt(v)
+// SetRevoked sets the "revoked" field.
+func (_c *OauthRefreshTokenCreate) SetRevoked(v bool) *OauthRefreshTokenCreate {
+	_c.mutation.SetRevoked(v)
 	return _c
 }
 
@@ -76,16 +38,10 @@ func (_c *OauthRefreshTokenCreate) SetExpiresAt(v time.Time) *OauthRefreshTokenC
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *OauthRefreshTokenCreate) SetCreatedAt(v time.Time) *OauthRefreshTokenCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *OauthRefreshTokenCreate) SetNillableCreatedAt(v *time.Time) *OauthRefreshTokenCreate {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_c *OauthRefreshTokenCreate) SetNillableExpiresAt(v *time.Time) *OauthRefreshTokenCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetExpiresAt(*v)
 	}
 	return _c
 }
@@ -103,7 +59,6 @@ func (_c *OauthRefreshTokenCreate) Mutation() *OauthRefreshTokenMutation {
 
 // Save creates the OauthRefreshToken in the database.
 func (_c *OauthRefreshTokenCreate) Save(ctx context.Context) (*OauthRefreshToken, error) {
-	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -129,46 +84,23 @@ func (_c *OauthRefreshTokenCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *OauthRefreshTokenCreate) defaults() {
-	if _, ok := _c.mutation.Active(); !ok {
-		v := oauthrefreshtoken.DefaultActive
-		_c.mutation.SetActive(v)
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := oauthrefreshtoken.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (_c *OauthRefreshTokenCreate) check() error {
-	if _, ok := _c.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request_id", err: errors.New(`ent: missing required field "OauthRefreshToken.request_id"`)}
+	if _, ok := _c.mutation.AccessTokenID(); !ok {
+		return &ValidationError{Name: "access_token_id", err: errors.New(`ent: missing required field "OauthRefreshToken.access_token_id"`)}
 	}
-	if _, ok := _c.mutation.ClientID(); !ok {
-		return &ValidationError{Name: "client_id", err: errors.New(`ent: missing required field "OauthRefreshToken.client_id"`)}
+	if v, ok := _c.mutation.AccessTokenID(); ok {
+		if err := oauthrefreshtoken.AccessTokenIDValidator(v); err != nil {
+			return &ValidationError{Name: "access_token_id", err: fmt.Errorf(`ent: validator failed for field "OauthRefreshToken.access_token_id": %w`, err)}
+		}
 	}
-	if _, ok := _c.mutation.Subject(); !ok {
-		return &ValidationError{Name: "subject", err: errors.New(`ent: missing required field "OauthRefreshToken.subject"`)}
+	if _, ok := _c.mutation.Revoked(); !ok {
+		return &ValidationError{Name: "revoked", err: errors.New(`ent: missing required field "OauthRefreshToken.revoked"`)}
 	}
-	if _, ok := _c.mutation.Scopes(); !ok {
-		return &ValidationError{Name: "scopes", err: errors.New(`ent: missing required field "OauthRefreshToken.scopes"`)}
-	}
-	if _, ok := _c.mutation.Session(); !ok {
-		return &ValidationError{Name: "session", err: errors.New(`ent: missing required field "OauthRefreshToken.session"`)}
-	}
-	if _, ok := _c.mutation.Active(); !ok {
-		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "OauthRefreshToken.active"`)}
-	}
-	if _, ok := _c.mutation.RequestedAt(); !ok {
-		return &ValidationError{Name: "requested_at", err: errors.New(`ent: missing required field "OauthRefreshToken.requested_at"`)}
-	}
-	if _, ok := _c.mutation.ExpiresAt(); !ok {
-		return &ValidationError{Name: "expires_at", err: errors.New(`ent: missing required field "OauthRefreshToken.expires_at"`)}
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "OauthRefreshToken.created_at"`)}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := oauthrefreshtoken.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "OauthRefreshToken.id": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -205,41 +137,17 @@ func (_c *OauthRefreshTokenCreate) createSpec() (*OauthRefreshToken, *sqlgraph.C
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.RequestID(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldRequestID, field.TypeString, value)
-		_node.RequestID = value
+	if value, ok := _c.mutation.AccessTokenID(); ok {
+		_spec.SetField(oauthrefreshtoken.FieldAccessTokenID, field.TypeString, value)
+		_node.AccessTokenID = value
 	}
-	if value, ok := _c.mutation.ClientID(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldClientID, field.TypeString, value)
-		_node.ClientID = value
-	}
-	if value, ok := _c.mutation.Subject(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldSubject, field.TypeString, value)
-		_node.Subject = value
-	}
-	if value, ok := _c.mutation.Scopes(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldScopes, field.TypeJSON, value)
-		_node.Scopes = value
-	}
-	if value, ok := _c.mutation.Session(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldSession, field.TypeBytes, value)
-		_node.Session = value
-	}
-	if value, ok := _c.mutation.Active(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldActive, field.TypeBool, value)
-		_node.Active = value
-	}
-	if value, ok := _c.mutation.RequestedAt(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldRequestedAt, field.TypeTime, value)
-		_node.RequestedAt = value
+	if value, ok := _c.mutation.Revoked(); ok {
+		_spec.SetField(oauthrefreshtoken.FieldRevoked, field.TypeBool, value)
+		_node.Revoked = value
 	}
 	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(oauthrefreshtoken.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
-	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(oauthrefreshtoken.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
 	}
 	return _node, _spec
 }
@@ -262,7 +170,6 @@ func (_c *OauthRefreshTokenCreateBulk) Save(ctx context.Context) ([]*OauthRefres
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*OauthRefreshTokenMutation)
 				if !ok {

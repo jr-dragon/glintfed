@@ -64,34 +64,14 @@ func IDContainsFold(id string) predicate.OauthRefreshToken {
 	return predicate.OauthRefreshToken(sql.FieldContainsFold(FieldID, id))
 }
 
-// RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
-func RequestID(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldRequestID, v))
+// AccessTokenID applies equality check predicate on the "access_token_id" field. It's identical to AccessTokenIDEQ.
+func AccessTokenID(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldEQ(FieldAccessTokenID, v))
 }
 
-// ClientID applies equality check predicate on the "client_id" field. It's identical to ClientIDEQ.
-func ClientID(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldClientID, v))
-}
-
-// Subject applies equality check predicate on the "subject" field. It's identical to SubjectEQ.
-func Subject(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldSubject, v))
-}
-
-// Session applies equality check predicate on the "session" field. It's identical to SessionEQ.
-func Session(v []byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldSession, v))
-}
-
-// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
-func Active(v bool) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldActive, v))
-}
-
-// RequestedAt applies equality check predicate on the "requested_at" field. It's identical to RequestedAtEQ.
-func RequestedAt(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldRequestedAt, v))
+// Revoked applies equality check predicate on the "revoked" field. It's identical to RevokedEQ.
+func Revoked(v bool) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldEQ(FieldRevoked, v))
 }
 
 // ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
@@ -99,294 +79,79 @@ func ExpiresAt(v time.Time) predicate.OauthRefreshToken {
 	return predicate.OauthRefreshToken(sql.FieldEQ(FieldExpiresAt, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldCreatedAt, v))
+// AccessTokenIDEQ applies the EQ predicate on the "access_token_id" field.
+func AccessTokenIDEQ(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldEQ(FieldAccessTokenID, v))
 }
 
-// RequestIDEQ applies the EQ predicate on the "request_id" field.
-func RequestIDEQ(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldRequestID, v))
+// AccessTokenIDNEQ applies the NEQ predicate on the "access_token_id" field.
+func AccessTokenIDNEQ(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldAccessTokenID, v))
 }
 
-// RequestIDNEQ applies the NEQ predicate on the "request_id" field.
-func RequestIDNEQ(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldRequestID, v))
+// AccessTokenIDIn applies the In predicate on the "access_token_id" field.
+func AccessTokenIDIn(vs ...string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldIn(FieldAccessTokenID, vs...))
 }
 
-// RequestIDIn applies the In predicate on the "request_id" field.
-func RequestIDIn(vs ...string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldIn(FieldRequestID, vs...))
+// AccessTokenIDNotIn applies the NotIn predicate on the "access_token_id" field.
+func AccessTokenIDNotIn(vs ...string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldNotIn(FieldAccessTokenID, vs...))
 }
 
-// RequestIDNotIn applies the NotIn predicate on the "request_id" field.
-func RequestIDNotIn(vs ...string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNotIn(FieldRequestID, vs...))
+// AccessTokenIDGT applies the GT predicate on the "access_token_id" field.
+func AccessTokenIDGT(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldGT(FieldAccessTokenID, v))
 }
 
-// RequestIDGT applies the GT predicate on the "request_id" field.
-func RequestIDGT(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGT(FieldRequestID, v))
+// AccessTokenIDGTE applies the GTE predicate on the "access_token_id" field.
+func AccessTokenIDGTE(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldGTE(FieldAccessTokenID, v))
 }
 
-// RequestIDGTE applies the GTE predicate on the "request_id" field.
-func RequestIDGTE(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGTE(FieldRequestID, v))
+// AccessTokenIDLT applies the LT predicate on the "access_token_id" field.
+func AccessTokenIDLT(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldLT(FieldAccessTokenID, v))
 }
 
-// RequestIDLT applies the LT predicate on the "request_id" field.
-func RequestIDLT(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLT(FieldRequestID, v))
+// AccessTokenIDLTE applies the LTE predicate on the "access_token_id" field.
+func AccessTokenIDLTE(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldLTE(FieldAccessTokenID, v))
 }
 
-// RequestIDLTE applies the LTE predicate on the "request_id" field.
-func RequestIDLTE(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLTE(FieldRequestID, v))
+// AccessTokenIDContains applies the Contains predicate on the "access_token_id" field.
+func AccessTokenIDContains(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldContains(FieldAccessTokenID, v))
 }
 
-// RequestIDContains applies the Contains predicate on the "request_id" field.
-func RequestIDContains(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldContains(FieldRequestID, v))
+// AccessTokenIDHasPrefix applies the HasPrefix predicate on the "access_token_id" field.
+func AccessTokenIDHasPrefix(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldHasPrefix(FieldAccessTokenID, v))
 }
 
-// RequestIDHasPrefix applies the HasPrefix predicate on the "request_id" field.
-func RequestIDHasPrefix(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldHasPrefix(FieldRequestID, v))
+// AccessTokenIDHasSuffix applies the HasSuffix predicate on the "access_token_id" field.
+func AccessTokenIDHasSuffix(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldHasSuffix(FieldAccessTokenID, v))
 }
 
-// RequestIDHasSuffix applies the HasSuffix predicate on the "request_id" field.
-func RequestIDHasSuffix(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldHasSuffix(FieldRequestID, v))
+// AccessTokenIDEqualFold applies the EqualFold predicate on the "access_token_id" field.
+func AccessTokenIDEqualFold(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldEqualFold(FieldAccessTokenID, v))
 }
 
-// RequestIDEqualFold applies the EqualFold predicate on the "request_id" field.
-func RequestIDEqualFold(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEqualFold(FieldRequestID, v))
+// AccessTokenIDContainsFold applies the ContainsFold predicate on the "access_token_id" field.
+func AccessTokenIDContainsFold(v string) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldContainsFold(FieldAccessTokenID, v))
 }
 
-// RequestIDContainsFold applies the ContainsFold predicate on the "request_id" field.
-func RequestIDContainsFold(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldContainsFold(FieldRequestID, v))
+// RevokedEQ applies the EQ predicate on the "revoked" field.
+func RevokedEQ(v bool) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldEQ(FieldRevoked, v))
 }
 
-// ClientIDEQ applies the EQ predicate on the "client_id" field.
-func ClientIDEQ(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldClientID, v))
-}
-
-// ClientIDNEQ applies the NEQ predicate on the "client_id" field.
-func ClientIDNEQ(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldClientID, v))
-}
-
-// ClientIDIn applies the In predicate on the "client_id" field.
-func ClientIDIn(vs ...string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldIn(FieldClientID, vs...))
-}
-
-// ClientIDNotIn applies the NotIn predicate on the "client_id" field.
-func ClientIDNotIn(vs ...string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNotIn(FieldClientID, vs...))
-}
-
-// ClientIDGT applies the GT predicate on the "client_id" field.
-func ClientIDGT(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGT(FieldClientID, v))
-}
-
-// ClientIDGTE applies the GTE predicate on the "client_id" field.
-func ClientIDGTE(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGTE(FieldClientID, v))
-}
-
-// ClientIDLT applies the LT predicate on the "client_id" field.
-func ClientIDLT(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLT(FieldClientID, v))
-}
-
-// ClientIDLTE applies the LTE predicate on the "client_id" field.
-func ClientIDLTE(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLTE(FieldClientID, v))
-}
-
-// ClientIDContains applies the Contains predicate on the "client_id" field.
-func ClientIDContains(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldContains(FieldClientID, v))
-}
-
-// ClientIDHasPrefix applies the HasPrefix predicate on the "client_id" field.
-func ClientIDHasPrefix(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldHasPrefix(FieldClientID, v))
-}
-
-// ClientIDHasSuffix applies the HasSuffix predicate on the "client_id" field.
-func ClientIDHasSuffix(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldHasSuffix(FieldClientID, v))
-}
-
-// ClientIDEqualFold applies the EqualFold predicate on the "client_id" field.
-func ClientIDEqualFold(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEqualFold(FieldClientID, v))
-}
-
-// ClientIDContainsFold applies the ContainsFold predicate on the "client_id" field.
-func ClientIDContainsFold(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldContainsFold(FieldClientID, v))
-}
-
-// SubjectEQ applies the EQ predicate on the "subject" field.
-func SubjectEQ(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldSubject, v))
-}
-
-// SubjectNEQ applies the NEQ predicate on the "subject" field.
-func SubjectNEQ(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldSubject, v))
-}
-
-// SubjectIn applies the In predicate on the "subject" field.
-func SubjectIn(vs ...string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldIn(FieldSubject, vs...))
-}
-
-// SubjectNotIn applies the NotIn predicate on the "subject" field.
-func SubjectNotIn(vs ...string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNotIn(FieldSubject, vs...))
-}
-
-// SubjectGT applies the GT predicate on the "subject" field.
-func SubjectGT(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGT(FieldSubject, v))
-}
-
-// SubjectGTE applies the GTE predicate on the "subject" field.
-func SubjectGTE(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGTE(FieldSubject, v))
-}
-
-// SubjectLT applies the LT predicate on the "subject" field.
-func SubjectLT(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLT(FieldSubject, v))
-}
-
-// SubjectLTE applies the LTE predicate on the "subject" field.
-func SubjectLTE(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLTE(FieldSubject, v))
-}
-
-// SubjectContains applies the Contains predicate on the "subject" field.
-func SubjectContains(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldContains(FieldSubject, v))
-}
-
-// SubjectHasPrefix applies the HasPrefix predicate on the "subject" field.
-func SubjectHasPrefix(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldHasPrefix(FieldSubject, v))
-}
-
-// SubjectHasSuffix applies the HasSuffix predicate on the "subject" field.
-func SubjectHasSuffix(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldHasSuffix(FieldSubject, v))
-}
-
-// SubjectEqualFold applies the EqualFold predicate on the "subject" field.
-func SubjectEqualFold(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEqualFold(FieldSubject, v))
-}
-
-// SubjectContainsFold applies the ContainsFold predicate on the "subject" field.
-func SubjectContainsFold(v string) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldContainsFold(FieldSubject, v))
-}
-
-// SessionEQ applies the EQ predicate on the "session" field.
-func SessionEQ(v []byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldSession, v))
-}
-
-// SessionNEQ applies the NEQ predicate on the "session" field.
-func SessionNEQ(v []byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldSession, v))
-}
-
-// SessionIn applies the In predicate on the "session" field.
-func SessionIn(vs ...[]byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldIn(FieldSession, vs...))
-}
-
-// SessionNotIn applies the NotIn predicate on the "session" field.
-func SessionNotIn(vs ...[]byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNotIn(FieldSession, vs...))
-}
-
-// SessionGT applies the GT predicate on the "session" field.
-func SessionGT(v []byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGT(FieldSession, v))
-}
-
-// SessionGTE applies the GTE predicate on the "session" field.
-func SessionGTE(v []byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGTE(FieldSession, v))
-}
-
-// SessionLT applies the LT predicate on the "session" field.
-func SessionLT(v []byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLT(FieldSession, v))
-}
-
-// SessionLTE applies the LTE predicate on the "session" field.
-func SessionLTE(v []byte) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLTE(FieldSession, v))
-}
-
-// ActiveEQ applies the EQ predicate on the "active" field.
-func ActiveEQ(v bool) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldActive, v))
-}
-
-// ActiveNEQ applies the NEQ predicate on the "active" field.
-func ActiveNEQ(v bool) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldActive, v))
-}
-
-// RequestedAtEQ applies the EQ predicate on the "requested_at" field.
-func RequestedAtEQ(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldRequestedAt, v))
-}
-
-// RequestedAtNEQ applies the NEQ predicate on the "requested_at" field.
-func RequestedAtNEQ(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldRequestedAt, v))
-}
-
-// RequestedAtIn applies the In predicate on the "requested_at" field.
-func RequestedAtIn(vs ...time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldIn(FieldRequestedAt, vs...))
-}
-
-// RequestedAtNotIn applies the NotIn predicate on the "requested_at" field.
-func RequestedAtNotIn(vs ...time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNotIn(FieldRequestedAt, vs...))
-}
-
-// RequestedAtGT applies the GT predicate on the "requested_at" field.
-func RequestedAtGT(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGT(FieldRequestedAt, v))
-}
-
-// RequestedAtGTE applies the GTE predicate on the "requested_at" field.
-func RequestedAtGTE(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGTE(FieldRequestedAt, v))
-}
-
-// RequestedAtLT applies the LT predicate on the "requested_at" field.
-func RequestedAtLT(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLT(FieldRequestedAt, v))
-}
-
-// RequestedAtLTE applies the LTE predicate on the "requested_at" field.
-func RequestedAtLTE(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLTE(FieldRequestedAt, v))
+// RevokedNEQ applies the NEQ predicate on the "revoked" field.
+func RevokedNEQ(v bool) predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldRevoked, v))
 }
 
 // ExpiresAtEQ applies the EQ predicate on the "expires_at" field.
@@ -429,44 +194,14 @@ func ExpiresAtLTE(v time.Time) predicate.OauthRefreshToken {
 	return predicate.OauthRefreshToken(sql.FieldLTE(FieldExpiresAt, v))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldEQ(FieldCreatedAt, v))
+// ExpiresAtIsNil applies the IsNil predicate on the "expires_at" field.
+func ExpiresAtIsNil() predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldIsNull(FieldExpiresAt))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNEQ(FieldCreatedAt, v))
-}
-
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldNotIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGT(FieldCreatedAt, v))
-}
-
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldGTE(FieldCreatedAt, v))
-}
-
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLT(FieldCreatedAt, v))
-}
-
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.OauthRefreshToken {
-	return predicate.OauthRefreshToken(sql.FieldLTE(FieldCreatedAt, v))
+// ExpiresAtNotNil applies the NotNil predicate on the "expires_at" field.
+func ExpiresAtNotNil() predicate.OauthRefreshToken {
+	return predicate.OauthRefreshToken(sql.FieldNotNull(FieldExpiresAt))
 }
 
 // And groups predicates with the AND operator between them.

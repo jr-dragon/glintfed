@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -18,24 +17,12 @@ type OauthRefreshToken struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
-	// RequestID holds the value of the "request_id" field.
-	RequestID string `json:"request_id,omitempty"`
-	// ClientID holds the value of the "client_id" field.
-	ClientID string `json:"client_id,omitempty"`
-	// Subject holds the value of the "subject" field.
-	Subject string `json:"subject,omitempty"`
-	// Scopes holds the value of the "scopes" field.
-	Scopes []string `json:"scopes,omitempty"`
-	// Session holds the value of the "session" field.
-	Session []byte `json:"session,omitempty"`
-	// Active holds the value of the "active" field.
-	Active bool `json:"active,omitempty"`
-	// RequestedAt holds the value of the "requested_at" field.
-	RequestedAt time.Time `json:"requested_at,omitempty"`
+	// AccessTokenID holds the value of the "access_token_id" field.
+	AccessTokenID string `json:"access_token_id,omitempty"`
+	// Revoked holds the value of the "revoked" field.
+	Revoked bool `json:"revoked,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
-	ExpiresAt time.Time `json:"expires_at,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt    time.Time `json:"created_at,omitempty"`
+	ExpiresAt    time.Time `json:"expires_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -44,13 +31,11 @@ func (*OauthRefreshToken) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case oauthrefreshtoken.FieldScopes, oauthrefreshtoken.FieldSession:
-			values[i] = new([]byte)
-		case oauthrefreshtoken.FieldActive:
+		case oauthrefreshtoken.FieldRevoked:
 			values[i] = new(sql.NullBool)
-		case oauthrefreshtoken.FieldID, oauthrefreshtoken.FieldRequestID, oauthrefreshtoken.FieldClientID, oauthrefreshtoken.FieldSubject:
+		case oauthrefreshtoken.FieldID, oauthrefreshtoken.FieldAccessTokenID:
 			values[i] = new(sql.NullString)
-		case oauthrefreshtoken.FieldRequestedAt, oauthrefreshtoken.FieldExpiresAt, oauthrefreshtoken.FieldCreatedAt:
+		case oauthrefreshtoken.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -73,61 +58,23 @@ func (_m *OauthRefreshToken) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				_m.ID = value.String
 			}
-		case oauthrefreshtoken.FieldRequestID:
+		case oauthrefreshtoken.FieldAccessTokenID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+				return fmt.Errorf("unexpected type %T for field access_token_id", values[i])
 			} else if value.Valid {
-				_m.RequestID = value.String
+				_m.AccessTokenID = value.String
 			}
-		case oauthrefreshtoken.FieldClientID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field client_id", values[i])
-			} else if value.Valid {
-				_m.ClientID = value.String
-			}
-		case oauthrefreshtoken.FieldSubject:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field subject", values[i])
-			} else if value.Valid {
-				_m.Subject = value.String
-			}
-		case oauthrefreshtoken.FieldScopes:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field scopes", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Scopes); err != nil {
-					return fmt.Errorf("unmarshal field scopes: %w", err)
-				}
-			}
-		case oauthrefreshtoken.FieldSession:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field session", values[i])
-			} else if value != nil {
-				_m.Session = *value
-			}
-		case oauthrefreshtoken.FieldActive:
+		case oauthrefreshtoken.FieldRevoked:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field active", values[i])
+				return fmt.Errorf("unexpected type %T for field revoked", values[i])
 			} else if value.Valid {
-				_m.Active = value.Bool
-			}
-		case oauthrefreshtoken.FieldRequestedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field requested_at", values[i])
-			} else if value.Valid {
-				_m.RequestedAt = value.Time
+				_m.Revoked = value.Bool
 			}
 		case oauthrefreshtoken.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
 				_m.ExpiresAt = value.Time
-			}
-		case oauthrefreshtoken.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				_m.CreatedAt = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -165,32 +112,14 @@ func (_m *OauthRefreshToken) String() string {
 	var builder strings.Builder
 	builder.WriteString("OauthRefreshToken(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("request_id=")
-	builder.WriteString(_m.RequestID)
+	builder.WriteString("access_token_id=")
+	builder.WriteString(_m.AccessTokenID)
 	builder.WriteString(", ")
-	builder.WriteString("client_id=")
-	builder.WriteString(_m.ClientID)
-	builder.WriteString(", ")
-	builder.WriteString("subject=")
-	builder.WriteString(_m.Subject)
-	builder.WriteString(", ")
-	builder.WriteString("scopes=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Scopes))
-	builder.WriteString(", ")
-	builder.WriteString("session=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Session))
-	builder.WriteString(", ")
-	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Active))
-	builder.WriteString(", ")
-	builder.WriteString("requested_at=")
-	builder.WriteString(_m.RequestedAt.Format(time.ANSIC))
+	builder.WriteString("revoked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Revoked))
 	builder.WriteString(", ")
 	builder.WriteString("expires_at=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -18,24 +17,22 @@ type OauthAccessToken struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
-	// RequestID holds the value of the "request_id" field.
-	RequestID string `json:"request_id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID uint64 `json:"user_id,omitempty"`
 	// ClientID holds the value of the "client_id" field.
-	ClientID string `json:"client_id,omitempty"`
-	// Subject holds the value of the "subject" field.
-	Subject string `json:"subject,omitempty"`
+	ClientID uint64 `json:"client_id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// Scopes holds the value of the "scopes" field.
-	Scopes []string `json:"scopes,omitempty"`
-	// Session holds the value of the "session" field.
-	Session []byte `json:"session,omitempty"`
-	// Active holds the value of the "active" field.
-	Active bool `json:"active,omitempty"`
-	// RequestedAt holds the value of the "requested_at" field.
-	RequestedAt time.Time `json:"requested_at,omitempty"`
-	// ExpiresAt holds the value of the "expires_at" field.
-	ExpiresAt time.Time `json:"expires_at,omitempty"`
+	Scopes string `json:"scopes,omitempty"`
+	// Revoked holds the value of the "revoked" field.
+	Revoked bool `json:"revoked,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt    time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// ExpiresAt holds the value of the "expires_at" field.
+	ExpiresAt    time.Time `json:"expires_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -44,13 +41,13 @@ func (*OauthAccessToken) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case oauthaccesstoken.FieldScopes, oauthaccesstoken.FieldSession:
-			values[i] = new([]byte)
-		case oauthaccesstoken.FieldActive:
+		case oauthaccesstoken.FieldRevoked:
 			values[i] = new(sql.NullBool)
-		case oauthaccesstoken.FieldID, oauthaccesstoken.FieldRequestID, oauthaccesstoken.FieldClientID, oauthaccesstoken.FieldSubject:
+		case oauthaccesstoken.FieldUserID, oauthaccesstoken.FieldClientID:
+			values[i] = new(sql.NullInt64)
+		case oauthaccesstoken.FieldID, oauthaccesstoken.FieldName, oauthaccesstoken.FieldScopes:
 			values[i] = new(sql.NullString)
-		case oauthaccesstoken.FieldRequestedAt, oauthaccesstoken.FieldExpiresAt, oauthaccesstoken.FieldCreatedAt:
+		case oauthaccesstoken.FieldCreatedAt, oauthaccesstoken.FieldUpdatedAt, oauthaccesstoken.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -73,61 +70,53 @@ func (_m *OauthAccessToken) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ID = value.String
 			}
-		case oauthaccesstoken.FieldRequestID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+		case oauthaccesstoken.FieldUserID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.RequestID = value.String
+				_m.UserID = uint64(value.Int64)
 			}
 		case oauthaccesstoken.FieldClientID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field client_id", values[i])
 			} else if value.Valid {
-				_m.ClientID = value.String
+				_m.ClientID = uint64(value.Int64)
 			}
-		case oauthaccesstoken.FieldSubject:
+		case oauthaccesstoken.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field subject", values[i])
+				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				_m.Subject = value.String
+				_m.Name = value.String
 			}
 		case oauthaccesstoken.FieldScopes:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scopes", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Scopes); err != nil {
-					return fmt.Errorf("unmarshal field scopes: %w", err)
-				}
+			} else if value.Valid {
+				_m.Scopes = value.String
 			}
-		case oauthaccesstoken.FieldSession:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field session", values[i])
-			} else if value != nil {
-				_m.Session = *value
-			}
-		case oauthaccesstoken.FieldActive:
+		case oauthaccesstoken.FieldRevoked:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field active", values[i])
+				return fmt.Errorf("unexpected type %T for field revoked", values[i])
 			} else if value.Valid {
-				_m.Active = value.Bool
-			}
-		case oauthaccesstoken.FieldRequestedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field requested_at", values[i])
-			} else if value.Valid {
-				_m.RequestedAt = value.Time
-			}
-		case oauthaccesstoken.FieldExpiresAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
-			} else if value.Valid {
-				_m.ExpiresAt = value.Time
+				_m.Revoked = value.Bool
 			}
 		case oauthaccesstoken.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
+			}
+		case oauthaccesstoken.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
+			}
+		case oauthaccesstoken.FieldExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
+			} else if value.Valid {
+				_m.ExpiresAt = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -165,32 +154,29 @@ func (_m *OauthAccessToken) String() string {
 	var builder strings.Builder
 	builder.WriteString("OauthAccessToken(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("request_id=")
-	builder.WriteString(_m.RequestID)
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("client_id=")
-	builder.WriteString(_m.ClientID)
+	builder.WriteString(fmt.Sprintf("%v", _m.ClientID))
 	builder.WriteString(", ")
-	builder.WriteString("subject=")
-	builder.WriteString(_m.Subject)
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("scopes=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Scopes))
+	builder.WriteString(_m.Scopes)
 	builder.WriteString(", ")
-	builder.WriteString("session=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Session))
-	builder.WriteString(", ")
-	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Active))
-	builder.WriteString(", ")
-	builder.WriteString("requested_at=")
-	builder.WriteString(_m.RequestedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("expires_at=")
-	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString("revoked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Revoked))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("expires_at=")
+	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -11,68 +11,68 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"glintfed.org/ent/oauthaccesstoken"
+	"glintfed.org/ent/oauthpersonalaccessclient"
 	"glintfed.org/ent/predicate"
 )
 
-// OauthAccessTokenQuery is the builder for querying OauthAccessToken entities.
-type OauthAccessTokenQuery struct {
+// OauthPersonalAccessClientQuery is the builder for querying OauthPersonalAccessClient entities.
+type OauthPersonalAccessClientQuery struct {
 	config
 	ctx        *QueryContext
-	order      []oauthaccesstoken.OrderOption
+	order      []oauthpersonalaccessclient.OrderOption
 	inters     []Interceptor
-	predicates []predicate.OauthAccessToken
+	predicates []predicate.OauthPersonalAccessClient
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the OauthAccessTokenQuery builder.
-func (_q *OauthAccessTokenQuery) Where(ps ...predicate.OauthAccessToken) *OauthAccessTokenQuery {
+// Where adds a new predicate for the OauthPersonalAccessClientQuery builder.
+func (_q *OauthPersonalAccessClientQuery) Where(ps ...predicate.OauthPersonalAccessClient) *OauthPersonalAccessClientQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *OauthAccessTokenQuery) Limit(limit int) *OauthAccessTokenQuery {
+func (_q *OauthPersonalAccessClientQuery) Limit(limit int) *OauthPersonalAccessClientQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *OauthAccessTokenQuery) Offset(offset int) *OauthAccessTokenQuery {
+func (_q *OauthPersonalAccessClientQuery) Offset(offset int) *OauthPersonalAccessClientQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *OauthAccessTokenQuery) Unique(unique bool) *OauthAccessTokenQuery {
+func (_q *OauthPersonalAccessClientQuery) Unique(unique bool) *OauthPersonalAccessClientQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *OauthAccessTokenQuery) Order(o ...oauthaccesstoken.OrderOption) *OauthAccessTokenQuery {
+func (_q *OauthPersonalAccessClientQuery) Order(o ...oauthpersonalaccessclient.OrderOption) *OauthPersonalAccessClientQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// First returns the first OauthAccessToken entity from the query.
-// Returns a *NotFoundError when no OauthAccessToken was found.
-func (_q *OauthAccessTokenQuery) First(ctx context.Context) (*OauthAccessToken, error) {
+// First returns the first OauthPersonalAccessClient entity from the query.
+// Returns a *NotFoundError when no OauthPersonalAccessClient was found.
+func (_q *OauthPersonalAccessClientQuery) First(ctx context.Context) (*OauthPersonalAccessClient, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{oauthaccesstoken.Label}
+		return nil, &NotFoundError{oauthpersonalaccessclient.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) FirstX(ctx context.Context) *OauthAccessToken {
+func (_q *OauthPersonalAccessClientQuery) FirstX(ctx context.Context) *OauthPersonalAccessClient {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -80,22 +80,22 @@ func (_q *OauthAccessTokenQuery) FirstX(ctx context.Context) *OauthAccessToken {
 	return node
 }
 
-// FirstID returns the first OauthAccessToken ID from the query.
-// Returns a *NotFoundError when no OauthAccessToken ID was found.
-func (_q *OauthAccessTokenQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+// FirstID returns the first OauthPersonalAccessClient ID from the query.
+// Returns a *NotFoundError when no OauthPersonalAccessClient ID was found.
+func (_q *OauthPersonalAccessClientQuery) FirstID(ctx context.Context) (id uint64, err error) {
+	var ids []uint64
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{oauthaccesstoken.Label}
+		err = &NotFoundError{oauthpersonalaccessclient.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) FirstIDX(ctx context.Context) string {
+func (_q *OauthPersonalAccessClientQuery) FirstIDX(ctx context.Context) uint64 {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -103,10 +103,10 @@ func (_q *OauthAccessTokenQuery) FirstIDX(ctx context.Context) string {
 	return id
 }
 
-// Only returns a single OauthAccessToken entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one OauthAccessToken entity is found.
-// Returns a *NotFoundError when no OauthAccessToken entities are found.
-func (_q *OauthAccessTokenQuery) Only(ctx context.Context) (*OauthAccessToken, error) {
+// Only returns a single OauthPersonalAccessClient entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one OauthPersonalAccessClient entity is found.
+// Returns a *NotFoundError when no OauthPersonalAccessClient entities are found.
+func (_q *OauthPersonalAccessClientQuery) Only(ctx context.Context) (*OauthPersonalAccessClient, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -115,14 +115,14 @@ func (_q *OauthAccessTokenQuery) Only(ctx context.Context) (*OauthAccessToken, e
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{oauthaccesstoken.Label}
+		return nil, &NotFoundError{oauthpersonalaccessclient.Label}
 	default:
-		return nil, &NotSingularError{oauthaccesstoken.Label}
+		return nil, &NotSingularError{oauthpersonalaccessclient.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) OnlyX(ctx context.Context) *OauthAccessToken {
+func (_q *OauthPersonalAccessClientQuery) OnlyX(ctx context.Context) *OauthPersonalAccessClient {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -130,11 +130,11 @@ func (_q *OauthAccessTokenQuery) OnlyX(ctx context.Context) *OauthAccessToken {
 	return node
 }
 
-// OnlyID is like Only, but returns the only OauthAccessToken ID in the query.
-// Returns a *NotSingularError when more than one OauthAccessToken ID is found.
+// OnlyID is like Only, but returns the only OauthPersonalAccessClient ID in the query.
+// Returns a *NotSingularError when more than one OauthPersonalAccessClient ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *OauthAccessTokenQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (_q *OauthPersonalAccessClientQuery) OnlyID(ctx context.Context) (id uint64, err error) {
+	var ids []uint64
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -142,15 +142,15 @@ func (_q *OauthAccessTokenQuery) OnlyID(ctx context.Context) (id string, err err
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{oauthaccesstoken.Label}
+		err = &NotFoundError{oauthpersonalaccessclient.Label}
 	default:
-		err = &NotSingularError{oauthaccesstoken.Label}
+		err = &NotSingularError{oauthpersonalaccessclient.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) OnlyIDX(ctx context.Context) string {
+func (_q *OauthPersonalAccessClientQuery) OnlyIDX(ctx context.Context) uint64 {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -158,18 +158,18 @@ func (_q *OauthAccessTokenQuery) OnlyIDX(ctx context.Context) string {
 	return id
 }
 
-// All executes the query and returns a list of OauthAccessTokens.
-func (_q *OauthAccessTokenQuery) All(ctx context.Context) ([]*OauthAccessToken, error) {
+// All executes the query and returns a list of OauthPersonalAccessClients.
+func (_q *OauthPersonalAccessClientQuery) All(ctx context.Context) ([]*OauthPersonalAccessClient, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*OauthAccessToken, *OauthAccessTokenQuery]()
-	return withInterceptors[[]*OauthAccessToken](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*OauthPersonalAccessClient, *OauthPersonalAccessClientQuery]()
+	return withInterceptors[[]*OauthPersonalAccessClient](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) AllX(ctx context.Context) []*OauthAccessToken {
+func (_q *OauthPersonalAccessClientQuery) AllX(ctx context.Context) []*OauthPersonalAccessClient {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -177,20 +177,20 @@ func (_q *OauthAccessTokenQuery) AllX(ctx context.Context) []*OauthAccessToken {
 	return nodes
 }
 
-// IDs executes the query and returns a list of OauthAccessToken IDs.
-func (_q *OauthAccessTokenQuery) IDs(ctx context.Context) (ids []string, err error) {
+// IDs executes the query and returns a list of OauthPersonalAccessClient IDs.
+func (_q *OauthPersonalAccessClientQuery) IDs(ctx context.Context) (ids []uint64, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(oauthaccesstoken.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(oauthpersonalaccessclient.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) IDsX(ctx context.Context) []string {
+func (_q *OauthPersonalAccessClientQuery) IDsX(ctx context.Context) []uint64 {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -199,16 +199,16 @@ func (_q *OauthAccessTokenQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (_q *OauthAccessTokenQuery) Count(ctx context.Context) (int, error) {
+func (_q *OauthPersonalAccessClientQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*OauthAccessTokenQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*OauthPersonalAccessClientQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) CountX(ctx context.Context) int {
+func (_q *OauthPersonalAccessClientQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -217,7 +217,7 @@ func (_q *OauthAccessTokenQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *OauthAccessTokenQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *OauthPersonalAccessClientQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -230,7 +230,7 @@ func (_q *OauthAccessTokenQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *OauthAccessTokenQuery) ExistX(ctx context.Context) bool {
+func (_q *OauthPersonalAccessClientQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -238,18 +238,18 @@ func (_q *OauthAccessTokenQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the OauthAccessTokenQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the OauthPersonalAccessClientQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *OauthAccessTokenQuery) Clone() *OauthAccessTokenQuery {
+func (_q *OauthPersonalAccessClientQuery) Clone() *OauthPersonalAccessClientQuery {
 	if _q == nil {
 		return nil
 	}
-	return &OauthAccessTokenQuery{
+	return &OauthPersonalAccessClientQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]oauthaccesstoken.OrderOption{}, _q.order...),
+		order:      append([]oauthpersonalaccessclient.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.OauthAccessToken{}, _q.predicates...),
+		predicates: append([]predicate.OauthPersonalAccessClient{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -262,19 +262,19 @@ func (_q *OauthAccessTokenQuery) Clone() *OauthAccessTokenQuery {
 // Example:
 //
 //	var v []struct {
-//		UserID uint64 `json:"user_id,omitempty"`
+//		ClientID uint64 `json:"client_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.OauthAccessToken.Query().
-//		GroupBy(oauthaccesstoken.FieldUserID).
+//	client.OauthPersonalAccessClient.Query().
+//		GroupBy(oauthpersonalaccessclient.FieldClientID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *OauthAccessTokenQuery) GroupBy(field string, fields ...string) *OauthAccessTokenGroupBy {
+func (_q *OauthPersonalAccessClientQuery) GroupBy(field string, fields ...string) *OauthPersonalAccessClientGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &OauthAccessTokenGroupBy{build: _q}
+	grbuild := &OauthPersonalAccessClientGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = oauthaccesstoken.Label
+	grbuild.label = oauthpersonalaccessclient.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -285,26 +285,26 @@ func (_q *OauthAccessTokenQuery) GroupBy(field string, fields ...string) *OauthA
 // Example:
 //
 //	var v []struct {
-//		UserID uint64 `json:"user_id,omitempty"`
+//		ClientID uint64 `json:"client_id,omitempty"`
 //	}
 //
-//	client.OauthAccessToken.Query().
-//		Select(oauthaccesstoken.FieldUserID).
+//	client.OauthPersonalAccessClient.Query().
+//		Select(oauthpersonalaccessclient.FieldClientID).
 //		Scan(ctx, &v)
-func (_q *OauthAccessTokenQuery) Select(fields ...string) *OauthAccessTokenSelect {
+func (_q *OauthPersonalAccessClientQuery) Select(fields ...string) *OauthPersonalAccessClientSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &OauthAccessTokenSelect{OauthAccessTokenQuery: _q}
-	sbuild.label = oauthaccesstoken.Label
+	sbuild := &OauthPersonalAccessClientSelect{OauthPersonalAccessClientQuery: _q}
+	sbuild.label = oauthpersonalaccessclient.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a OauthAccessTokenSelect configured with the given aggregations.
-func (_q *OauthAccessTokenQuery) Aggregate(fns ...AggregateFunc) *OauthAccessTokenSelect {
+// Aggregate returns a OauthPersonalAccessClientSelect configured with the given aggregations.
+func (_q *OauthPersonalAccessClientQuery) Aggregate(fns ...AggregateFunc) *OauthPersonalAccessClientSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *OauthAccessTokenQuery) prepareQuery(ctx context.Context) error {
+func (_q *OauthPersonalAccessClientQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -316,7 +316,7 @@ func (_q *OauthAccessTokenQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !oauthaccesstoken.ValidColumn(f) {
+		if !oauthpersonalaccessclient.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -330,16 +330,16 @@ func (_q *OauthAccessTokenQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *OauthAccessTokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*OauthAccessToken, error) {
+func (_q *OauthPersonalAccessClientQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*OauthPersonalAccessClient, error) {
 	var (
-		nodes = []*OauthAccessToken{}
+		nodes = []*OauthPersonalAccessClient{}
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*OauthAccessToken).scanValues(nil, columns)
+		return (*OauthPersonalAccessClient).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &OauthAccessToken{config: _q.config}
+		node := &OauthPersonalAccessClient{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
@@ -355,7 +355,7 @@ func (_q *OauthAccessTokenQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	return nodes, nil
 }
 
-func (_q *OauthAccessTokenQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *OauthPersonalAccessClientQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -364,8 +364,8 @@ func (_q *OauthAccessTokenQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *OauthAccessTokenQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(oauthaccesstoken.Table, oauthaccesstoken.Columns, sqlgraph.NewFieldSpec(oauthaccesstoken.FieldID, field.TypeString))
+func (_q *OauthPersonalAccessClientQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(oauthpersonalaccessclient.Table, oauthpersonalaccessclient.Columns, sqlgraph.NewFieldSpec(oauthpersonalaccessclient.FieldID, field.TypeUint64))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -374,9 +374,9 @@ func (_q *OauthAccessTokenQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, oauthaccesstoken.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, oauthpersonalaccessclient.FieldID)
 		for i := range fields {
-			if fields[i] != oauthaccesstoken.FieldID {
+			if fields[i] != oauthpersonalaccessclient.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -404,12 +404,12 @@ func (_q *OauthAccessTokenQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *OauthAccessTokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *OauthPersonalAccessClientQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(oauthaccesstoken.Table)
+	t1 := builder.Table(oauthpersonalaccessclient.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = oauthaccesstoken.Columns
+		columns = oauthpersonalaccessclient.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -436,28 +436,28 @@ func (_q *OauthAccessTokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// OauthAccessTokenGroupBy is the group-by builder for OauthAccessToken entities.
-type OauthAccessTokenGroupBy struct {
+// OauthPersonalAccessClientGroupBy is the group-by builder for OauthPersonalAccessClient entities.
+type OauthPersonalAccessClientGroupBy struct {
 	selector
-	build *OauthAccessTokenQuery
+	build *OauthPersonalAccessClientQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *OauthAccessTokenGroupBy) Aggregate(fns ...AggregateFunc) *OauthAccessTokenGroupBy {
+func (_g *OauthPersonalAccessClientGroupBy) Aggregate(fns ...AggregateFunc) *OauthPersonalAccessClientGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *OauthAccessTokenGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *OauthPersonalAccessClientGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*OauthAccessTokenQuery, *OauthAccessTokenGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*OauthPersonalAccessClientQuery, *OauthPersonalAccessClientGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *OauthAccessTokenGroupBy) sqlScan(ctx context.Context, root *OauthAccessTokenQuery, v any) error {
+func (_g *OauthPersonalAccessClientGroupBy) sqlScan(ctx context.Context, root *OauthPersonalAccessClientQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -484,28 +484,28 @@ func (_g *OauthAccessTokenGroupBy) sqlScan(ctx context.Context, root *OauthAcces
 	return sql.ScanSlice(rows, v)
 }
 
-// OauthAccessTokenSelect is the builder for selecting fields of OauthAccessToken entities.
-type OauthAccessTokenSelect struct {
-	*OauthAccessTokenQuery
+// OauthPersonalAccessClientSelect is the builder for selecting fields of OauthPersonalAccessClient entities.
+type OauthPersonalAccessClientSelect struct {
+	*OauthPersonalAccessClientQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *OauthAccessTokenSelect) Aggregate(fns ...AggregateFunc) *OauthAccessTokenSelect {
+func (_s *OauthPersonalAccessClientSelect) Aggregate(fns ...AggregateFunc) *OauthPersonalAccessClientSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *OauthAccessTokenSelect) Scan(ctx context.Context, v any) error {
+func (_s *OauthPersonalAccessClientSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*OauthAccessTokenQuery, *OauthAccessTokenSelect](ctx, _s.OauthAccessTokenQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*OauthPersonalAccessClientQuery, *OauthPersonalAccessClientSelect](ctx, _s.OauthPersonalAccessClientQuery, _s, _s.inters, v)
 }
 
-func (_s *OauthAccessTokenSelect) sqlScan(ctx context.Context, root *OauthAccessTokenQuery, v any) error {
+func (_s *OauthPersonalAccessClientSelect) sqlScan(ctx context.Context, root *OauthPersonalAccessClientQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

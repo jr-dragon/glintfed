@@ -1401,41 +1401,50 @@ var (
 	}
 	// OauthAccessTokensColumns holds the columns for the "oauth_access_tokens" table.
 	OauthAccessTokensColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "request_id", Type: field.TypeString},
-		{Name: "client_id", Type: field.TypeString},
-		{Name: "subject", Type: field.TypeString},
-		{Name: "scopes", Type: field.TypeJSON},
-		{Name: "session", Type: field.TypeBytes},
-		{Name: "active", Type: field.TypeBool, Default: true},
-		{Name: "requested_at", Type: field.TypeTime},
-		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 100},
+		{Name: "user_id", Type: field.TypeUint64, Nullable: true},
+		{Name: "client_id", Type: field.TypeUint64},
+		{Name: "name", Type: field.TypeString, Nullable: true, Size: 191},
+		{Name: "scopes", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "revoked", Type: field.TypeBool},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 	}
 	// OauthAccessTokensTable holds the schema information for the "oauth_access_tokens" table.
 	OauthAccessTokensTable = &schema.Table{
 		Name:       "oauth_access_tokens",
 		Columns:    OauthAccessTokensColumns,
 		PrimaryKey: []*schema.Column{OauthAccessTokensColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauthaccesstoken_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{OauthAccessTokensColumns[1]},
+			},
+		},
 	}
-	// OauthAuthorizationCodesColumns holds the columns for the "oauth_authorization_codes" table.
-	OauthAuthorizationCodesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "request_id", Type: field.TypeString},
-		{Name: "client_id", Type: field.TypeString},
-		{Name: "subject", Type: field.TypeString},
-		{Name: "scopes", Type: field.TypeJSON},
-		{Name: "session", Type: field.TypeBytes},
-		{Name: "active", Type: field.TypeBool, Default: true},
-		{Name: "requested_at", Type: field.TypeTime},
-		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "created_at", Type: field.TypeTime},
+	// OauthAuthCodesColumns holds the columns for the "oauth_auth_codes" table.
+	OauthAuthCodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 100},
+		{Name: "user_id", Type: field.TypeUint64},
+		{Name: "client_id", Type: field.TypeUint64},
+		{Name: "scopes", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "revoked", Type: field.TypeBool},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 	}
-	// OauthAuthorizationCodesTable holds the schema information for the "oauth_authorization_codes" table.
-	OauthAuthorizationCodesTable = &schema.Table{
-		Name:       "oauth_authorization_codes",
-		Columns:    OauthAuthorizationCodesColumns,
-		PrimaryKey: []*schema.Column{OauthAuthorizationCodesColumns[0]},
+	// OauthAuthCodesTable holds the schema information for the "oauth_auth_codes" table.
+	OauthAuthCodesTable = &schema.Table{
+		Name:       "oauth_auth_codes",
+		Columns:    OauthAuthCodesColumns,
+		PrimaryKey: []*schema.Column{OauthAuthCodesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauthauthorizationcode_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{OauthAuthCodesColumns[1]},
+			},
+		},
 	}
 	// OauthClientsColumns holds the columns for the "oauth_clients" table.
 	OauthClientsColumns = []*schema.Column{
@@ -1447,11 +1456,6 @@ var (
 		{Name: "redirect", Type: field.TypeString, Size: 2147483647},
 		{Name: "personal_access_client", Type: field.TypeBool},
 		{Name: "password_client", Type: field.TypeBool},
-		{Name: "public", Type: field.TypeBool, Default: false},
-		{Name: "grant_types", Type: field.TypeJSON},
-		{Name: "response_types", Type: field.TypeJSON},
-		{Name: "scopes", Type: field.TypeJSON},
-		{Name: "audience", Type: field.TypeJSON},
 		{Name: "revoked", Type: field.TypeBool},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -1461,6 +1465,26 @@ var (
 		Name:       "oauth_clients",
 		Columns:    OauthClientsColumns,
 		PrimaryKey: []*schema.Column{OauthClientsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauthclient_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{OauthClientsColumns[1]},
+			},
+		},
+	}
+	// OauthPersonalAccessClientsColumns holds the columns for the "oauth_personal_access_clients" table.
+	OauthPersonalAccessClientsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint64, Increment: true},
+		{Name: "client_id", Type: field.TypeUint64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// OauthPersonalAccessClientsTable holds the schema information for the "oauth_personal_access_clients" table.
+	OauthPersonalAccessClientsTable = &schema.Table{
+		Name:       "oauth_personal_access_clients",
+		Columns:    OauthPersonalAccessClientsColumns,
+		PrimaryKey: []*schema.Column{OauthPersonalAccessClientsColumns[0]},
 	}
 	// OauthPkceColumns holds the columns for the "oauth_pkce" table.
 	OauthPkceColumns = []*schema.Column{
@@ -1483,22 +1507,23 @@ var (
 	}
 	// OauthRefreshTokensColumns holds the columns for the "oauth_refresh_tokens" table.
 	OauthRefreshTokensColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "request_id", Type: field.TypeString},
-		{Name: "client_id", Type: field.TypeString},
-		{Name: "subject", Type: field.TypeString},
-		{Name: "scopes", Type: field.TypeJSON},
-		{Name: "session", Type: field.TypeBytes},
-		{Name: "active", Type: field.TypeBool, Default: true},
-		{Name: "requested_at", Type: field.TypeTime},
-		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 100},
+		{Name: "access_token_id", Type: field.TypeString, Size: 100},
+		{Name: "revoked", Type: field.TypeBool},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 	}
 	// OauthRefreshTokensTable holds the schema information for the "oauth_refresh_tokens" table.
 	OauthRefreshTokensTable = &schema.Table{
 		Name:       "oauth_refresh_tokens",
 		Columns:    OauthRefreshTokensColumns,
 		PrimaryKey: []*schema.Column{OauthRefreshTokensColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauthrefreshtoken_access_token_id",
+				Unique:  false,
+				Columns: []*schema.Column{OauthRefreshTokensColumns[1]},
+			},
+		},
 	}
 	// PagesColumns holds the columns for the "pages" table.
 	PagesColumns = []*schema.Column{
@@ -2344,8 +2369,9 @@ var (
 		NewsroomTable,
 		NotificationsTable,
 		OauthAccessTokensTable,
-		OauthAuthorizationCodesTable,
+		OauthAuthCodesTable,
 		OauthClientsTable,
+		OauthPersonalAccessClientsTable,
 		OauthPkceTable,
 		OauthRefreshTokensTable,
 		PagesTable,
@@ -2596,11 +2622,14 @@ func init() {
 	OauthAccessTokensTable.Annotation = &entsql.Annotation{
 		Table: "oauth_access_tokens",
 	}
-	OauthAuthorizationCodesTable.Annotation = &entsql.Annotation{
-		Table: "oauth_authorization_codes",
+	OauthAuthCodesTable.Annotation = &entsql.Annotation{
+		Table: "oauth_auth_codes",
 	}
 	OauthClientsTable.Annotation = &entsql.Annotation{
 		Table: "oauth_clients",
+	}
+	OauthPersonalAccessClientsTable.Annotation = &entsql.Annotation{
+		Table: "oauth_personal_access_clients",
 	}
 	OauthPkceTable.Annotation = &entsql.Annotation{
 		Table: "oauth_pkce",

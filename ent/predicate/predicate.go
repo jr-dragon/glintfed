@@ -219,6 +219,9 @@ type OauthAuthorizationCode func(*sql.Selector)
 // OauthClient is the predicate function for oauthclient builders.
 type OauthClient func(*sql.Selector)
 
+// OauthPersonalAccessClient is the predicate function for oauthpersonalaccessclient builders.
+type OauthPersonalAccessClient func(*sql.Selector)
+
 // OauthPkce is the predicate function for oauthpkce builders.
 type OauthPkce func(*sql.Selector)
 

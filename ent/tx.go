@@ -154,6 +154,8 @@ type Tx struct {
 	OauthAuthorizationCode *OauthAuthorizationCodeClient
 	// OauthClient is the client for interacting with the OauthClient builders.
 	OauthClient *OauthClientClient
+	// OauthPersonalAccessClient is the client for interacting with the OauthPersonalAccessClient builders.
+	OauthPersonalAccessClient *OauthPersonalAccessClientClient
 	// OauthPkce is the client for interacting with the OauthPkce builders.
 	OauthPkce *OauthPkceClient
 	// OauthRefreshToken is the client for interacting with the OauthRefreshToken builders.
@@ -434,6 +436,7 @@ func (tx *Tx) init() {
 	tx.OauthAccessToken = NewOauthAccessTokenClient(tx.config)
 	tx.OauthAuthorizationCode = NewOauthAuthorizationCodeClient(tx.config)
 	tx.OauthClient = NewOauthClientClient(tx.config)
+	tx.OauthPersonalAccessClient = NewOauthPersonalAccessClientClient(tx.config)
 	tx.OauthPkce = NewOauthPkceClient(tx.config)
 	tx.OauthRefreshToken = NewOauthRefreshTokenClient(tx.config)
 	tx.Page = NewPageClient(tx.config)

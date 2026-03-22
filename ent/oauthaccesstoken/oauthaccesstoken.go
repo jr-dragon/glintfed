@@ -13,24 +13,22 @@ const (
 	Label = "oauth_access_token"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldRequestID holds the string denoting the request_id field in the database.
-	FieldRequestID = "request_id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldClientID holds the string denoting the client_id field in the database.
 	FieldClientID = "client_id"
-	// FieldSubject holds the string denoting the subject field in the database.
-	FieldSubject = "subject"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldScopes holds the string denoting the scopes field in the database.
 	FieldScopes = "scopes"
-	// FieldSession holds the string denoting the session field in the database.
-	FieldSession = "session"
-	// FieldActive holds the string denoting the active field in the database.
-	FieldActive = "active"
-	// FieldRequestedAt holds the string denoting the requested_at field in the database.
-	FieldRequestedAt = "requested_at"
-	// FieldExpiresAt holds the string denoting the expires_at field in the database.
-	FieldExpiresAt = "expires_at"
+	// FieldRevoked holds the string denoting the revoked field in the database.
+	FieldRevoked = "revoked"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldExpiresAt holds the string denoting the expires_at field in the database.
+	FieldExpiresAt = "expires_at"
 	// Table holds the table name of the oauthaccesstoken in the database.
 	Table = "oauth_access_tokens"
 )
@@ -38,15 +36,14 @@ const (
 // Columns holds all SQL columns for oauthaccesstoken fields.
 var Columns = []string{
 	FieldID,
-	FieldRequestID,
+	FieldUserID,
 	FieldClientID,
-	FieldSubject,
+	FieldName,
 	FieldScopes,
-	FieldSession,
-	FieldActive,
-	FieldRequestedAt,
-	FieldExpiresAt,
+	FieldRevoked,
 	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldExpiresAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -60,10 +57,16 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultActive holds the default value on creation for the "active" field.
-	DefaultActive bool
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the OauthAccessToken queries.
@@ -74,9 +77,9 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByRequestID orders the results by the request_id field.
-func ByRequestID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRequestID, opts...).ToFunc()
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByClientID orders the results by the client_id field.
@@ -84,27 +87,32 @@ func ByClientID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClientID, opts...).ToFunc()
 }
 
-// BySubject orders the results by the subject field.
-func BySubject(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSubject, opts...).ToFunc()
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByActive orders the results by the active field.
-func ByActive(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldActive, opts...).ToFunc()
+// ByScopes orders the results by the scopes field.
+func ByScopes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScopes, opts...).ToFunc()
 }
 
-// ByRequestedAt orders the results by the requested_at field.
-func ByRequestedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRequestedAt, opts...).ToFunc()
-}
-
-// ByExpiresAt orders the results by the expires_at field.
-func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
+// ByRevoked orders the results by the revoked field.
+func ByRevoked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRevoked, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByExpiresAt orders the results by the expires_at field.
+func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
 }

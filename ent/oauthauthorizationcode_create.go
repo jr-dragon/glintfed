@@ -20,53 +20,35 @@ type OauthAuthorizationCodeCreate struct {
 	hooks    []Hook
 }
 
-// SetRequestID sets the "request_id" field.
-func (_c *OauthAuthorizationCodeCreate) SetRequestID(v string) *OauthAuthorizationCodeCreate {
-	_c.mutation.SetRequestID(v)
+// SetUserID sets the "user_id" field.
+func (_c *OauthAuthorizationCodeCreate) SetUserID(v uint64) *OauthAuthorizationCodeCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetClientID sets the "client_id" field.
-func (_c *OauthAuthorizationCodeCreate) SetClientID(v string) *OauthAuthorizationCodeCreate {
+func (_c *OauthAuthorizationCodeCreate) SetClientID(v uint64) *OauthAuthorizationCodeCreate {
 	_c.mutation.SetClientID(v)
 	return _c
 }
 
-// SetSubject sets the "subject" field.
-func (_c *OauthAuthorizationCodeCreate) SetSubject(v string) *OauthAuthorizationCodeCreate {
-	_c.mutation.SetSubject(v)
-	return _c
-}
-
 // SetScopes sets the "scopes" field.
-func (_c *OauthAuthorizationCodeCreate) SetScopes(v []string) *OauthAuthorizationCodeCreate {
+func (_c *OauthAuthorizationCodeCreate) SetScopes(v string) *OauthAuthorizationCodeCreate {
 	_c.mutation.SetScopes(v)
 	return _c
 }
 
-// SetSession sets the "session" field.
-func (_c *OauthAuthorizationCodeCreate) SetSession(v []byte) *OauthAuthorizationCodeCreate {
-	_c.mutation.SetSession(v)
-	return _c
-}
-
-// SetActive sets the "active" field.
-func (_c *OauthAuthorizationCodeCreate) SetActive(v bool) *OauthAuthorizationCodeCreate {
-	_c.mutation.SetActive(v)
-	return _c
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *OauthAuthorizationCodeCreate) SetNillableActive(v *bool) *OauthAuthorizationCodeCreate {
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (_c *OauthAuthorizationCodeCreate) SetNillableScopes(v *string) *OauthAuthorizationCodeCreate {
 	if v != nil {
-		_c.SetActive(*v)
+		_c.SetScopes(*v)
 	}
 	return _c
 }
 
-// SetRequestedAt sets the "requested_at" field.
-func (_c *OauthAuthorizationCodeCreate) SetRequestedAt(v time.Time) *OauthAuthorizationCodeCreate {
-	_c.mutation.SetRequestedAt(v)
+// SetRevoked sets the "revoked" field.
+func (_c *OauthAuthorizationCodeCreate) SetRevoked(v bool) *OauthAuthorizationCodeCreate {
+	_c.mutation.SetRevoked(v)
 	return _c
 }
 
@@ -76,16 +58,10 @@ func (_c *OauthAuthorizationCodeCreate) SetExpiresAt(v time.Time) *OauthAuthoriz
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *OauthAuthorizationCodeCreate) SetCreatedAt(v time.Time) *OauthAuthorizationCodeCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *OauthAuthorizationCodeCreate) SetNillableCreatedAt(v *time.Time) *OauthAuthorizationCodeCreate {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_c *OauthAuthorizationCodeCreate) SetNillableExpiresAt(v *time.Time) *OauthAuthorizationCodeCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetExpiresAt(*v)
 	}
 	return _c
 }
@@ -103,7 +79,6 @@ func (_c *OauthAuthorizationCodeCreate) Mutation() *OauthAuthorizationCodeMutati
 
 // Save creates the OauthAuthorizationCode in the database.
 func (_c *OauthAuthorizationCodeCreate) Save(ctx context.Context) (*OauthAuthorizationCode, error) {
-	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -129,46 +104,21 @@ func (_c *OauthAuthorizationCodeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *OauthAuthorizationCodeCreate) defaults() {
-	if _, ok := _c.mutation.Active(); !ok {
-		v := oauthauthorizationcode.DefaultActive
-		_c.mutation.SetActive(v)
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := oauthauthorizationcode.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (_c *OauthAuthorizationCodeCreate) check() error {
-	if _, ok := _c.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request_id", err: errors.New(`ent: missing required field "OauthAuthorizationCode.request_id"`)}
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "OauthAuthorizationCode.user_id"`)}
 	}
 	if _, ok := _c.mutation.ClientID(); !ok {
 		return &ValidationError{Name: "client_id", err: errors.New(`ent: missing required field "OauthAuthorizationCode.client_id"`)}
 	}
-	if _, ok := _c.mutation.Subject(); !ok {
-		return &ValidationError{Name: "subject", err: errors.New(`ent: missing required field "OauthAuthorizationCode.subject"`)}
+	if _, ok := _c.mutation.Revoked(); !ok {
+		return &ValidationError{Name: "revoked", err: errors.New(`ent: missing required field "OauthAuthorizationCode.revoked"`)}
 	}
-	if _, ok := _c.mutation.Scopes(); !ok {
-		return &ValidationError{Name: "scopes", err: errors.New(`ent: missing required field "OauthAuthorizationCode.scopes"`)}
-	}
-	if _, ok := _c.mutation.Session(); !ok {
-		return &ValidationError{Name: "session", err: errors.New(`ent: missing required field "OauthAuthorizationCode.session"`)}
-	}
-	if _, ok := _c.mutation.Active(); !ok {
-		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "OauthAuthorizationCode.active"`)}
-	}
-	if _, ok := _c.mutation.RequestedAt(); !ok {
-		return &ValidationError{Name: "requested_at", err: errors.New(`ent: missing required field "OauthAuthorizationCode.requested_at"`)}
-	}
-	if _, ok := _c.mutation.ExpiresAt(); !ok {
-		return &ValidationError{Name: "expires_at", err: errors.New(`ent: missing required field "OauthAuthorizationCode.expires_at"`)}
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "OauthAuthorizationCode.created_at"`)}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := oauthauthorizationcode.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "OauthAuthorizationCode.id": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -205,41 +155,25 @@ func (_c *OauthAuthorizationCodeCreate) createSpec() (*OauthAuthorizationCode, *
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.RequestID(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldRequestID, field.TypeString, value)
-		_node.RequestID = value
+	if value, ok := _c.mutation.UserID(); ok {
+		_spec.SetField(oauthauthorizationcode.FieldUserID, field.TypeUint64, value)
+		_node.UserID = value
 	}
 	if value, ok := _c.mutation.ClientID(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldClientID, field.TypeString, value)
+		_spec.SetField(oauthauthorizationcode.FieldClientID, field.TypeUint64, value)
 		_node.ClientID = value
 	}
-	if value, ok := _c.mutation.Subject(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldSubject, field.TypeString, value)
-		_node.Subject = value
-	}
 	if value, ok := _c.mutation.Scopes(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldScopes, field.TypeJSON, value)
+		_spec.SetField(oauthauthorizationcode.FieldScopes, field.TypeString, value)
 		_node.Scopes = value
 	}
-	if value, ok := _c.mutation.Session(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldSession, field.TypeBytes, value)
-		_node.Session = value
-	}
-	if value, ok := _c.mutation.Active(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldActive, field.TypeBool, value)
-		_node.Active = value
-	}
-	if value, ok := _c.mutation.RequestedAt(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldRequestedAt, field.TypeTime, value)
-		_node.RequestedAt = value
+	if value, ok := _c.mutation.Revoked(); ok {
+		_spec.SetField(oauthauthorizationcode.FieldRevoked, field.TypeBool, value)
+		_node.Revoked = value
 	}
 	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(oauthauthorizationcode.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
-	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
 	}
 	return _node, _spec
 }
@@ -262,7 +196,6 @@ func (_c *OauthAuthorizationCodeCreateBulk) Save(ctx context.Context) ([]*OauthA
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*OauthAuthorizationCodeMutation)
 				if !ok {

@@ -76,6 +76,7 @@ import (
 	"glintfed.org/ent/oauthaccesstoken"
 	"glintfed.org/ent/oauthauthorizationcode"
 	"glintfed.org/ent/oauthclient"
+	"glintfed.org/ent/oauthpersonalaccessclient"
 	"glintfed.org/ent/oauthpkce"
 	"glintfed.org/ent/oauthrefreshtoken"
 	"glintfed.org/ent/page"
@@ -1480,60 +1481,58 @@ func init() {
 	notification.UpdateDefaultUpdatedAt = notificationDescUpdatedAt.UpdateDefault.(func() time.Time)
 	oauthaccesstokenFields := schema.OauthAccessToken{}.Fields()
 	_ = oauthaccesstokenFields
-	// oauthaccesstokenDescActive is the schema descriptor for active field.
-	oauthaccesstokenDescActive := oauthaccesstokenFields[6].Descriptor()
-	// oauthaccesstoken.DefaultActive holds the default value on creation for the active field.
-	oauthaccesstoken.DefaultActive = oauthaccesstokenDescActive.Default.(bool)
+	// oauthaccesstokenDescName is the schema descriptor for name field.
+	oauthaccesstokenDescName := oauthaccesstokenFields[3].Descriptor()
+	// oauthaccesstoken.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	oauthaccesstoken.NameValidator = oauthaccesstokenDescName.Validators[0].(func(string) error)
 	// oauthaccesstokenDescCreatedAt is the schema descriptor for created_at field.
-	oauthaccesstokenDescCreatedAt := oauthaccesstokenFields[9].Descriptor()
+	oauthaccesstokenDescCreatedAt := oauthaccesstokenFields[6].Descriptor()
 	// oauthaccesstoken.DefaultCreatedAt holds the default value on creation for the created_at field.
 	oauthaccesstoken.DefaultCreatedAt = oauthaccesstokenDescCreatedAt.Default.(func() time.Time)
+	// oauthaccesstokenDescUpdatedAt is the schema descriptor for updated_at field.
+	oauthaccesstokenDescUpdatedAt := oauthaccesstokenFields[7].Descriptor()
+	// oauthaccesstoken.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	oauthaccesstoken.DefaultUpdatedAt = oauthaccesstokenDescUpdatedAt.Default.(func() time.Time)
+	// oauthaccesstoken.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	oauthaccesstoken.UpdateDefaultUpdatedAt = oauthaccesstokenDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// oauthaccesstokenDescID is the schema descriptor for id field.
+	oauthaccesstokenDescID := oauthaccesstokenFields[0].Descriptor()
+	// oauthaccesstoken.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	oauthaccesstoken.IDValidator = oauthaccesstokenDescID.Validators[0].(func(string) error)
 	oauthauthorizationcodeFields := schema.OauthAuthorizationCode{}.Fields()
 	_ = oauthauthorizationcodeFields
-	// oauthauthorizationcodeDescActive is the schema descriptor for active field.
-	oauthauthorizationcodeDescActive := oauthauthorizationcodeFields[6].Descriptor()
-	// oauthauthorizationcode.DefaultActive holds the default value on creation for the active field.
-	oauthauthorizationcode.DefaultActive = oauthauthorizationcodeDescActive.Default.(bool)
-	// oauthauthorizationcodeDescCreatedAt is the schema descriptor for created_at field.
-	oauthauthorizationcodeDescCreatedAt := oauthauthorizationcodeFields[9].Descriptor()
-	// oauthauthorizationcode.DefaultCreatedAt holds the default value on creation for the created_at field.
-	oauthauthorizationcode.DefaultCreatedAt = oauthauthorizationcodeDescCreatedAt.Default.(func() time.Time)
+	// oauthauthorizationcodeDescID is the schema descriptor for id field.
+	oauthauthorizationcodeDescID := oauthauthorizationcodeFields[0].Descriptor()
+	// oauthauthorizationcode.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	oauthauthorizationcode.IDValidator = oauthauthorizationcodeDescID.Validators[0].(func(string) error)
 	oauthclientFields := schema.OauthClient{}.Fields()
 	_ = oauthclientFields
 	// oauthclientDescSecret is the schema descriptor for secret field.
 	oauthclientDescSecret := oauthclientFields[3].Descriptor()
 	// oauthclient.SecretValidator is a validator for the "secret" field. It is called by the builders before save.
 	oauthclient.SecretValidator = oauthclientDescSecret.Validators[0].(func(string) error)
-	// oauthclientDescPublic is the schema descriptor for public field.
-	oauthclientDescPublic := oauthclientFields[8].Descriptor()
-	// oauthclient.DefaultPublic holds the default value on creation for the public field.
-	oauthclient.DefaultPublic = oauthclientDescPublic.Default.(bool)
-	// oauthclientDescGrantTypes is the schema descriptor for grant_types field.
-	oauthclientDescGrantTypes := oauthclientFields[9].Descriptor()
-	// oauthclient.DefaultGrantTypes holds the default value on creation for the grant_types field.
-	oauthclient.DefaultGrantTypes = oauthclientDescGrantTypes.Default.([]string)
-	// oauthclientDescResponseTypes is the schema descriptor for response_types field.
-	oauthclientDescResponseTypes := oauthclientFields[10].Descriptor()
-	// oauthclient.DefaultResponseTypes holds the default value on creation for the response_types field.
-	oauthclient.DefaultResponseTypes = oauthclientDescResponseTypes.Default.([]string)
-	// oauthclientDescScopes is the schema descriptor for scopes field.
-	oauthclientDescScopes := oauthclientFields[11].Descriptor()
-	// oauthclient.DefaultScopes holds the default value on creation for the scopes field.
-	oauthclient.DefaultScopes = oauthclientDescScopes.Default.([]string)
-	// oauthclientDescAudience is the schema descriptor for audience field.
-	oauthclientDescAudience := oauthclientFields[12].Descriptor()
-	// oauthclient.DefaultAudience holds the default value on creation for the audience field.
-	oauthclient.DefaultAudience = oauthclientDescAudience.Default.([]string)
 	// oauthclientDescCreatedAt is the schema descriptor for created_at field.
-	oauthclientDescCreatedAt := oauthclientFields[14].Descriptor()
+	oauthclientDescCreatedAt := oauthclientFields[9].Descriptor()
 	// oauthclient.DefaultCreatedAt holds the default value on creation for the created_at field.
 	oauthclient.DefaultCreatedAt = oauthclientDescCreatedAt.Default.(func() time.Time)
 	// oauthclientDescUpdatedAt is the schema descriptor for updated_at field.
-	oauthclientDescUpdatedAt := oauthclientFields[15].Descriptor()
+	oauthclientDescUpdatedAt := oauthclientFields[10].Descriptor()
 	// oauthclient.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	oauthclient.DefaultUpdatedAt = oauthclientDescUpdatedAt.Default.(func() time.Time)
 	// oauthclient.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	oauthclient.UpdateDefaultUpdatedAt = oauthclientDescUpdatedAt.UpdateDefault.(func() time.Time)
+	oauthpersonalaccessclientFields := schema.OauthPersonalAccessClient{}.Fields()
+	_ = oauthpersonalaccessclientFields
+	// oauthpersonalaccessclientDescCreatedAt is the schema descriptor for created_at field.
+	oauthpersonalaccessclientDescCreatedAt := oauthpersonalaccessclientFields[2].Descriptor()
+	// oauthpersonalaccessclient.DefaultCreatedAt holds the default value on creation for the created_at field.
+	oauthpersonalaccessclient.DefaultCreatedAt = oauthpersonalaccessclientDescCreatedAt.Default.(func() time.Time)
+	// oauthpersonalaccessclientDescUpdatedAt is the schema descriptor for updated_at field.
+	oauthpersonalaccessclientDescUpdatedAt := oauthpersonalaccessclientFields[3].Descriptor()
+	// oauthpersonalaccessclient.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	oauthpersonalaccessclient.DefaultUpdatedAt = oauthpersonalaccessclientDescUpdatedAt.Default.(func() time.Time)
+	// oauthpersonalaccessclient.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	oauthpersonalaccessclient.UpdateDefaultUpdatedAt = oauthpersonalaccessclientDescUpdatedAt.UpdateDefault.(func() time.Time)
 	oauthpkceFields := schema.OauthPkce{}.Fields()
 	_ = oauthpkceFields
 	// oauthpkceDescActive is the schema descriptor for active field.
@@ -1546,14 +1545,14 @@ func init() {
 	oauthpkce.DefaultCreatedAt = oauthpkceDescCreatedAt.Default.(func() time.Time)
 	oauthrefreshtokenFields := schema.OauthRefreshToken{}.Fields()
 	_ = oauthrefreshtokenFields
-	// oauthrefreshtokenDescActive is the schema descriptor for active field.
-	oauthrefreshtokenDescActive := oauthrefreshtokenFields[6].Descriptor()
-	// oauthrefreshtoken.DefaultActive holds the default value on creation for the active field.
-	oauthrefreshtoken.DefaultActive = oauthrefreshtokenDescActive.Default.(bool)
-	// oauthrefreshtokenDescCreatedAt is the schema descriptor for created_at field.
-	oauthrefreshtokenDescCreatedAt := oauthrefreshtokenFields[9].Descriptor()
-	// oauthrefreshtoken.DefaultCreatedAt holds the default value on creation for the created_at field.
-	oauthrefreshtoken.DefaultCreatedAt = oauthrefreshtokenDescCreatedAt.Default.(func() time.Time)
+	// oauthrefreshtokenDescAccessTokenID is the schema descriptor for access_token_id field.
+	oauthrefreshtokenDescAccessTokenID := oauthrefreshtokenFields[1].Descriptor()
+	// oauthrefreshtoken.AccessTokenIDValidator is a validator for the "access_token_id" field. It is called by the builders before save.
+	oauthrefreshtoken.AccessTokenIDValidator = oauthrefreshtokenDescAccessTokenID.Validators[0].(func(string) error)
+	// oauthrefreshtokenDescID is the schema descriptor for id field.
+	oauthrefreshtokenDescID := oauthrefreshtokenFields[0].Descriptor()
+	// oauthrefreshtoken.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	oauthrefreshtoken.IDValidator = oauthrefreshtokenDescID.Validators[0].(func(string) error)
 	pageFields := schema.Page{}.Fields()
 	_ = pageFields
 	// pageDescTemplate is the schema descriptor for template field.

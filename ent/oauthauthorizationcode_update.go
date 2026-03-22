@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"glintfed.org/ent/oauthauthorizationcode"
 	"glintfed.org/ent/predicate"
@@ -29,90 +28,78 @@ func (_u *OauthAuthorizationCodeUpdate) Where(ps ...predicate.OauthAuthorization
 	return _u
 }
 
-// SetRequestID sets the "request_id" field.
-func (_u *OauthAuthorizationCodeUpdate) SetRequestID(v string) *OauthAuthorizationCodeUpdate {
-	_u.mutation.SetRequestID(v)
+// SetUserID sets the "user_id" field.
+func (_u *OauthAuthorizationCodeUpdate) SetUserID(v uint64) *OauthAuthorizationCodeUpdate {
+	_u.mutation.ResetUserID()
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
-// SetNillableRequestID sets the "request_id" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdate) SetNillableRequestID(v *string) *OauthAuthorizationCodeUpdate {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *OauthAuthorizationCodeUpdate) SetNillableUserID(v *uint64) *OauthAuthorizationCodeUpdate {
 	if v != nil {
-		_u.SetRequestID(*v)
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
+// AddUserID adds value to the "user_id" field.
+func (_u *OauthAuthorizationCodeUpdate) AddUserID(v int64) *OauthAuthorizationCodeUpdate {
+	_u.mutation.AddUserID(v)
+	return _u
+}
+
 // SetClientID sets the "client_id" field.
-func (_u *OauthAuthorizationCodeUpdate) SetClientID(v string) *OauthAuthorizationCodeUpdate {
+func (_u *OauthAuthorizationCodeUpdate) SetClientID(v uint64) *OauthAuthorizationCodeUpdate {
+	_u.mutation.ResetClientID()
 	_u.mutation.SetClientID(v)
 	return _u
 }
 
 // SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdate) SetNillableClientID(v *string) *OauthAuthorizationCodeUpdate {
+func (_u *OauthAuthorizationCodeUpdate) SetNillableClientID(v *uint64) *OauthAuthorizationCodeUpdate {
 	if v != nil {
 		_u.SetClientID(*v)
 	}
 	return _u
 }
 
-// SetSubject sets the "subject" field.
-func (_u *OauthAuthorizationCodeUpdate) SetSubject(v string) *OauthAuthorizationCodeUpdate {
-	_u.mutation.SetSubject(v)
-	return _u
-}
-
-// SetNillableSubject sets the "subject" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdate) SetNillableSubject(v *string) *OauthAuthorizationCodeUpdate {
-	if v != nil {
-		_u.SetSubject(*v)
-	}
+// AddClientID adds value to the "client_id" field.
+func (_u *OauthAuthorizationCodeUpdate) AddClientID(v int64) *OauthAuthorizationCodeUpdate {
+	_u.mutation.AddClientID(v)
 	return _u
 }
 
 // SetScopes sets the "scopes" field.
-func (_u *OauthAuthorizationCodeUpdate) SetScopes(v []string) *OauthAuthorizationCodeUpdate {
+func (_u *OauthAuthorizationCodeUpdate) SetScopes(v string) *OauthAuthorizationCodeUpdate {
 	_u.mutation.SetScopes(v)
 	return _u
 }
 
-// AppendScopes appends value to the "scopes" field.
-func (_u *OauthAuthorizationCodeUpdate) AppendScopes(v []string) *OauthAuthorizationCodeUpdate {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// SetSession sets the "session" field.
-func (_u *OauthAuthorizationCodeUpdate) SetSession(v []byte) *OauthAuthorizationCodeUpdate {
-	_u.mutation.SetSession(v)
-	return _u
-}
-
-// SetActive sets the "active" field.
-func (_u *OauthAuthorizationCodeUpdate) SetActive(v bool) *OauthAuthorizationCodeUpdate {
-	_u.mutation.SetActive(v)
-	return _u
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdate) SetNillableActive(v *bool) *OauthAuthorizationCodeUpdate {
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (_u *OauthAuthorizationCodeUpdate) SetNillableScopes(v *string) *OauthAuthorizationCodeUpdate {
 	if v != nil {
-		_u.SetActive(*v)
+		_u.SetScopes(*v)
 	}
 	return _u
 }
 
-// SetRequestedAt sets the "requested_at" field.
-func (_u *OauthAuthorizationCodeUpdate) SetRequestedAt(v time.Time) *OauthAuthorizationCodeUpdate {
-	_u.mutation.SetRequestedAt(v)
+// ClearScopes clears the value of the "scopes" field.
+func (_u *OauthAuthorizationCodeUpdate) ClearScopes() *OauthAuthorizationCodeUpdate {
+	_u.mutation.ClearScopes()
 	return _u
 }
 
-// SetNillableRequestedAt sets the "requested_at" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdate) SetNillableRequestedAt(v *time.Time) *OauthAuthorizationCodeUpdate {
+// SetRevoked sets the "revoked" field.
+func (_u *OauthAuthorizationCodeUpdate) SetRevoked(v bool) *OauthAuthorizationCodeUpdate {
+	_u.mutation.SetRevoked(v)
+	return _u
+}
+
+// SetNillableRevoked sets the "revoked" field if the given value is not nil.
+func (_u *OauthAuthorizationCodeUpdate) SetNillableRevoked(v *bool) *OauthAuthorizationCodeUpdate {
 	if v != nil {
-		_u.SetRequestedAt(*v)
+		_u.SetRevoked(*v)
 	}
 	return _u
 }
@@ -128,6 +115,12 @@ func (_u *OauthAuthorizationCodeUpdate) SetNillableExpiresAt(v *time.Time) *Oaut
 	if v != nil {
 		_u.SetExpiresAt(*v)
 	}
+	return _u
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *OauthAuthorizationCodeUpdate) ClearExpiresAt() *OauthAuthorizationCodeUpdate {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -172,34 +165,32 @@ func (_u *OauthAuthorizationCodeUpdate) sqlSave(ctx context.Context) (_node int,
 			}
 		}
 	}
-	if value, ok := _u.mutation.RequestID(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldRequestID, field.TypeString, value)
+	if value, ok := _u.mutation.UserID(); ok {
+		_spec.SetField(oauthauthorizationcode.FieldUserID, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.AddedUserID(); ok {
+		_spec.AddField(oauthauthorizationcode.FieldUserID, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldClientID, field.TypeString, value)
+		_spec.SetField(oauthauthorizationcode.FieldClientID, field.TypeUint64, value)
 	}
-	if value, ok := _u.mutation.Subject(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldSubject, field.TypeString, value)
+	if value, ok := _u.mutation.AddedClientID(); ok {
+		_spec.AddField(oauthauthorizationcode.FieldClientID, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldScopes, field.TypeJSON, value)
+		_spec.SetField(oauthauthorizationcode.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthauthorizationcode.FieldScopes, value)
-		})
+	if _u.mutation.ScopesCleared() {
+		_spec.ClearField(oauthauthorizationcode.FieldScopes, field.TypeString)
 	}
-	if value, ok := _u.mutation.Session(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldSession, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.RequestedAt(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldRequestedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.Revoked(); ok {
+		_spec.SetField(oauthauthorizationcode.FieldRevoked, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(oauthauthorizationcode.FieldExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(oauthauthorizationcode.FieldExpiresAt, field.TypeTime)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -221,90 +212,78 @@ type OauthAuthorizationCodeUpdateOne struct {
 	mutation *OauthAuthorizationCodeMutation
 }
 
-// SetRequestID sets the "request_id" field.
-func (_u *OauthAuthorizationCodeUpdateOne) SetRequestID(v string) *OauthAuthorizationCodeUpdateOne {
-	_u.mutation.SetRequestID(v)
+// SetUserID sets the "user_id" field.
+func (_u *OauthAuthorizationCodeUpdateOne) SetUserID(v uint64) *OauthAuthorizationCodeUpdateOne {
+	_u.mutation.ResetUserID()
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
-// SetNillableRequestID sets the "request_id" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdateOne) SetNillableRequestID(v *string) *OauthAuthorizationCodeUpdateOne {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *OauthAuthorizationCodeUpdateOne) SetNillableUserID(v *uint64) *OauthAuthorizationCodeUpdateOne {
 	if v != nil {
-		_u.SetRequestID(*v)
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
+// AddUserID adds value to the "user_id" field.
+func (_u *OauthAuthorizationCodeUpdateOne) AddUserID(v int64) *OauthAuthorizationCodeUpdateOne {
+	_u.mutation.AddUserID(v)
+	return _u
+}
+
 // SetClientID sets the "client_id" field.
-func (_u *OauthAuthorizationCodeUpdateOne) SetClientID(v string) *OauthAuthorizationCodeUpdateOne {
+func (_u *OauthAuthorizationCodeUpdateOne) SetClientID(v uint64) *OauthAuthorizationCodeUpdateOne {
+	_u.mutation.ResetClientID()
 	_u.mutation.SetClientID(v)
 	return _u
 }
 
 // SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdateOne) SetNillableClientID(v *string) *OauthAuthorizationCodeUpdateOne {
+func (_u *OauthAuthorizationCodeUpdateOne) SetNillableClientID(v *uint64) *OauthAuthorizationCodeUpdateOne {
 	if v != nil {
 		_u.SetClientID(*v)
 	}
 	return _u
 }
 
-// SetSubject sets the "subject" field.
-func (_u *OauthAuthorizationCodeUpdateOne) SetSubject(v string) *OauthAuthorizationCodeUpdateOne {
-	_u.mutation.SetSubject(v)
-	return _u
-}
-
-// SetNillableSubject sets the "subject" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdateOne) SetNillableSubject(v *string) *OauthAuthorizationCodeUpdateOne {
-	if v != nil {
-		_u.SetSubject(*v)
-	}
+// AddClientID adds value to the "client_id" field.
+func (_u *OauthAuthorizationCodeUpdateOne) AddClientID(v int64) *OauthAuthorizationCodeUpdateOne {
+	_u.mutation.AddClientID(v)
 	return _u
 }
 
 // SetScopes sets the "scopes" field.
-func (_u *OauthAuthorizationCodeUpdateOne) SetScopes(v []string) *OauthAuthorizationCodeUpdateOne {
+func (_u *OauthAuthorizationCodeUpdateOne) SetScopes(v string) *OauthAuthorizationCodeUpdateOne {
 	_u.mutation.SetScopes(v)
 	return _u
 }
 
-// AppendScopes appends value to the "scopes" field.
-func (_u *OauthAuthorizationCodeUpdateOne) AppendScopes(v []string) *OauthAuthorizationCodeUpdateOne {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// SetSession sets the "session" field.
-func (_u *OauthAuthorizationCodeUpdateOne) SetSession(v []byte) *OauthAuthorizationCodeUpdateOne {
-	_u.mutation.SetSession(v)
-	return _u
-}
-
-// SetActive sets the "active" field.
-func (_u *OauthAuthorizationCodeUpdateOne) SetActive(v bool) *OauthAuthorizationCodeUpdateOne {
-	_u.mutation.SetActive(v)
-	return _u
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdateOne) SetNillableActive(v *bool) *OauthAuthorizationCodeUpdateOne {
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (_u *OauthAuthorizationCodeUpdateOne) SetNillableScopes(v *string) *OauthAuthorizationCodeUpdateOne {
 	if v != nil {
-		_u.SetActive(*v)
+		_u.SetScopes(*v)
 	}
 	return _u
 }
 
-// SetRequestedAt sets the "requested_at" field.
-func (_u *OauthAuthorizationCodeUpdateOne) SetRequestedAt(v time.Time) *OauthAuthorizationCodeUpdateOne {
-	_u.mutation.SetRequestedAt(v)
+// ClearScopes clears the value of the "scopes" field.
+func (_u *OauthAuthorizationCodeUpdateOne) ClearScopes() *OauthAuthorizationCodeUpdateOne {
+	_u.mutation.ClearScopes()
 	return _u
 }
 
-// SetNillableRequestedAt sets the "requested_at" field if the given value is not nil.
-func (_u *OauthAuthorizationCodeUpdateOne) SetNillableRequestedAt(v *time.Time) *OauthAuthorizationCodeUpdateOne {
+// SetRevoked sets the "revoked" field.
+func (_u *OauthAuthorizationCodeUpdateOne) SetRevoked(v bool) *OauthAuthorizationCodeUpdateOne {
+	_u.mutation.SetRevoked(v)
+	return _u
+}
+
+// SetNillableRevoked sets the "revoked" field if the given value is not nil.
+func (_u *OauthAuthorizationCodeUpdateOne) SetNillableRevoked(v *bool) *OauthAuthorizationCodeUpdateOne {
 	if v != nil {
-		_u.SetRequestedAt(*v)
+		_u.SetRevoked(*v)
 	}
 	return _u
 }
@@ -320,6 +299,12 @@ func (_u *OauthAuthorizationCodeUpdateOne) SetNillableExpiresAt(v *time.Time) *O
 	if v != nil {
 		_u.SetExpiresAt(*v)
 	}
+	return _u
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *OauthAuthorizationCodeUpdateOne) ClearExpiresAt() *OauthAuthorizationCodeUpdateOne {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -394,34 +379,32 @@ func (_u *OauthAuthorizationCodeUpdateOne) sqlSave(ctx context.Context) (_node *
 			}
 		}
 	}
-	if value, ok := _u.mutation.RequestID(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldRequestID, field.TypeString, value)
+	if value, ok := _u.mutation.UserID(); ok {
+		_spec.SetField(oauthauthorizationcode.FieldUserID, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.AddedUserID(); ok {
+		_spec.AddField(oauthauthorizationcode.FieldUserID, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldClientID, field.TypeString, value)
+		_spec.SetField(oauthauthorizationcode.FieldClientID, field.TypeUint64, value)
 	}
-	if value, ok := _u.mutation.Subject(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldSubject, field.TypeString, value)
+	if value, ok := _u.mutation.AddedClientID(); ok {
+		_spec.AddField(oauthauthorizationcode.FieldClientID, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldScopes, field.TypeJSON, value)
+		_spec.SetField(oauthauthorizationcode.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthauthorizationcode.FieldScopes, value)
-		})
+	if _u.mutation.ScopesCleared() {
+		_spec.ClearField(oauthauthorizationcode.FieldScopes, field.TypeString)
 	}
-	if value, ok := _u.mutation.Session(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldSession, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.RequestedAt(); ok {
-		_spec.SetField(oauthauthorizationcode.FieldRequestedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.Revoked(); ok {
+		_spec.SetField(oauthauthorizationcode.FieldRevoked, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(oauthauthorizationcode.FieldExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(oauthauthorizationcode.FieldExpiresAt, field.TypeTime)
 	}
 	_node = &OauthAuthorizationCode{config: _u.config}
 	_spec.Assign = _node.assignValues

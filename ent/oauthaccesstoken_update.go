@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"glintfed.org/ent/oauthaccesstoken"
 	"glintfed.org/ent/predicate"
@@ -29,91 +28,111 @@ func (_u *OauthAccessTokenUpdate) Where(ps ...predicate.OauthAccessToken) *Oauth
 	return _u
 }
 
-// SetRequestID sets the "request_id" field.
-func (_u *OauthAccessTokenUpdate) SetRequestID(v string) *OauthAccessTokenUpdate {
-	_u.mutation.SetRequestID(v)
+// SetUserID sets the "user_id" field.
+func (_u *OauthAccessTokenUpdate) SetUserID(v uint64) *OauthAccessTokenUpdate {
+	_u.mutation.ResetUserID()
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
-// SetNillableRequestID sets the "request_id" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdate) SetNillableRequestID(v *string) *OauthAccessTokenUpdate {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdate) SetNillableUserID(v *uint64) *OauthAccessTokenUpdate {
 	if v != nil {
-		_u.SetRequestID(*v)
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
+// AddUserID adds value to the "user_id" field.
+func (_u *OauthAccessTokenUpdate) AddUserID(v int64) *OauthAccessTokenUpdate {
+	_u.mutation.AddUserID(v)
+	return _u
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (_u *OauthAccessTokenUpdate) ClearUserID() *OauthAccessTokenUpdate {
+	_u.mutation.ClearUserID()
+	return _u
+}
+
 // SetClientID sets the "client_id" field.
-func (_u *OauthAccessTokenUpdate) SetClientID(v string) *OauthAccessTokenUpdate {
+func (_u *OauthAccessTokenUpdate) SetClientID(v uint64) *OauthAccessTokenUpdate {
+	_u.mutation.ResetClientID()
 	_u.mutation.SetClientID(v)
 	return _u
 }
 
 // SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdate) SetNillableClientID(v *string) *OauthAccessTokenUpdate {
+func (_u *OauthAccessTokenUpdate) SetNillableClientID(v *uint64) *OauthAccessTokenUpdate {
 	if v != nil {
 		_u.SetClientID(*v)
 	}
 	return _u
 }
 
-// SetSubject sets the "subject" field.
-func (_u *OauthAccessTokenUpdate) SetSubject(v string) *OauthAccessTokenUpdate {
-	_u.mutation.SetSubject(v)
+// AddClientID adds value to the "client_id" field.
+func (_u *OauthAccessTokenUpdate) AddClientID(v int64) *OauthAccessTokenUpdate {
+	_u.mutation.AddClientID(v)
 	return _u
 }
 
-// SetNillableSubject sets the "subject" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdate) SetNillableSubject(v *string) *OauthAccessTokenUpdate {
+// SetName sets the "name" field.
+func (_u *OauthAccessTokenUpdate) SetName(v string) *OauthAccessTokenUpdate {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdate) SetNillableName(v *string) *OauthAccessTokenUpdate {
 	if v != nil {
-		_u.SetSubject(*v)
+		_u.SetName(*v)
 	}
+	return _u
+}
+
+// ClearName clears the value of the "name" field.
+func (_u *OauthAccessTokenUpdate) ClearName() *OauthAccessTokenUpdate {
+	_u.mutation.ClearName()
 	return _u
 }
 
 // SetScopes sets the "scopes" field.
-func (_u *OauthAccessTokenUpdate) SetScopes(v []string) *OauthAccessTokenUpdate {
+func (_u *OauthAccessTokenUpdate) SetScopes(v string) *OauthAccessTokenUpdate {
 	_u.mutation.SetScopes(v)
 	return _u
 }
 
-// AppendScopes appends value to the "scopes" field.
-func (_u *OauthAccessTokenUpdate) AppendScopes(v []string) *OauthAccessTokenUpdate {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// SetSession sets the "session" field.
-func (_u *OauthAccessTokenUpdate) SetSession(v []byte) *OauthAccessTokenUpdate {
-	_u.mutation.SetSession(v)
-	return _u
-}
-
-// SetActive sets the "active" field.
-func (_u *OauthAccessTokenUpdate) SetActive(v bool) *OauthAccessTokenUpdate {
-	_u.mutation.SetActive(v)
-	return _u
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdate) SetNillableActive(v *bool) *OauthAccessTokenUpdate {
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdate) SetNillableScopes(v *string) *OauthAccessTokenUpdate {
 	if v != nil {
-		_u.SetActive(*v)
+		_u.SetScopes(*v)
 	}
 	return _u
 }
 
-// SetRequestedAt sets the "requested_at" field.
-func (_u *OauthAccessTokenUpdate) SetRequestedAt(v time.Time) *OauthAccessTokenUpdate {
-	_u.mutation.SetRequestedAt(v)
+// ClearScopes clears the value of the "scopes" field.
+func (_u *OauthAccessTokenUpdate) ClearScopes() *OauthAccessTokenUpdate {
+	_u.mutation.ClearScopes()
 	return _u
 }
 
-// SetNillableRequestedAt sets the "requested_at" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdate) SetNillableRequestedAt(v *time.Time) *OauthAccessTokenUpdate {
+// SetRevoked sets the "revoked" field.
+func (_u *OauthAccessTokenUpdate) SetRevoked(v bool) *OauthAccessTokenUpdate {
+	_u.mutation.SetRevoked(v)
+	return _u
+}
+
+// SetNillableRevoked sets the "revoked" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdate) SetNillableRevoked(v *bool) *OauthAccessTokenUpdate {
 	if v != nil {
-		_u.SetRequestedAt(*v)
+		_u.SetRevoked(*v)
 	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *OauthAccessTokenUpdate) SetUpdatedAt(v time.Time) *OauthAccessTokenUpdate {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -131,6 +150,12 @@ func (_u *OauthAccessTokenUpdate) SetNillableExpiresAt(v *time.Time) *OauthAcces
 	return _u
 }
 
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *OauthAccessTokenUpdate) ClearExpiresAt() *OauthAccessTokenUpdate {
+	_u.mutation.ClearExpiresAt()
+	return _u
+}
+
 // Mutation returns the OauthAccessTokenMutation object of the builder.
 func (_u *OauthAccessTokenUpdate) Mutation() *OauthAccessTokenMutation {
 	return _u.mutation
@@ -138,6 +163,7 @@ func (_u *OauthAccessTokenUpdate) Mutation() *OauthAccessTokenMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *OauthAccessTokenUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -163,7 +189,28 @@ func (_u *OauthAccessTokenUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *OauthAccessTokenUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := oauthaccesstoken.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (_u *OauthAccessTokenUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
+		if err := oauthaccesstoken.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "OauthAccessToken.name": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *OauthAccessTokenUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(oauthaccesstoken.Table, oauthaccesstoken.Columns, sqlgraph.NewFieldSpec(oauthaccesstoken.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -172,34 +219,44 @@ func (_u *OauthAccessTokenUpdate) sqlSave(ctx context.Context) (_node int, err e
 			}
 		}
 	}
-	if value, ok := _u.mutation.RequestID(); ok {
-		_spec.SetField(oauthaccesstoken.FieldRequestID, field.TypeString, value)
+	if value, ok := _u.mutation.UserID(); ok {
+		_spec.SetField(oauthaccesstoken.FieldUserID, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.AddedUserID(); ok {
+		_spec.AddField(oauthaccesstoken.FieldUserID, field.TypeUint64, value)
+	}
+	if _u.mutation.UserIDCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldUserID, field.TypeUint64)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
-		_spec.SetField(oauthaccesstoken.FieldClientID, field.TypeString, value)
+		_spec.SetField(oauthaccesstoken.FieldClientID, field.TypeUint64, value)
 	}
-	if value, ok := _u.mutation.Subject(); ok {
-		_spec.SetField(oauthaccesstoken.FieldSubject, field.TypeString, value)
+	if value, ok := _u.mutation.AddedClientID(); ok {
+		_spec.AddField(oauthaccesstoken.FieldClientID, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(oauthaccesstoken.FieldName, field.TypeString, value)
+	}
+	if _u.mutation.NameCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldName, field.TypeString)
 	}
 	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(oauthaccesstoken.FieldScopes, field.TypeJSON, value)
+		_spec.SetField(oauthaccesstoken.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthaccesstoken.FieldScopes, value)
-		})
+	if _u.mutation.ScopesCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldScopes, field.TypeString)
 	}
-	if value, ok := _u.mutation.Session(); ok {
-		_spec.SetField(oauthaccesstoken.FieldSession, field.TypeBytes, value)
+	if value, ok := _u.mutation.Revoked(); ok {
+		_spec.SetField(oauthaccesstoken.FieldRevoked, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(oauthaccesstoken.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.RequestedAt(); ok {
-		_spec.SetField(oauthaccesstoken.FieldRequestedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(oauthaccesstoken.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(oauthaccesstoken.FieldExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldExpiresAt, field.TypeTime)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -221,91 +278,111 @@ type OauthAccessTokenUpdateOne struct {
 	mutation *OauthAccessTokenMutation
 }
 
-// SetRequestID sets the "request_id" field.
-func (_u *OauthAccessTokenUpdateOne) SetRequestID(v string) *OauthAccessTokenUpdateOne {
-	_u.mutation.SetRequestID(v)
+// SetUserID sets the "user_id" field.
+func (_u *OauthAccessTokenUpdateOne) SetUserID(v uint64) *OauthAccessTokenUpdateOne {
+	_u.mutation.ResetUserID()
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
-// SetNillableRequestID sets the "request_id" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdateOne) SetNillableRequestID(v *string) *OauthAccessTokenUpdateOne {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdateOne) SetNillableUserID(v *uint64) *OauthAccessTokenUpdateOne {
 	if v != nil {
-		_u.SetRequestID(*v)
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
+// AddUserID adds value to the "user_id" field.
+func (_u *OauthAccessTokenUpdateOne) AddUserID(v int64) *OauthAccessTokenUpdateOne {
+	_u.mutation.AddUserID(v)
+	return _u
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (_u *OauthAccessTokenUpdateOne) ClearUserID() *OauthAccessTokenUpdateOne {
+	_u.mutation.ClearUserID()
+	return _u
+}
+
 // SetClientID sets the "client_id" field.
-func (_u *OauthAccessTokenUpdateOne) SetClientID(v string) *OauthAccessTokenUpdateOne {
+func (_u *OauthAccessTokenUpdateOne) SetClientID(v uint64) *OauthAccessTokenUpdateOne {
+	_u.mutation.ResetClientID()
 	_u.mutation.SetClientID(v)
 	return _u
 }
 
 // SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdateOne) SetNillableClientID(v *string) *OauthAccessTokenUpdateOne {
+func (_u *OauthAccessTokenUpdateOne) SetNillableClientID(v *uint64) *OauthAccessTokenUpdateOne {
 	if v != nil {
 		_u.SetClientID(*v)
 	}
 	return _u
 }
 
-// SetSubject sets the "subject" field.
-func (_u *OauthAccessTokenUpdateOne) SetSubject(v string) *OauthAccessTokenUpdateOne {
-	_u.mutation.SetSubject(v)
+// AddClientID adds value to the "client_id" field.
+func (_u *OauthAccessTokenUpdateOne) AddClientID(v int64) *OauthAccessTokenUpdateOne {
+	_u.mutation.AddClientID(v)
 	return _u
 }
 
-// SetNillableSubject sets the "subject" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdateOne) SetNillableSubject(v *string) *OauthAccessTokenUpdateOne {
+// SetName sets the "name" field.
+func (_u *OauthAccessTokenUpdateOne) SetName(v string) *OauthAccessTokenUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdateOne) SetNillableName(v *string) *OauthAccessTokenUpdateOne {
 	if v != nil {
-		_u.SetSubject(*v)
+		_u.SetName(*v)
 	}
+	return _u
+}
+
+// ClearName clears the value of the "name" field.
+func (_u *OauthAccessTokenUpdateOne) ClearName() *OauthAccessTokenUpdateOne {
+	_u.mutation.ClearName()
 	return _u
 }
 
 // SetScopes sets the "scopes" field.
-func (_u *OauthAccessTokenUpdateOne) SetScopes(v []string) *OauthAccessTokenUpdateOne {
+func (_u *OauthAccessTokenUpdateOne) SetScopes(v string) *OauthAccessTokenUpdateOne {
 	_u.mutation.SetScopes(v)
 	return _u
 }
 
-// AppendScopes appends value to the "scopes" field.
-func (_u *OauthAccessTokenUpdateOne) AppendScopes(v []string) *OauthAccessTokenUpdateOne {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// SetSession sets the "session" field.
-func (_u *OauthAccessTokenUpdateOne) SetSession(v []byte) *OauthAccessTokenUpdateOne {
-	_u.mutation.SetSession(v)
-	return _u
-}
-
-// SetActive sets the "active" field.
-func (_u *OauthAccessTokenUpdateOne) SetActive(v bool) *OauthAccessTokenUpdateOne {
-	_u.mutation.SetActive(v)
-	return _u
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdateOne) SetNillableActive(v *bool) *OauthAccessTokenUpdateOne {
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdateOne) SetNillableScopes(v *string) *OauthAccessTokenUpdateOne {
 	if v != nil {
-		_u.SetActive(*v)
+		_u.SetScopes(*v)
 	}
 	return _u
 }
 
-// SetRequestedAt sets the "requested_at" field.
-func (_u *OauthAccessTokenUpdateOne) SetRequestedAt(v time.Time) *OauthAccessTokenUpdateOne {
-	_u.mutation.SetRequestedAt(v)
+// ClearScopes clears the value of the "scopes" field.
+func (_u *OauthAccessTokenUpdateOne) ClearScopes() *OauthAccessTokenUpdateOne {
+	_u.mutation.ClearScopes()
 	return _u
 }
 
-// SetNillableRequestedAt sets the "requested_at" field if the given value is not nil.
-func (_u *OauthAccessTokenUpdateOne) SetNillableRequestedAt(v *time.Time) *OauthAccessTokenUpdateOne {
+// SetRevoked sets the "revoked" field.
+func (_u *OauthAccessTokenUpdateOne) SetRevoked(v bool) *OauthAccessTokenUpdateOne {
+	_u.mutation.SetRevoked(v)
+	return _u
+}
+
+// SetNillableRevoked sets the "revoked" field if the given value is not nil.
+func (_u *OauthAccessTokenUpdateOne) SetNillableRevoked(v *bool) *OauthAccessTokenUpdateOne {
 	if v != nil {
-		_u.SetRequestedAt(*v)
+		_u.SetRevoked(*v)
 	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *OauthAccessTokenUpdateOne) SetUpdatedAt(v time.Time) *OauthAccessTokenUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -320,6 +397,12 @@ func (_u *OauthAccessTokenUpdateOne) SetNillableExpiresAt(v *time.Time) *OauthAc
 	if v != nil {
 		_u.SetExpiresAt(*v)
 	}
+	return _u
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *OauthAccessTokenUpdateOne) ClearExpiresAt() *OauthAccessTokenUpdateOne {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -343,6 +426,7 @@ func (_u *OauthAccessTokenUpdateOne) Select(field string, fields ...string) *Oau
 
 // Save executes the query and returns the updated OauthAccessToken entity.
 func (_u *OauthAccessTokenUpdateOne) Save(ctx context.Context) (*OauthAccessToken, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -368,7 +452,28 @@ func (_u *OauthAccessTokenUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *OauthAccessTokenUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := oauthaccesstoken.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (_u *OauthAccessTokenUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
+		if err := oauthaccesstoken.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "OauthAccessToken.name": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *OauthAccessTokenUpdateOne) sqlSave(ctx context.Context) (_node *OauthAccessToken, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(oauthaccesstoken.Table, oauthaccesstoken.Columns, sqlgraph.NewFieldSpec(oauthaccesstoken.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -394,34 +499,44 @@ func (_u *OauthAccessTokenUpdateOne) sqlSave(ctx context.Context) (_node *OauthA
 			}
 		}
 	}
-	if value, ok := _u.mutation.RequestID(); ok {
-		_spec.SetField(oauthaccesstoken.FieldRequestID, field.TypeString, value)
+	if value, ok := _u.mutation.UserID(); ok {
+		_spec.SetField(oauthaccesstoken.FieldUserID, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.AddedUserID(); ok {
+		_spec.AddField(oauthaccesstoken.FieldUserID, field.TypeUint64, value)
+	}
+	if _u.mutation.UserIDCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldUserID, field.TypeUint64)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
-		_spec.SetField(oauthaccesstoken.FieldClientID, field.TypeString, value)
+		_spec.SetField(oauthaccesstoken.FieldClientID, field.TypeUint64, value)
 	}
-	if value, ok := _u.mutation.Subject(); ok {
-		_spec.SetField(oauthaccesstoken.FieldSubject, field.TypeString, value)
+	if value, ok := _u.mutation.AddedClientID(); ok {
+		_spec.AddField(oauthaccesstoken.FieldClientID, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(oauthaccesstoken.FieldName, field.TypeString, value)
+	}
+	if _u.mutation.NameCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldName, field.TypeString)
 	}
 	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(oauthaccesstoken.FieldScopes, field.TypeJSON, value)
+		_spec.SetField(oauthaccesstoken.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthaccesstoken.FieldScopes, value)
-		})
+	if _u.mutation.ScopesCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldScopes, field.TypeString)
 	}
-	if value, ok := _u.mutation.Session(); ok {
-		_spec.SetField(oauthaccesstoken.FieldSession, field.TypeBytes, value)
+	if value, ok := _u.mutation.Revoked(); ok {
+		_spec.SetField(oauthaccesstoken.FieldRevoked, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(oauthaccesstoken.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.RequestedAt(); ok {
-		_spec.SetField(oauthaccesstoken.FieldRequestedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(oauthaccesstoken.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(oauthaccesstoken.FieldExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(oauthaccesstoken.FieldExpiresAt, field.TypeTime)
 	}
 	_node = &OauthAccessToken{config: _u.config}
 	_spec.Assign = _node.assignValues

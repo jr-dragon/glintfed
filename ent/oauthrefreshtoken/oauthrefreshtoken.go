@@ -3,8 +3,6 @@
 package oauthrefreshtoken
 
 import (
-	"time"
-
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -13,24 +11,12 @@ const (
 	Label = "oauth_refresh_token"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldRequestID holds the string denoting the request_id field in the database.
-	FieldRequestID = "request_id"
-	// FieldClientID holds the string denoting the client_id field in the database.
-	FieldClientID = "client_id"
-	// FieldSubject holds the string denoting the subject field in the database.
-	FieldSubject = "subject"
-	// FieldScopes holds the string denoting the scopes field in the database.
-	FieldScopes = "scopes"
-	// FieldSession holds the string denoting the session field in the database.
-	FieldSession = "session"
-	// FieldActive holds the string denoting the active field in the database.
-	FieldActive = "active"
-	// FieldRequestedAt holds the string denoting the requested_at field in the database.
-	FieldRequestedAt = "requested_at"
+	// FieldAccessTokenID holds the string denoting the access_token_id field in the database.
+	FieldAccessTokenID = "access_token_id"
+	// FieldRevoked holds the string denoting the revoked field in the database.
+	FieldRevoked = "revoked"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
 	FieldExpiresAt = "expires_at"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
 	// Table holds the table name of the oauthrefreshtoken in the database.
 	Table = "oauth_refresh_tokens"
 )
@@ -38,15 +24,9 @@ const (
 // Columns holds all SQL columns for oauthrefreshtoken fields.
 var Columns = []string{
 	FieldID,
-	FieldRequestID,
-	FieldClientID,
-	FieldSubject,
-	FieldScopes,
-	FieldSession,
-	FieldActive,
-	FieldRequestedAt,
+	FieldAccessTokenID,
+	FieldRevoked,
 	FieldExpiresAt,
-	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -60,10 +40,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultActive holds the default value on creation for the "active" field.
-	DefaultActive bool
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// AccessTokenIDValidator is a validator for the "access_token_id" field. It is called by the builders before save.
+	AccessTokenIDValidator func(string) error
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the OauthRefreshToken queries.
@@ -74,37 +54,17 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByRequestID orders the results by the request_id field.
-func ByRequestID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRequestID, opts...).ToFunc()
+// ByAccessTokenID orders the results by the access_token_id field.
+func ByAccessTokenID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccessTokenID, opts...).ToFunc()
 }
 
-// ByClientID orders the results by the client_id field.
-func ByClientID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldClientID, opts...).ToFunc()
-}
-
-// BySubject orders the results by the subject field.
-func BySubject(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSubject, opts...).ToFunc()
-}
-
-// ByActive orders the results by the active field.
-func ByActive(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldActive, opts...).ToFunc()
-}
-
-// ByRequestedAt orders the results by the requested_at field.
-func ByRequestedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRequestedAt, opts...).ToFunc()
+// ByRevoked orders the results by the revoked field.
+func ByRevoked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRevoked, opts...).ToFunc()
 }
 
 // ByExpiresAt orders the results by the expires_at field.
 func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
-}
-
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }

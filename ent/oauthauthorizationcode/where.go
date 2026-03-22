@@ -64,34 +64,24 @@ func IDContainsFold(id string) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldContainsFold(FieldID, id))
 }
 
-// RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
-func RequestID(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldRequestID, v))
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldUserID, v))
 }
 
 // ClientID applies equality check predicate on the "client_id" field. It's identical to ClientIDEQ.
-func ClientID(v string) predicate.OauthAuthorizationCode {
+func ClientID(v uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldClientID, v))
 }
 
-// Subject applies equality check predicate on the "subject" field. It's identical to SubjectEQ.
-func Subject(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldSubject, v))
+// Scopes applies equality check predicate on the "scopes" field. It's identical to ScopesEQ.
+func Scopes(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldScopes, v))
 }
 
-// Session applies equality check predicate on the "session" field. It's identical to SessionEQ.
-func Session(v []byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldSession, v))
-}
-
-// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
-func Active(v bool) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldActive, v))
-}
-
-// RequestedAt applies equality check predicate on the "requested_at" field. It's identical to RequestedAtEQ.
-func RequestedAt(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldRequestedAt, v))
+// Revoked applies equality check predicate on the "revoked" field. It's identical to RevokedEQ.
+func Revoked(v bool) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldRevoked, v))
 }
 
 // ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
@@ -99,294 +89,169 @@ func ExpiresAt(v time.Time) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldExpiresAt, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldCreatedAt, v))
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldUserID, v))
 }
 
-// RequestIDEQ applies the EQ predicate on the "request_id" field.
-func RequestIDEQ(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldRequestID, v))
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldUserID, v))
 }
 
-// RequestIDNEQ applies the NEQ predicate on the "request_id" field.
-func RequestIDNEQ(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldRequestID, v))
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldUserID, vs...))
 }
 
-// RequestIDIn applies the In predicate on the "request_id" field.
-func RequestIDIn(vs ...string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldRequestID, vs...))
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldUserID, vs...))
 }
 
-// RequestIDNotIn applies the NotIn predicate on the "request_id" field.
-func RequestIDNotIn(vs ...string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldRequestID, vs...))
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldUserID, v))
 }
 
-// RequestIDGT applies the GT predicate on the "request_id" field.
-func RequestIDGT(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldRequestID, v))
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldUserID, v))
 }
 
-// RequestIDGTE applies the GTE predicate on the "request_id" field.
-func RequestIDGTE(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldRequestID, v))
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldUserID, v))
 }
 
-// RequestIDLT applies the LT predicate on the "request_id" field.
-func RequestIDLT(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldRequestID, v))
-}
-
-// RequestIDLTE applies the LTE predicate on the "request_id" field.
-func RequestIDLTE(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldRequestID, v))
-}
-
-// RequestIDContains applies the Contains predicate on the "request_id" field.
-func RequestIDContains(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldContains(FieldRequestID, v))
-}
-
-// RequestIDHasPrefix applies the HasPrefix predicate on the "request_id" field.
-func RequestIDHasPrefix(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldHasPrefix(FieldRequestID, v))
-}
-
-// RequestIDHasSuffix applies the HasSuffix predicate on the "request_id" field.
-func RequestIDHasSuffix(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldHasSuffix(FieldRequestID, v))
-}
-
-// RequestIDEqualFold applies the EqualFold predicate on the "request_id" field.
-func RequestIDEqualFold(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEqualFold(FieldRequestID, v))
-}
-
-// RequestIDContainsFold applies the ContainsFold predicate on the "request_id" field.
-func RequestIDContainsFold(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldContainsFold(FieldRequestID, v))
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v uint64) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldUserID, v))
 }
 
 // ClientIDEQ applies the EQ predicate on the "client_id" field.
-func ClientIDEQ(v string) predicate.OauthAuthorizationCode {
+func ClientIDEQ(v uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldClientID, v))
 }
 
 // ClientIDNEQ applies the NEQ predicate on the "client_id" field.
-func ClientIDNEQ(v string) predicate.OauthAuthorizationCode {
+func ClientIDNEQ(v uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldClientID, v))
 }
 
 // ClientIDIn applies the In predicate on the "client_id" field.
-func ClientIDIn(vs ...string) predicate.OauthAuthorizationCode {
+func ClientIDIn(vs ...uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldClientID, vs...))
 }
 
 // ClientIDNotIn applies the NotIn predicate on the "client_id" field.
-func ClientIDNotIn(vs ...string) predicate.OauthAuthorizationCode {
+func ClientIDNotIn(vs ...uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldClientID, vs...))
 }
 
 // ClientIDGT applies the GT predicate on the "client_id" field.
-func ClientIDGT(v string) predicate.OauthAuthorizationCode {
+func ClientIDGT(v uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldClientID, v))
 }
 
 // ClientIDGTE applies the GTE predicate on the "client_id" field.
-func ClientIDGTE(v string) predicate.OauthAuthorizationCode {
+func ClientIDGTE(v uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldClientID, v))
 }
 
 // ClientIDLT applies the LT predicate on the "client_id" field.
-func ClientIDLT(v string) predicate.OauthAuthorizationCode {
+func ClientIDLT(v uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldClientID, v))
 }
 
 // ClientIDLTE applies the LTE predicate on the "client_id" field.
-func ClientIDLTE(v string) predicate.OauthAuthorizationCode {
+func ClientIDLTE(v uint64) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldClientID, v))
 }
 
-// ClientIDContains applies the Contains predicate on the "client_id" field.
-func ClientIDContains(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldContains(FieldClientID, v))
+// ScopesEQ applies the EQ predicate on the "scopes" field.
+func ScopesEQ(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldScopes, v))
 }
 
-// ClientIDHasPrefix applies the HasPrefix predicate on the "client_id" field.
-func ClientIDHasPrefix(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldHasPrefix(FieldClientID, v))
+// ScopesNEQ applies the NEQ predicate on the "scopes" field.
+func ScopesNEQ(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldScopes, v))
 }
 
-// ClientIDHasSuffix applies the HasSuffix predicate on the "client_id" field.
-func ClientIDHasSuffix(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldHasSuffix(FieldClientID, v))
+// ScopesIn applies the In predicate on the "scopes" field.
+func ScopesIn(vs ...string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldScopes, vs...))
 }
 
-// ClientIDEqualFold applies the EqualFold predicate on the "client_id" field.
-func ClientIDEqualFold(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEqualFold(FieldClientID, v))
+// ScopesNotIn applies the NotIn predicate on the "scopes" field.
+func ScopesNotIn(vs ...string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldScopes, vs...))
 }
 
-// ClientIDContainsFold applies the ContainsFold predicate on the "client_id" field.
-func ClientIDContainsFold(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldContainsFold(FieldClientID, v))
+// ScopesGT applies the GT predicate on the "scopes" field.
+func ScopesGT(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldScopes, v))
 }
 
-// SubjectEQ applies the EQ predicate on the "subject" field.
-func SubjectEQ(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldSubject, v))
+// ScopesGTE applies the GTE predicate on the "scopes" field.
+func ScopesGTE(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldScopes, v))
 }
 
-// SubjectNEQ applies the NEQ predicate on the "subject" field.
-func SubjectNEQ(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldSubject, v))
+// ScopesLT applies the LT predicate on the "scopes" field.
+func ScopesLT(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldScopes, v))
 }
 
-// SubjectIn applies the In predicate on the "subject" field.
-func SubjectIn(vs ...string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldSubject, vs...))
+// ScopesLTE applies the LTE predicate on the "scopes" field.
+func ScopesLTE(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldScopes, v))
 }
 
-// SubjectNotIn applies the NotIn predicate on the "subject" field.
-func SubjectNotIn(vs ...string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldSubject, vs...))
+// ScopesContains applies the Contains predicate on the "scopes" field.
+func ScopesContains(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldContains(FieldScopes, v))
 }
 
-// SubjectGT applies the GT predicate on the "subject" field.
-func SubjectGT(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldSubject, v))
+// ScopesHasPrefix applies the HasPrefix predicate on the "scopes" field.
+func ScopesHasPrefix(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldHasPrefix(FieldScopes, v))
 }
 
-// SubjectGTE applies the GTE predicate on the "subject" field.
-func SubjectGTE(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldSubject, v))
+// ScopesHasSuffix applies the HasSuffix predicate on the "scopes" field.
+func ScopesHasSuffix(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldHasSuffix(FieldScopes, v))
 }
 
-// SubjectLT applies the LT predicate on the "subject" field.
-func SubjectLT(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldSubject, v))
+// ScopesIsNil applies the IsNil predicate on the "scopes" field.
+func ScopesIsNil() predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldIsNull(FieldScopes))
 }
 
-// SubjectLTE applies the LTE predicate on the "subject" field.
-func SubjectLTE(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldSubject, v))
+// ScopesNotNil applies the NotNil predicate on the "scopes" field.
+func ScopesNotNil() predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldNotNull(FieldScopes))
 }
 
-// SubjectContains applies the Contains predicate on the "subject" field.
-func SubjectContains(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldContains(FieldSubject, v))
+// ScopesEqualFold applies the EqualFold predicate on the "scopes" field.
+func ScopesEqualFold(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldEqualFold(FieldScopes, v))
 }
 
-// SubjectHasPrefix applies the HasPrefix predicate on the "subject" field.
-func SubjectHasPrefix(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldHasPrefix(FieldSubject, v))
+// ScopesContainsFold applies the ContainsFold predicate on the "scopes" field.
+func ScopesContainsFold(v string) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldContainsFold(FieldScopes, v))
 }
 
-// SubjectHasSuffix applies the HasSuffix predicate on the "subject" field.
-func SubjectHasSuffix(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldHasSuffix(FieldSubject, v))
+// RevokedEQ applies the EQ predicate on the "revoked" field.
+func RevokedEQ(v bool) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldRevoked, v))
 }
 
-// SubjectEqualFold applies the EqualFold predicate on the "subject" field.
-func SubjectEqualFold(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEqualFold(FieldSubject, v))
-}
-
-// SubjectContainsFold applies the ContainsFold predicate on the "subject" field.
-func SubjectContainsFold(v string) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldContainsFold(FieldSubject, v))
-}
-
-// SessionEQ applies the EQ predicate on the "session" field.
-func SessionEQ(v []byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldSession, v))
-}
-
-// SessionNEQ applies the NEQ predicate on the "session" field.
-func SessionNEQ(v []byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldSession, v))
-}
-
-// SessionIn applies the In predicate on the "session" field.
-func SessionIn(vs ...[]byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldSession, vs...))
-}
-
-// SessionNotIn applies the NotIn predicate on the "session" field.
-func SessionNotIn(vs ...[]byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldSession, vs...))
-}
-
-// SessionGT applies the GT predicate on the "session" field.
-func SessionGT(v []byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldSession, v))
-}
-
-// SessionGTE applies the GTE predicate on the "session" field.
-func SessionGTE(v []byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldSession, v))
-}
-
-// SessionLT applies the LT predicate on the "session" field.
-func SessionLT(v []byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldSession, v))
-}
-
-// SessionLTE applies the LTE predicate on the "session" field.
-func SessionLTE(v []byte) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldSession, v))
-}
-
-// ActiveEQ applies the EQ predicate on the "active" field.
-func ActiveEQ(v bool) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldActive, v))
-}
-
-// ActiveNEQ applies the NEQ predicate on the "active" field.
-func ActiveNEQ(v bool) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldActive, v))
-}
-
-// RequestedAtEQ applies the EQ predicate on the "requested_at" field.
-func RequestedAtEQ(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldRequestedAt, v))
-}
-
-// RequestedAtNEQ applies the NEQ predicate on the "requested_at" field.
-func RequestedAtNEQ(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldRequestedAt, v))
-}
-
-// RequestedAtIn applies the In predicate on the "requested_at" field.
-func RequestedAtIn(vs ...time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldRequestedAt, vs...))
-}
-
-// RequestedAtNotIn applies the NotIn predicate on the "requested_at" field.
-func RequestedAtNotIn(vs ...time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldRequestedAt, vs...))
-}
-
-// RequestedAtGT applies the GT predicate on the "requested_at" field.
-func RequestedAtGT(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldRequestedAt, v))
-}
-
-// RequestedAtGTE applies the GTE predicate on the "requested_at" field.
-func RequestedAtGTE(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldRequestedAt, v))
-}
-
-// RequestedAtLT applies the LT predicate on the "requested_at" field.
-func RequestedAtLT(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldRequestedAt, v))
-}
-
-// RequestedAtLTE applies the LTE predicate on the "requested_at" field.
-func RequestedAtLTE(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldRequestedAt, v))
+// RevokedNEQ applies the NEQ predicate on the "revoked" field.
+func RevokedNEQ(v bool) predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldRevoked, v))
 }
 
 // ExpiresAtEQ applies the EQ predicate on the "expires_at" field.
@@ -429,44 +294,14 @@ func ExpiresAtLTE(v time.Time) predicate.OauthAuthorizationCode {
 	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldExpiresAt, v))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldEQ(FieldCreatedAt, v))
+// ExpiresAtIsNil applies the IsNil predicate on the "expires_at" field.
+func ExpiresAtIsNil() predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldIsNull(FieldExpiresAt))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNEQ(FieldCreatedAt, v))
-}
-
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldNotIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGT(FieldCreatedAt, v))
-}
-
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldGTE(FieldCreatedAt, v))
-}
-
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLT(FieldCreatedAt, v))
-}
-
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.OauthAuthorizationCode {
-	return predicate.OauthAuthorizationCode(sql.FieldLTE(FieldCreatedAt, v))
+// ExpiresAtNotNil applies the NotNil predicate on the "expires_at" field.
+func ExpiresAtNotNil() predicate.OauthAuthorizationCode {
+	return predicate.OauthAuthorizationCode(sql.FieldNotNull(FieldExpiresAt))
 }
 
 // And groups predicates with the AND operator between them.

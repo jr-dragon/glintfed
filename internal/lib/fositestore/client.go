@@ -35,29 +35,33 @@ func (c *FositeClient) GetRedirectURIs() []string {
 	return strings.Split(c.Redirect, "\n")
 }
 
-// GetGrantTypes returns the allowed grant types.
+// GetGrantTypes returns the allowed grant types derived from the client's capabilities.
 func (c *FositeClient) GetGrantTypes() fosite.Arguments {
-	return fosite.Arguments(c.GrantTypes)
+	types := fosite.Arguments{"authorization_code", "refresh_token", "client_credentials"}
+	if c.PasswordClient {
+		types = append(types, "password")
+	}
+	return types
 }
 
 // GetResponseTypes returns the allowed response types.
 func (c *FositeClient) GetResponseTypes() fosite.Arguments {
-	return fosite.Arguments(c.ResponseTypes)
+	return fosite.Arguments{"code", "token"}
 }
 
 // GetScopes returns the allowed scopes.
 func (c *FositeClient) GetScopes() fosite.Arguments {
-	return fosite.Arguments(c.Scopes)
+	return fosite.Arguments{"read", "write", "follow", "push"}
 }
 
-// IsPublic returns whether the client is public (no client secret required).
+// IsPublic returns whether the client is public (personal access client has no secret).
 func (c *FositeClient) IsPublic() bool {
-	return c.Public
+	return c.PersonalAccessClient
 }
 
 // GetAudience returns the allowed audience.
 func (c *FositeClient) GetAudience() fosite.Arguments {
-	return fosite.Arguments(c.Audience)
+	return fosite.Arguments{}
 }
 
 // GetClient retrieves a client by its string ID.

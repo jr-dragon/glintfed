@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"glintfed.org/ent/oauthclient"
 	"glintfed.org/ent/predicate"
@@ -152,68 +151,6 @@ func (_u *OauthClientUpdate) SetNillablePasswordClient(v *bool) *OauthClientUpda
 	return _u
 }
 
-// SetPublic sets the "public" field.
-func (_u *OauthClientUpdate) SetPublic(v bool) *OauthClientUpdate {
-	_u.mutation.SetPublic(v)
-	return _u
-}
-
-// SetNillablePublic sets the "public" field if the given value is not nil.
-func (_u *OauthClientUpdate) SetNillablePublic(v *bool) *OauthClientUpdate {
-	if v != nil {
-		_u.SetPublic(*v)
-	}
-	return _u
-}
-
-// SetGrantTypes sets the "grant_types" field.
-func (_u *OauthClientUpdate) SetGrantTypes(v []string) *OauthClientUpdate {
-	_u.mutation.SetGrantTypes(v)
-	return _u
-}
-
-// AppendGrantTypes appends value to the "grant_types" field.
-func (_u *OauthClientUpdate) AppendGrantTypes(v []string) *OauthClientUpdate {
-	_u.mutation.AppendGrantTypes(v)
-	return _u
-}
-
-// SetResponseTypes sets the "response_types" field.
-func (_u *OauthClientUpdate) SetResponseTypes(v []string) *OauthClientUpdate {
-	_u.mutation.SetResponseTypes(v)
-	return _u
-}
-
-// AppendResponseTypes appends value to the "response_types" field.
-func (_u *OauthClientUpdate) AppendResponseTypes(v []string) *OauthClientUpdate {
-	_u.mutation.AppendResponseTypes(v)
-	return _u
-}
-
-// SetScopes sets the "scopes" field.
-func (_u *OauthClientUpdate) SetScopes(v []string) *OauthClientUpdate {
-	_u.mutation.SetScopes(v)
-	return _u
-}
-
-// AppendScopes appends value to the "scopes" field.
-func (_u *OauthClientUpdate) AppendScopes(v []string) *OauthClientUpdate {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// SetAudience sets the "audience" field.
-func (_u *OauthClientUpdate) SetAudience(v []string) *OauthClientUpdate {
-	_u.mutation.SetAudience(v)
-	return _u
-}
-
-// AppendAudience appends value to the "audience" field.
-func (_u *OauthClientUpdate) AppendAudience(v []string) *OauthClientUpdate {
-	_u.mutation.AppendAudience(v)
-	return _u
-}
-
 // SetRevoked sets the "revoked" field.
 func (_u *OauthClientUpdate) SetRevoked(v bool) *OauthClientUpdate {
 	_u.mutation.SetRevoked(v)
@@ -329,41 +266,6 @@ func (_u *OauthClientUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.PasswordClient(); ok {
 		_spec.SetField(oauthclient.FieldPasswordClient, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.Public(); ok {
-		_spec.SetField(oauthclient.FieldPublic, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.GrantTypes(); ok {
-		_spec.SetField(oauthclient.FieldGrantTypes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedGrantTypes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldGrantTypes, value)
-		})
-	}
-	if value, ok := _u.mutation.ResponseTypes(); ok {
-		_spec.SetField(oauthclient.FieldResponseTypes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedResponseTypes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldResponseTypes, value)
-		})
-	}
-	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(oauthclient.FieldScopes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldScopes, value)
-		})
-	}
-	if value, ok := _u.mutation.Audience(); ok {
-		_spec.SetField(oauthclient.FieldAudience, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedAudience(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldAudience, value)
-		})
 	}
 	if value, ok := _u.mutation.Revoked(); ok {
 		_spec.SetField(oauthclient.FieldRevoked, field.TypeBool, value)
@@ -514,68 +416,6 @@ func (_u *OauthClientUpdateOne) SetNillablePasswordClient(v *bool) *OauthClientU
 	return _u
 }
 
-// SetPublic sets the "public" field.
-func (_u *OauthClientUpdateOne) SetPublic(v bool) *OauthClientUpdateOne {
-	_u.mutation.SetPublic(v)
-	return _u
-}
-
-// SetNillablePublic sets the "public" field if the given value is not nil.
-func (_u *OauthClientUpdateOne) SetNillablePublic(v *bool) *OauthClientUpdateOne {
-	if v != nil {
-		_u.SetPublic(*v)
-	}
-	return _u
-}
-
-// SetGrantTypes sets the "grant_types" field.
-func (_u *OauthClientUpdateOne) SetGrantTypes(v []string) *OauthClientUpdateOne {
-	_u.mutation.SetGrantTypes(v)
-	return _u
-}
-
-// AppendGrantTypes appends value to the "grant_types" field.
-func (_u *OauthClientUpdateOne) AppendGrantTypes(v []string) *OauthClientUpdateOne {
-	_u.mutation.AppendGrantTypes(v)
-	return _u
-}
-
-// SetResponseTypes sets the "response_types" field.
-func (_u *OauthClientUpdateOne) SetResponseTypes(v []string) *OauthClientUpdateOne {
-	_u.mutation.SetResponseTypes(v)
-	return _u
-}
-
-// AppendResponseTypes appends value to the "response_types" field.
-func (_u *OauthClientUpdateOne) AppendResponseTypes(v []string) *OauthClientUpdateOne {
-	_u.mutation.AppendResponseTypes(v)
-	return _u
-}
-
-// SetScopes sets the "scopes" field.
-func (_u *OauthClientUpdateOne) SetScopes(v []string) *OauthClientUpdateOne {
-	_u.mutation.SetScopes(v)
-	return _u
-}
-
-// AppendScopes appends value to the "scopes" field.
-func (_u *OauthClientUpdateOne) AppendScopes(v []string) *OauthClientUpdateOne {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// SetAudience sets the "audience" field.
-func (_u *OauthClientUpdateOne) SetAudience(v []string) *OauthClientUpdateOne {
-	_u.mutation.SetAudience(v)
-	return _u
-}
-
-// AppendAudience appends value to the "audience" field.
-func (_u *OauthClientUpdateOne) AppendAudience(v []string) *OauthClientUpdateOne {
-	_u.mutation.AppendAudience(v)
-	return _u
-}
-
 // SetRevoked sets the "revoked" field.
 func (_u *OauthClientUpdateOne) SetRevoked(v bool) *OauthClientUpdateOne {
 	_u.mutation.SetRevoked(v)
@@ -721,41 +561,6 @@ func (_u *OauthClientUpdateOne) sqlSave(ctx context.Context) (_node *OauthClient
 	}
 	if value, ok := _u.mutation.PasswordClient(); ok {
 		_spec.SetField(oauthclient.FieldPasswordClient, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.Public(); ok {
-		_spec.SetField(oauthclient.FieldPublic, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.GrantTypes(); ok {
-		_spec.SetField(oauthclient.FieldGrantTypes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedGrantTypes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldGrantTypes, value)
-		})
-	}
-	if value, ok := _u.mutation.ResponseTypes(); ok {
-		_spec.SetField(oauthclient.FieldResponseTypes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedResponseTypes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldResponseTypes, value)
-		})
-	}
-	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(oauthclient.FieldScopes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldScopes, value)
-		})
-	}
-	if value, ok := _u.mutation.Audience(); ok {
-		_spec.SetField(oauthclient.FieldAudience, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedAudience(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, oauthclient.FieldAudience, value)
-		})
 	}
 	if value, ok := _u.mutation.Revoked(); ok {
 		_spec.SetField(oauthclient.FieldRevoked, field.TypeBool, value)

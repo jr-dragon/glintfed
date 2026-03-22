@@ -262,12 +262,12 @@ func (_q *OauthAuthorizationCodeQuery) Clone() *OauthAuthorizationCodeQuery {
 // Example:
 //
 //	var v []struct {
-//		RequestID string `json:"request_id,omitempty"`
+//		UserID uint64 `json:"user_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.OauthAuthorizationCode.Query().
-//		GroupBy(oauthauthorizationcode.FieldRequestID).
+//		GroupBy(oauthauthorizationcode.FieldUserID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *OauthAuthorizationCodeQuery) GroupBy(field string, fields ...string) *OauthAuthorizationCodeGroupBy {
@@ -285,11 +285,11 @@ func (_q *OauthAuthorizationCodeQuery) GroupBy(field string, fields ...string) *
 // Example:
 //
 //	var v []struct {
-//		RequestID string `json:"request_id,omitempty"`
+//		UserID uint64 `json:"user_id,omitempty"`
 //	}
 //
 //	client.OauthAuthorizationCode.Query().
-//		Select(oauthauthorizationcode.FieldRequestID).
+//		Select(oauthauthorizationcode.FieldUserID).
 //		Scan(ctx, &v)
 func (_q *OauthAuthorizationCodeQuery) Select(fields ...string) *OauthAuthorizationCodeSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

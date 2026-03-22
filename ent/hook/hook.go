@@ -861,6 +861,18 @@ func (f OauthClientFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OauthClientMutation", m)
 }
 
+// The OauthPersonalAccessClientFunc type is an adapter to allow the use of ordinary
+// function as OauthPersonalAccessClient mutator.
+type OauthPersonalAccessClientFunc func(context.Context, *ent.OauthPersonalAccessClientMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OauthPersonalAccessClientFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.OauthPersonalAccessClientMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OauthPersonalAccessClientMutation", m)
+}
+
 // The OauthPkceFunc type is an adapter to allow the use of ordinary
 // function as OauthPkce mutator.
 type OauthPkceFunc func(context.Context, *ent.OauthPkceMutation) (ent.Value, error)

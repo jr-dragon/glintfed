@@ -2,6 +2,7 @@ package fositestore
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/ory/fosite"
 
@@ -13,7 +14,7 @@ import (
 //	INSERT INTO oauth_pkce (id, request_id, client_id, subject, scopes, session, active, requested_at, expires_at)
 //	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 func (s *Store) CreatePKCERequestSession(ctx context.Context, signature string, req fosite.Requester) error {
-	sessionBytes, err := marshalSession(req.GetSession())
+	sessionBytes, err := json.Marshal(req.GetSession())
 	if err != nil {
 		return err
 	}
@@ -49,7 +50,21 @@ func (s *Store) GetPKCERequestSession(ctx context.Context, signature string, ses
 	if err != nil {
 		return nil, err
 	}
-	return requesterFromRow(t.RequestID, t.ClientID, t.Subject, t.Scopes, t.Session, t.RequestedAt, t.ExpiresAt, client, session)
+
+	if err = json.Unmarshal(t.Session, session); err != nil {
+		return nil, err
+	}
+
+	r := fosite.NewRequest()
+	r.ID = t.RequestID
+	r.Client = client
+	r.RequestedAt = t.RequestedAt
+	r.Session = session
+	r.SetRequestedScopes(fosite.Arguments(t.Scopes))
+	for _, sc := range t.Scopes {
+		r.GrantScope(sc)
+	}
+	return r, nil
 }
 
 // DeletePKCERequestSession removes a PKCE session by signature.

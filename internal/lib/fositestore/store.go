@@ -9,8 +9,6 @@ import (
 	"github.com/ory/fosite/handler/oauth2"
 
 	"glintfed.org/ent"
-	"glintfed.org/ent/oauthaccesstoken"
-	"glintfed.org/ent/oauthrefreshtoken"
 	"glintfed.org/internal/data"
 )
 
@@ -46,24 +44,18 @@ func (s *Store) SetClientAssertionJWT(_ context.Context, _ string, _ time.Time) 
 	return nil
 }
 
-// RevokeAccessToken revokes all access tokens for a given requestID.
+// RevokeAccessToken revokes an access token by its token signature (id).
 //
-//	UPDATE oauth_access_tokens SET active = false WHERE request_id = ?
+//	UPDATE oauth_access_tokens SET revoked = true WHERE id = ?
 func (s *Store) RevokeAccessToken(ctx context.Context, requestID string) error {
-	return s.db.OauthAccessToken.Update().
-		Where(oauthaccesstoken.RequestID(requestID)).
-		SetActive(false).
-		Exec(ctx)
+	return s.db.OauthAccessToken.UpdateOneID(requestID).SetRevoked(true).Exec(ctx)
 }
 
-// RevokeRefreshToken revokes all refresh tokens for a given requestID.
+// RevokeRefreshToken revokes a refresh token by its token signature (id).
 //
-//	UPDATE oauth_refresh_tokens SET active = false WHERE request_id = ?
+//	UPDATE oauth_refresh_tokens SET revoked = true WHERE id = ?
 func (s *Store) RevokeRefreshToken(ctx context.Context, requestID string) error {
-	return s.db.OauthRefreshToken.Update().
-		Where(oauthrefreshtoken.RequestID(requestID)).
-		SetActive(false).
-		Exec(ctx)
+	return s.db.OauthRefreshToken.UpdateOneID(requestID).SetRevoked(true).Exec(ctx)
 }
 
 // RevokeRefreshTokenMaybeGracePeriod is the same as RevokeRefreshToken (no grace period implemented).
@@ -71,17 +63,16 @@ func (s *Store) RevokeRefreshTokenMaybeGracePeriod(ctx context.Context, requestI
 	return s.RevokeRefreshToken(ctx, requestID)
 }
 
-// RotateRefreshToken revokes the old refresh token by signature (sets active=false).
+// RotateRefreshToken revokes the old refresh token by signature.
 //
-//	UPDATE oauth_refresh_tokens SET active = false WHERE id = ?
+//	UPDATE oauth_refresh_tokens SET revoked = true WHERE id = ?
 func (s *Store) RotateRefreshToken(ctx context.Context, _ string, refreshTokenSignature string) error {
-	return s.db.OauthRefreshToken.UpdateOneID(refreshTokenSignature).
-		SetActive(false).
-		Exec(ctx)
+	return s.db.OauthRefreshToken.UpdateOneID(refreshTokenSignature).SetRevoked(true).Exec(ctx)
 }
 
 // CreatePersonalAccessTokens directly issues an access token and refresh token for the given requester
 // using the HMAC strategy without going through the full OAuth2 authorization flow.
+// It sets req.ID to the access token signature so that CreateRefreshTokenSession can use it as access_token_id.
 func (s *Store) CreatePersonalAccessTokens(ctx context.Context, req fosite.Requester) (accessToken, refreshToken string, err error) {
 	at, atSig, err := s.strategy.GenerateAccessToken(ctx, req)
 	if err != nil {
@@ -95,7 +86,9 @@ func (s *Store) CreatePersonalAccessTokens(ctx context.Context, req fosite.Reque
 	if err = s.CreateAccessTokenSession(ctx, atSig, req); err != nil {
 		return "", "", err
 	}
-	if err = s.CreateRefreshTokenSession(ctx, rtSig, atSig, req); err != nil {
+	// Set req ID to atSig so CreateRefreshTokenSession can use req.GetID() as access_token_id.
+	req.SetID(atSig)
+	if err = s.CreateRefreshTokenSession(ctx, rtSig, req); err != nil {
 		return "", "", err
 	}
 	return at, rt, nil

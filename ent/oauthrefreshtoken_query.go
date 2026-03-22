@@ -262,12 +262,12 @@ func (_q *OauthRefreshTokenQuery) Clone() *OauthRefreshTokenQuery {
 // Example:
 //
 //	var v []struct {
-//		RequestID string `json:"request_id,omitempty"`
+//		AccessTokenID string `json:"access_token_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.OauthRefreshToken.Query().
-//		GroupBy(oauthrefreshtoken.FieldRequestID).
+//		GroupBy(oauthrefreshtoken.FieldAccessTokenID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *OauthRefreshTokenQuery) GroupBy(field string, fields ...string) *OauthRefreshTokenGroupBy {
@@ -285,11 +285,11 @@ func (_q *OauthRefreshTokenQuery) GroupBy(field string, fields ...string) *Oauth
 // Example:
 //
 //	var v []struct {
-//		RequestID string `json:"request_id,omitempty"`
+//		AccessTokenID string `json:"access_token_id,omitempty"`
 //	}
 //
 //	client.OauthRefreshToken.Query().
-//		Select(oauthrefreshtoken.FieldRequestID).
+//		Select(oauthrefreshtoken.FieldAccessTokenID).
 //		Scan(ctx, &v)
 func (_q *OauthRefreshTokenQuery) Select(fields ...string) *OauthRefreshTokenSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

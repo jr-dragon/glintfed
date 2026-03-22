@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -32,16 +31,6 @@ type OauthClient struct {
 	PersonalAccessClient bool `json:"personal_access_client,omitempty"`
 	// PasswordClient holds the value of the "password_client" field.
 	PasswordClient bool `json:"password_client,omitempty"`
-	// Public holds the value of the "public" field.
-	Public bool `json:"public,omitempty"`
-	// GrantTypes holds the value of the "grant_types" field.
-	GrantTypes []string `json:"grant_types,omitempty"`
-	// ResponseTypes holds the value of the "response_types" field.
-	ResponseTypes []string `json:"response_types,omitempty"`
-	// Scopes holds the value of the "scopes" field.
-	Scopes []string `json:"scopes,omitempty"`
-	// Audience holds the value of the "audience" field.
-	Audience []string `json:"audience,omitempty"`
 	// Revoked holds the value of the "revoked" field.
 	Revoked bool `json:"revoked,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -56,9 +45,7 @@ func (*OauthClient) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case oauthclient.FieldGrantTypes, oauthclient.FieldResponseTypes, oauthclient.FieldScopes, oauthclient.FieldAudience:
-			values[i] = new([]byte)
-		case oauthclient.FieldPersonalAccessClient, oauthclient.FieldPasswordClient, oauthclient.FieldPublic, oauthclient.FieldRevoked:
+		case oauthclient.FieldPersonalAccessClient, oauthclient.FieldPasswordClient, oauthclient.FieldRevoked:
 			values[i] = new(sql.NullBool)
 		case oauthclient.FieldID, oauthclient.FieldUserID:
 			values[i] = new(sql.NullInt64)
@@ -128,44 +115,6 @@ func (_m *OauthClient) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field password_client", values[i])
 			} else if value.Valid {
 				_m.PasswordClient = value.Bool
-			}
-		case oauthclient.FieldPublic:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field public", values[i])
-			} else if value.Valid {
-				_m.Public = value.Bool
-			}
-		case oauthclient.FieldGrantTypes:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field grant_types", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.GrantTypes); err != nil {
-					return fmt.Errorf("unmarshal field grant_types: %w", err)
-				}
-			}
-		case oauthclient.FieldResponseTypes:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field response_types", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.ResponseTypes); err != nil {
-					return fmt.Errorf("unmarshal field response_types: %w", err)
-				}
-			}
-		case oauthclient.FieldScopes:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field scopes", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Scopes); err != nil {
-					return fmt.Errorf("unmarshal field scopes: %w", err)
-				}
-			}
-		case oauthclient.FieldAudience:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field audience", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Audience); err != nil {
-					return fmt.Errorf("unmarshal field audience: %w", err)
-				}
 			}
 		case oauthclient.FieldRevoked:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -241,21 +190,6 @@ func (_m *OauthClient) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("password_client=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PasswordClient))
-	builder.WriteString(", ")
-	builder.WriteString("public=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Public))
-	builder.WriteString(", ")
-	builder.WriteString("grant_types=")
-	builder.WriteString(fmt.Sprintf("%v", _m.GrantTypes))
-	builder.WriteString(", ")
-	builder.WriteString("response_types=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResponseTypes))
-	builder.WriteString(", ")
-	builder.WriteString("scopes=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Scopes))
-	builder.WriteString(", ")
-	builder.WriteString("audience=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Audience))
 	builder.WriteString(", ")
 	builder.WriteString("revoked=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Revoked))
