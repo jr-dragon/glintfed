@@ -30,6 +30,7 @@ type AppConfig struct {
 	OptimizeImage       bool   `json:"optimize_image" env:"PF_OPTIMIZE_IMAGES"`
 	OptimizeVideo       bool   `json:"optimize_video" env:"PF_OPTIMIZE_VIDEOS"`
 	EnforceAcountLimit  bool   `json:"enforce_account_limit" env:"LIMIT_ACCOUNT_SIZE"`
+	CloudStorage        bool   `json:"cloud_storage" env:"PF_ENABLE_CLOUD"`
 
 	MaxAvatarSize     int `json:"max_avatar_size" env:"MAX_AVATAR_SIZE"`
 	MaxBioLength      int `json:"max_bio_length" env:"MAX_BIO_LENGTH"`

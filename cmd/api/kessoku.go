@@ -6,6 +6,7 @@ import (
 	appregisterm "glintfed.org/internal/model/appregister"
 	"glintfed.org/internal/model/instance"
 	instanceactorm "glintfed.org/internal/model/instanceactor"
+	mediam "glintfed.org/internal/model/media"
 	"glintfed.org/internal/model/profile"
 	"glintfed.org/internal/model/status"
 	storym "glintfed.org/internal/model/story"
@@ -120,6 +121,7 @@ var _ = kessoku.Inject[*app](
 		kessoku.Bind[story.StoryGetter](kessoku.Provide(storym.NewModel)),
 		kessoku.Bind[appregister.AppRegisterModel](kessoku.Provide(appregisterm.NewModel)),
 		kessoku.Bind[appregister.UserModel](kessoku.Provide(func(m *user.Model) appregister.UserModel { return m })),
+		kessoku.Bind[media.MediaGetter](kessoku.Provide(mediam.NewModel)),
 	),
 	kessoku.Provide(server.NewAPIServices),
 	kessoku.Provide(newapp),
