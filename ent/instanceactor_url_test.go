@@ -12,6 +12,7 @@ func TestInstanceActor_Permalink(t *testing.T) {
 
 	assert.Equal(t, "https://example.com/i/actor", ia.Permalink(appURL))
 	assert.Equal(t, "https://example.com/i/actor/inbox", ia.Permalink(appURL, "/inbox"))
+	assert.Equal(t, "https://example.com/i/actor.png", ia.Permalink(appURL, ".png"))
 }
 
 func TestInstanceActor_GetActor(t *testing.T) {

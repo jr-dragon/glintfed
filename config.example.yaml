@@ -21,6 +21,7 @@ app:
   max_name_length: 30
   min_password_length: 8
   max_account_size: 1000000
+  cloud_storage: false
 
   auth:
     enable_registration: true

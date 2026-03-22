@@ -1,11 +1,24 @@
 package ent
 
-import "strings"
+import (
+	"log/slog"
+	"net/url"
+	"strings"
+)
 
 const ProfileBase = "/i/actor"
 
-func (ia *InstanceActor) Permalink(url string, suffixes ...string) string {
-	return url + ProfileBase + strings.Join(suffixes, "")
+func (ia *InstanceActor) Permalink(baseUrl string, suffixes ...string) string {
+	res, err := url.JoinPath(baseUrl, ProfileBase)
+	if err != nil {
+		slog.Error("failed to join path",
+			slog.String("baseUrl", baseUrl),
+			slog.String("profile_base", ProfileBase),
+			slog.Any("suffixes", suffixes),
+		)
+	}
+
+	return res + strings.Join(suffixes, "")
 }
 
 func (ia *InstanceActor) GetActor(url, domain string) map[string]any {
