@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make gen:*)",
+      "Bash(go build:*)",
+      "Bash(make build:*)",
+      "Bash(make lint:*)",
+      "Bash(make test:*)",
+      "Bash(make all:*)"
+    ]
+  }
+}

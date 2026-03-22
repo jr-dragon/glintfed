@@ -83,7 +83,12 @@ import (
 	"glintfed.org/ent/modlog"
 	"glintfed.org/ent/newsroom"
 	"glintfed.org/ent/notification"
+	"glintfed.org/ent/oauthaccesstoken"
+	"glintfed.org/ent/oauthauthorizationcode"
 	"glintfed.org/ent/oauthclient"
+	"glintfed.org/ent/oauthpersonalaccessclient"
+	"glintfed.org/ent/oauthpkce"
+	"glintfed.org/ent/oauthrefreshtoken"
 	"glintfed.org/ent/page"
 	"glintfed.org/ent/parentalcontrols"
 	"glintfed.org/ent/place"
@@ -264,8 +269,18 @@ type Client struct {
 	Newsroom *NewsroomClient
 	// Notification is the client for interacting with the Notification builders.
 	Notification *NotificationClient
+	// OauthAccessToken is the client for interacting with the OauthAccessToken builders.
+	OauthAccessToken *OauthAccessTokenClient
+	// OauthAuthorizationCode is the client for interacting with the OauthAuthorizationCode builders.
+	OauthAuthorizationCode *OauthAuthorizationCodeClient
 	// OauthClient is the client for interacting with the OauthClient builders.
 	OauthClient *OauthClientClient
+	// OauthPersonalAccessClient is the client for interacting with the OauthPersonalAccessClient builders.
+	OauthPersonalAccessClient *OauthPersonalAccessClientClient
+	// OauthPkce is the client for interacting with the OauthPkce builders.
+	OauthPkce *OauthPkceClient
+	// OauthRefreshToken is the client for interacting with the OauthRefreshToken builders.
+	OauthRefreshToken *OauthRefreshTokenClient
 	// Page is the client for interacting with the Page builders.
 	Page *PageClient
 	// ParentalControls is the client for interacting with the ParentalControls builders.
@@ -419,7 +434,12 @@ func (c *Client) init() {
 	c.ModeratedProfile = NewModeratedProfileClient(c.config)
 	c.Newsroom = NewNewsroomClient(c.config)
 	c.Notification = NewNotificationClient(c.config)
+	c.OauthAccessToken = NewOauthAccessTokenClient(c.config)
+	c.OauthAuthorizationCode = NewOauthAuthorizationCodeClient(c.config)
 	c.OauthClient = NewOauthClientClient(c.config)
+	c.OauthPersonalAccessClient = NewOauthPersonalAccessClientClient(c.config)
+	c.OauthPkce = NewOauthPkceClient(c.config)
+	c.OauthRefreshToken = NewOauthRefreshTokenClient(c.config)
 	c.Page = NewPageClient(c.config)
 	c.ParentalControls = NewParentalControlsClient(c.config)
 	c.Place = NewPlaceClient(c.config)
@@ -547,114 +567,119 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AccountInterstitial:     NewAccountInterstitialClient(cfg),
-		AccountLog:              NewAccountLogClient(cfg),
-		Activity:                NewActivityClient(cfg),
-		AdminInvite:             NewAdminInviteClient(cfg),
-		AdminShadowFilter:       NewAdminShadowFilterClient(cfg),
-		AppRegister:             NewAppRegisterClient(cfg),
-		AutospamCustomTokens:    NewAutospamCustomTokensClient(cfg),
-		Avatar:                  NewAvatarClient(cfg),
-		Bookmark:                NewBookmarkClient(cfg),
-		Circle:                  NewCircleClient(cfg),
-		CircleProfile:           NewCircleProfileClient(cfg),
-		Collection:              NewCollectionClient(cfg),
-		CollectionItem:          NewCollectionItemClient(cfg),
-		Comment:                 NewCommentClient(cfg),
-		ConfigCache:             NewConfigCacheClient(cfg),
-		Contact:                 NewContactClient(cfg),
-		Conversation:            NewConversationClient(cfg),
-		CuratedRegister:         NewCuratedRegisterClient(cfg),
-		CuratedRegisterActivity: NewCuratedRegisterActivityClient(cfg),
-		CuratedRegisterTemplate: NewCuratedRegisterTemplateClient(cfg),
-		CustomEmoji:             NewCustomEmojiClient(cfg),
-		CustomFilter:            NewCustomFilterClient(cfg),
-		CustomFilterKeyword:     NewCustomFilterKeywordClient(cfg),
-		CustomFilterStatus:      NewCustomFilterStatusClient(cfg),
-		DefaultDomainBlock:      NewDefaultDomainBlockClient(cfg),
-		DirectMessage:           NewDirectMessageClient(cfg),
-		DiscoverCategory:        NewDiscoverCategoryClient(cfg),
-		DiscoverCategoryHashtag: NewDiscoverCategoryHashtagClient(cfg),
-		EmailVerification:       NewEmailVerificationClient(cfg),
-		FailedJob:               NewFailedJobClient(cfg),
-		FollowRequest:           NewFollowRequestClient(cfg),
-		Follower:                NewFollowerClient(cfg),
-		Group:                   NewGroupClient(cfg),
-		GroupActivityGraph:      NewGroupActivityGraphClient(cfg),
-		GroupBlock:              NewGroupBlockClient(cfg),
-		GroupCategory:           NewGroupCategoryClient(cfg),
-		GroupComment:            NewGroupCommentClient(cfg),
-		GroupEvent:              NewGroupEventClient(cfg),
-		GroupHashtag:            NewGroupHashtagClient(cfg),
-		GroupInteraction:        NewGroupInteractionClient(cfg),
-		GroupInvitation:         NewGroupInvitationClient(cfg),
-		GroupLike:               NewGroupLikeClient(cfg),
-		GroupLimit:              NewGroupLimitClient(cfg),
-		GroupMedia:              NewGroupMediaClient(cfg),
-		GroupMember:             NewGroupMemberClient(cfg),
-		GroupPost:               NewGroupPostClient(cfg),
-		GroupPostHashtag:        NewGroupPostHashtagClient(cfg),
-		GroupReport:             NewGroupReportClient(cfg),
-		GroupRole:               NewGroupRoleClient(cfg),
-		GroupStore:              NewGroupStoreClient(cfg),
-		Hashtag:                 NewHashtagClient(cfg),
-		HashtagFollow:           NewHashtagFollowClient(cfg),
-		HashtagRelated:          NewHashtagRelatedClient(cfg),
-		ImportData:              NewImportDataClient(cfg),
-		ImportJob:               NewImportJobClient(cfg),
-		ImportPost:              NewImportPostClient(cfg),
-		Instance:                NewInstanceClient(cfg),
-		InstanceActor:           NewInstanceActorClient(cfg),
-		Like:                    NewLikeClient(cfg),
-		LiveStream:              NewLiveStreamClient(cfg),
-		Media:                   NewMediaClient(cfg),
-		MediaBlocklist:          NewMediaBlocklistClient(cfg),
-		MediaTag:                NewMediaTagClient(cfg),
-		Mention:                 NewMentionClient(cfg),
-		ModLog:                  NewModLogClient(cfg),
-		ModeratedProfile:        NewModeratedProfileClient(cfg),
-		Newsroom:                NewNewsroomClient(cfg),
-		Notification:            NewNotificationClient(cfg),
-		OauthClient:             NewOauthClientClient(cfg),
-		Page:                    NewPageClient(cfg),
-		ParentalControls:        NewParentalControlsClient(cfg),
-		Place:                   NewPlaceClient(cfg),
-		Poll:                    NewPollClient(cfg),
-		PollVote:                NewPollVoteClient(cfg),
-		Portfolio:               NewPortfolioClient(cfg),
-		Profile:                 NewProfileClient(cfg),
-		ProfileAlias:            NewProfileAliasClient(cfg),
-		ProfileMigration:        NewProfileMigrationClient(cfg),
-		ProfileSponsor:          NewProfileSponsorClient(cfg),
-		RemoteAuth:              NewRemoteAuthClient(cfg),
-		RemoteAuthInstance:      NewRemoteAuthInstanceClient(cfg),
-		RemoteReport:            NewRemoteReportClient(cfg),
-		Report:                  NewReportClient(cfg),
-		ReportComment:           NewReportCommentClient(cfg),
-		ReportLog:               NewReportLogClient(cfg),
-		Status:                  NewStatusClient(cfg),
-		StatusArchived:          NewStatusArchivedClient(cfg),
-		StatusEdit:              NewStatusEditClient(cfg),
-		StatusHashtag:           NewStatusHashtagClient(cfg),
-		StatusView:              NewStatusViewClient(cfg),
-		Story:                   NewStoryClient(cfg),
-		StoryItem:               NewStoryItemClient(cfg),
-		StoryReaction:           NewStoryReactionClient(cfg),
-		StoryView:               NewStoryViewClient(cfg),
-		UIKit:                   NewUIKitClient(cfg),
-		User:                    NewUserClient(cfg),
-		UserAppSettings:         NewUserAppSettingsClient(cfg),
-		UserDevice:              NewUserDeviceClient(cfg),
-		UserDomainBlock:         NewUserDomainBlockClient(cfg),
-		UserEmailForgot:         NewUserEmailForgotClient(cfg),
-		UserFilter:              NewUserFilterClient(cfg),
-		UserInvite:              NewUserInviteClient(cfg),
-		UserOidcMapping:         NewUserOidcMappingClient(cfg),
-		UserPronoun:             NewUserPronounClient(cfg),
-		UserRoles:               NewUserRolesClient(cfg),
-		UserSetting:             NewUserSettingClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		AccountInterstitial:       NewAccountInterstitialClient(cfg),
+		AccountLog:                NewAccountLogClient(cfg),
+		Activity:                  NewActivityClient(cfg),
+		AdminInvite:               NewAdminInviteClient(cfg),
+		AdminShadowFilter:         NewAdminShadowFilterClient(cfg),
+		AppRegister:               NewAppRegisterClient(cfg),
+		AutospamCustomTokens:      NewAutospamCustomTokensClient(cfg),
+		Avatar:                    NewAvatarClient(cfg),
+		Bookmark:                  NewBookmarkClient(cfg),
+		Circle:                    NewCircleClient(cfg),
+		CircleProfile:             NewCircleProfileClient(cfg),
+		Collection:                NewCollectionClient(cfg),
+		CollectionItem:            NewCollectionItemClient(cfg),
+		Comment:                   NewCommentClient(cfg),
+		ConfigCache:               NewConfigCacheClient(cfg),
+		Contact:                   NewContactClient(cfg),
+		Conversation:              NewConversationClient(cfg),
+		CuratedRegister:           NewCuratedRegisterClient(cfg),
+		CuratedRegisterActivity:   NewCuratedRegisterActivityClient(cfg),
+		CuratedRegisterTemplate:   NewCuratedRegisterTemplateClient(cfg),
+		CustomEmoji:               NewCustomEmojiClient(cfg),
+		CustomFilter:              NewCustomFilterClient(cfg),
+		CustomFilterKeyword:       NewCustomFilterKeywordClient(cfg),
+		CustomFilterStatus:        NewCustomFilterStatusClient(cfg),
+		DefaultDomainBlock:        NewDefaultDomainBlockClient(cfg),
+		DirectMessage:             NewDirectMessageClient(cfg),
+		DiscoverCategory:          NewDiscoverCategoryClient(cfg),
+		DiscoverCategoryHashtag:   NewDiscoverCategoryHashtagClient(cfg),
+		EmailVerification:         NewEmailVerificationClient(cfg),
+		FailedJob:                 NewFailedJobClient(cfg),
+		FollowRequest:             NewFollowRequestClient(cfg),
+		Follower:                  NewFollowerClient(cfg),
+		Group:                     NewGroupClient(cfg),
+		GroupActivityGraph:        NewGroupActivityGraphClient(cfg),
+		GroupBlock:                NewGroupBlockClient(cfg),
+		GroupCategory:             NewGroupCategoryClient(cfg),
+		GroupComment:              NewGroupCommentClient(cfg),
+		GroupEvent:                NewGroupEventClient(cfg),
+		GroupHashtag:              NewGroupHashtagClient(cfg),
+		GroupInteraction:          NewGroupInteractionClient(cfg),
+		GroupInvitation:           NewGroupInvitationClient(cfg),
+		GroupLike:                 NewGroupLikeClient(cfg),
+		GroupLimit:                NewGroupLimitClient(cfg),
+		GroupMedia:                NewGroupMediaClient(cfg),
+		GroupMember:               NewGroupMemberClient(cfg),
+		GroupPost:                 NewGroupPostClient(cfg),
+		GroupPostHashtag:          NewGroupPostHashtagClient(cfg),
+		GroupReport:               NewGroupReportClient(cfg),
+		GroupRole:                 NewGroupRoleClient(cfg),
+		GroupStore:                NewGroupStoreClient(cfg),
+		Hashtag:                   NewHashtagClient(cfg),
+		HashtagFollow:             NewHashtagFollowClient(cfg),
+		HashtagRelated:            NewHashtagRelatedClient(cfg),
+		ImportData:                NewImportDataClient(cfg),
+		ImportJob:                 NewImportJobClient(cfg),
+		ImportPost:                NewImportPostClient(cfg),
+		Instance:                  NewInstanceClient(cfg),
+		InstanceActor:             NewInstanceActorClient(cfg),
+		Like:                      NewLikeClient(cfg),
+		LiveStream:                NewLiveStreamClient(cfg),
+		Media:                     NewMediaClient(cfg),
+		MediaBlocklist:            NewMediaBlocklistClient(cfg),
+		MediaTag:                  NewMediaTagClient(cfg),
+		Mention:                   NewMentionClient(cfg),
+		ModLog:                    NewModLogClient(cfg),
+		ModeratedProfile:          NewModeratedProfileClient(cfg),
+		Newsroom:                  NewNewsroomClient(cfg),
+		Notification:              NewNotificationClient(cfg),
+		OauthAccessToken:          NewOauthAccessTokenClient(cfg),
+		OauthAuthorizationCode:    NewOauthAuthorizationCodeClient(cfg),
+		OauthClient:               NewOauthClientClient(cfg),
+		OauthPersonalAccessClient: NewOauthPersonalAccessClientClient(cfg),
+		OauthPkce:                 NewOauthPkceClient(cfg),
+		OauthRefreshToken:         NewOauthRefreshTokenClient(cfg),
+		Page:                      NewPageClient(cfg),
+		ParentalControls:          NewParentalControlsClient(cfg),
+		Place:                     NewPlaceClient(cfg),
+		Poll:                      NewPollClient(cfg),
+		PollVote:                  NewPollVoteClient(cfg),
+		Portfolio:                 NewPortfolioClient(cfg),
+		Profile:                   NewProfileClient(cfg),
+		ProfileAlias:              NewProfileAliasClient(cfg),
+		ProfileMigration:          NewProfileMigrationClient(cfg),
+		ProfileSponsor:            NewProfileSponsorClient(cfg),
+		RemoteAuth:                NewRemoteAuthClient(cfg),
+		RemoteAuthInstance:        NewRemoteAuthInstanceClient(cfg),
+		RemoteReport:              NewRemoteReportClient(cfg),
+		Report:                    NewReportClient(cfg),
+		ReportComment:             NewReportCommentClient(cfg),
+		ReportLog:                 NewReportLogClient(cfg),
+		Status:                    NewStatusClient(cfg),
+		StatusArchived:            NewStatusArchivedClient(cfg),
+		StatusEdit:                NewStatusEditClient(cfg),
+		StatusHashtag:             NewStatusHashtagClient(cfg),
+		StatusView:                NewStatusViewClient(cfg),
+		Story:                     NewStoryClient(cfg),
+		StoryItem:                 NewStoryItemClient(cfg),
+		StoryReaction:             NewStoryReactionClient(cfg),
+		StoryView:                 NewStoryViewClient(cfg),
+		UIKit:                     NewUIKitClient(cfg),
+		User:                      NewUserClient(cfg),
+		UserAppSettings:           NewUserAppSettingsClient(cfg),
+		UserDevice:                NewUserDeviceClient(cfg),
+		UserDomainBlock:           NewUserDomainBlockClient(cfg),
+		UserEmailForgot:           NewUserEmailForgotClient(cfg),
+		UserFilter:                NewUserFilterClient(cfg),
+		UserInvite:                NewUserInviteClient(cfg),
+		UserOidcMapping:           NewUserOidcMappingClient(cfg),
+		UserPronoun:               NewUserPronounClient(cfg),
+		UserRoles:                 NewUserRolesClient(cfg),
+		UserSetting:               NewUserSettingClient(cfg),
 	}, nil
 }
 
@@ -672,114 +697,119 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AccountInterstitial:     NewAccountInterstitialClient(cfg),
-		AccountLog:              NewAccountLogClient(cfg),
-		Activity:                NewActivityClient(cfg),
-		AdminInvite:             NewAdminInviteClient(cfg),
-		AdminShadowFilter:       NewAdminShadowFilterClient(cfg),
-		AppRegister:             NewAppRegisterClient(cfg),
-		AutospamCustomTokens:    NewAutospamCustomTokensClient(cfg),
-		Avatar:                  NewAvatarClient(cfg),
-		Bookmark:                NewBookmarkClient(cfg),
-		Circle:                  NewCircleClient(cfg),
-		CircleProfile:           NewCircleProfileClient(cfg),
-		Collection:              NewCollectionClient(cfg),
-		CollectionItem:          NewCollectionItemClient(cfg),
-		Comment:                 NewCommentClient(cfg),
-		ConfigCache:             NewConfigCacheClient(cfg),
-		Contact:                 NewContactClient(cfg),
-		Conversation:            NewConversationClient(cfg),
-		CuratedRegister:         NewCuratedRegisterClient(cfg),
-		CuratedRegisterActivity: NewCuratedRegisterActivityClient(cfg),
-		CuratedRegisterTemplate: NewCuratedRegisterTemplateClient(cfg),
-		CustomEmoji:             NewCustomEmojiClient(cfg),
-		CustomFilter:            NewCustomFilterClient(cfg),
-		CustomFilterKeyword:     NewCustomFilterKeywordClient(cfg),
-		CustomFilterStatus:      NewCustomFilterStatusClient(cfg),
-		DefaultDomainBlock:      NewDefaultDomainBlockClient(cfg),
-		DirectMessage:           NewDirectMessageClient(cfg),
-		DiscoverCategory:        NewDiscoverCategoryClient(cfg),
-		DiscoverCategoryHashtag: NewDiscoverCategoryHashtagClient(cfg),
-		EmailVerification:       NewEmailVerificationClient(cfg),
-		FailedJob:               NewFailedJobClient(cfg),
-		FollowRequest:           NewFollowRequestClient(cfg),
-		Follower:                NewFollowerClient(cfg),
-		Group:                   NewGroupClient(cfg),
-		GroupActivityGraph:      NewGroupActivityGraphClient(cfg),
-		GroupBlock:              NewGroupBlockClient(cfg),
-		GroupCategory:           NewGroupCategoryClient(cfg),
-		GroupComment:            NewGroupCommentClient(cfg),
-		GroupEvent:              NewGroupEventClient(cfg),
-		GroupHashtag:            NewGroupHashtagClient(cfg),
-		GroupInteraction:        NewGroupInteractionClient(cfg),
-		GroupInvitation:         NewGroupInvitationClient(cfg),
-		GroupLike:               NewGroupLikeClient(cfg),
-		GroupLimit:              NewGroupLimitClient(cfg),
-		GroupMedia:              NewGroupMediaClient(cfg),
-		GroupMember:             NewGroupMemberClient(cfg),
-		GroupPost:               NewGroupPostClient(cfg),
-		GroupPostHashtag:        NewGroupPostHashtagClient(cfg),
-		GroupReport:             NewGroupReportClient(cfg),
-		GroupRole:               NewGroupRoleClient(cfg),
-		GroupStore:              NewGroupStoreClient(cfg),
-		Hashtag:                 NewHashtagClient(cfg),
-		HashtagFollow:           NewHashtagFollowClient(cfg),
-		HashtagRelated:          NewHashtagRelatedClient(cfg),
-		ImportData:              NewImportDataClient(cfg),
-		ImportJob:               NewImportJobClient(cfg),
-		ImportPost:              NewImportPostClient(cfg),
-		Instance:                NewInstanceClient(cfg),
-		InstanceActor:           NewInstanceActorClient(cfg),
-		Like:                    NewLikeClient(cfg),
-		LiveStream:              NewLiveStreamClient(cfg),
-		Media:                   NewMediaClient(cfg),
-		MediaBlocklist:          NewMediaBlocklistClient(cfg),
-		MediaTag:                NewMediaTagClient(cfg),
-		Mention:                 NewMentionClient(cfg),
-		ModLog:                  NewModLogClient(cfg),
-		ModeratedProfile:        NewModeratedProfileClient(cfg),
-		Newsroom:                NewNewsroomClient(cfg),
-		Notification:            NewNotificationClient(cfg),
-		OauthClient:             NewOauthClientClient(cfg),
-		Page:                    NewPageClient(cfg),
-		ParentalControls:        NewParentalControlsClient(cfg),
-		Place:                   NewPlaceClient(cfg),
-		Poll:                    NewPollClient(cfg),
-		PollVote:                NewPollVoteClient(cfg),
-		Portfolio:               NewPortfolioClient(cfg),
-		Profile:                 NewProfileClient(cfg),
-		ProfileAlias:            NewProfileAliasClient(cfg),
-		ProfileMigration:        NewProfileMigrationClient(cfg),
-		ProfileSponsor:          NewProfileSponsorClient(cfg),
-		RemoteAuth:              NewRemoteAuthClient(cfg),
-		RemoteAuthInstance:      NewRemoteAuthInstanceClient(cfg),
-		RemoteReport:            NewRemoteReportClient(cfg),
-		Report:                  NewReportClient(cfg),
-		ReportComment:           NewReportCommentClient(cfg),
-		ReportLog:               NewReportLogClient(cfg),
-		Status:                  NewStatusClient(cfg),
-		StatusArchived:          NewStatusArchivedClient(cfg),
-		StatusEdit:              NewStatusEditClient(cfg),
-		StatusHashtag:           NewStatusHashtagClient(cfg),
-		StatusView:              NewStatusViewClient(cfg),
-		Story:                   NewStoryClient(cfg),
-		StoryItem:               NewStoryItemClient(cfg),
-		StoryReaction:           NewStoryReactionClient(cfg),
-		StoryView:               NewStoryViewClient(cfg),
-		UIKit:                   NewUIKitClient(cfg),
-		User:                    NewUserClient(cfg),
-		UserAppSettings:         NewUserAppSettingsClient(cfg),
-		UserDevice:              NewUserDeviceClient(cfg),
-		UserDomainBlock:         NewUserDomainBlockClient(cfg),
-		UserEmailForgot:         NewUserEmailForgotClient(cfg),
-		UserFilter:              NewUserFilterClient(cfg),
-		UserInvite:              NewUserInviteClient(cfg),
-		UserOidcMapping:         NewUserOidcMappingClient(cfg),
-		UserPronoun:             NewUserPronounClient(cfg),
-		UserRoles:               NewUserRolesClient(cfg),
-		UserSetting:             NewUserSettingClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		AccountInterstitial:       NewAccountInterstitialClient(cfg),
+		AccountLog:                NewAccountLogClient(cfg),
+		Activity:                  NewActivityClient(cfg),
+		AdminInvite:               NewAdminInviteClient(cfg),
+		AdminShadowFilter:         NewAdminShadowFilterClient(cfg),
+		AppRegister:               NewAppRegisterClient(cfg),
+		AutospamCustomTokens:      NewAutospamCustomTokensClient(cfg),
+		Avatar:                    NewAvatarClient(cfg),
+		Bookmark:                  NewBookmarkClient(cfg),
+		Circle:                    NewCircleClient(cfg),
+		CircleProfile:             NewCircleProfileClient(cfg),
+		Collection:                NewCollectionClient(cfg),
+		CollectionItem:            NewCollectionItemClient(cfg),
+		Comment:                   NewCommentClient(cfg),
+		ConfigCache:               NewConfigCacheClient(cfg),
+		Contact:                   NewContactClient(cfg),
+		Conversation:              NewConversationClient(cfg),
+		CuratedRegister:           NewCuratedRegisterClient(cfg),
+		CuratedRegisterActivity:   NewCuratedRegisterActivityClient(cfg),
+		CuratedRegisterTemplate:   NewCuratedRegisterTemplateClient(cfg),
+		CustomEmoji:               NewCustomEmojiClient(cfg),
+		CustomFilter:              NewCustomFilterClient(cfg),
+		CustomFilterKeyword:       NewCustomFilterKeywordClient(cfg),
+		CustomFilterStatus:        NewCustomFilterStatusClient(cfg),
+		DefaultDomainBlock:        NewDefaultDomainBlockClient(cfg),
+		DirectMessage:             NewDirectMessageClient(cfg),
+		DiscoverCategory:          NewDiscoverCategoryClient(cfg),
+		DiscoverCategoryHashtag:   NewDiscoverCategoryHashtagClient(cfg),
+		EmailVerification:         NewEmailVerificationClient(cfg),
+		FailedJob:                 NewFailedJobClient(cfg),
+		FollowRequest:             NewFollowRequestClient(cfg),
+		Follower:                  NewFollowerClient(cfg),
+		Group:                     NewGroupClient(cfg),
+		GroupActivityGraph:        NewGroupActivityGraphClient(cfg),
+		GroupBlock:                NewGroupBlockClient(cfg),
+		GroupCategory:             NewGroupCategoryClient(cfg),
+		GroupComment:              NewGroupCommentClient(cfg),
+		GroupEvent:                NewGroupEventClient(cfg),
+		GroupHashtag:              NewGroupHashtagClient(cfg),
+		GroupInteraction:          NewGroupInteractionClient(cfg),
+		GroupInvitation:           NewGroupInvitationClient(cfg),
+		GroupLike:                 NewGroupLikeClient(cfg),
+		GroupLimit:                NewGroupLimitClient(cfg),
+		GroupMedia:                NewGroupMediaClient(cfg),
+		GroupMember:               NewGroupMemberClient(cfg),
+		GroupPost:                 NewGroupPostClient(cfg),
+		GroupPostHashtag:          NewGroupPostHashtagClient(cfg),
+		GroupReport:               NewGroupReportClient(cfg),
+		GroupRole:                 NewGroupRoleClient(cfg),
+		GroupStore:                NewGroupStoreClient(cfg),
+		Hashtag:                   NewHashtagClient(cfg),
+		HashtagFollow:             NewHashtagFollowClient(cfg),
+		HashtagRelated:            NewHashtagRelatedClient(cfg),
+		ImportData:                NewImportDataClient(cfg),
+		ImportJob:                 NewImportJobClient(cfg),
+		ImportPost:                NewImportPostClient(cfg),
+		Instance:                  NewInstanceClient(cfg),
+		InstanceActor:             NewInstanceActorClient(cfg),
+		Like:                      NewLikeClient(cfg),
+		LiveStream:                NewLiveStreamClient(cfg),
+		Media:                     NewMediaClient(cfg),
+		MediaBlocklist:            NewMediaBlocklistClient(cfg),
+		MediaTag:                  NewMediaTagClient(cfg),
+		Mention:                   NewMentionClient(cfg),
+		ModLog:                    NewModLogClient(cfg),
+		ModeratedProfile:          NewModeratedProfileClient(cfg),
+		Newsroom:                  NewNewsroomClient(cfg),
+		Notification:              NewNotificationClient(cfg),
+		OauthAccessToken:          NewOauthAccessTokenClient(cfg),
+		OauthAuthorizationCode:    NewOauthAuthorizationCodeClient(cfg),
+		OauthClient:               NewOauthClientClient(cfg),
+		OauthPersonalAccessClient: NewOauthPersonalAccessClientClient(cfg),
+		OauthPkce:                 NewOauthPkceClient(cfg),
+		OauthRefreshToken:         NewOauthRefreshTokenClient(cfg),
+		Page:                      NewPageClient(cfg),
+		ParentalControls:          NewParentalControlsClient(cfg),
+		Place:                     NewPlaceClient(cfg),
+		Poll:                      NewPollClient(cfg),
+		PollVote:                  NewPollVoteClient(cfg),
+		Portfolio:                 NewPortfolioClient(cfg),
+		Profile:                   NewProfileClient(cfg),
+		ProfileAlias:              NewProfileAliasClient(cfg),
+		ProfileMigration:          NewProfileMigrationClient(cfg),
+		ProfileSponsor:            NewProfileSponsorClient(cfg),
+		RemoteAuth:                NewRemoteAuthClient(cfg),
+		RemoteAuthInstance:        NewRemoteAuthInstanceClient(cfg),
+		RemoteReport:              NewRemoteReportClient(cfg),
+		Report:                    NewReportClient(cfg),
+		ReportComment:             NewReportCommentClient(cfg),
+		ReportLog:                 NewReportLogClient(cfg),
+		Status:                    NewStatusClient(cfg),
+		StatusArchived:            NewStatusArchivedClient(cfg),
+		StatusEdit:                NewStatusEditClient(cfg),
+		StatusHashtag:             NewStatusHashtagClient(cfg),
+		StatusView:                NewStatusViewClient(cfg),
+		Story:                     NewStoryClient(cfg),
+		StoryItem:                 NewStoryItemClient(cfg),
+		StoryReaction:             NewStoryReactionClient(cfg),
+		StoryView:                 NewStoryViewClient(cfg),
+		UIKit:                     NewUIKitClient(cfg),
+		User:                      NewUserClient(cfg),
+		UserAppSettings:           NewUserAppSettingsClient(cfg),
+		UserDevice:                NewUserDeviceClient(cfg),
+		UserDomainBlock:           NewUserDomainBlockClient(cfg),
+		UserEmailForgot:           NewUserEmailForgotClient(cfg),
+		UserFilter:                NewUserFilterClient(cfg),
+		UserInvite:                NewUserInviteClient(cfg),
+		UserOidcMapping:           NewUserOidcMappingClient(cfg),
+		UserPronoun:               NewUserPronounClient(cfg),
+		UserRoles:                 NewUserRolesClient(cfg),
+		UserSetting:               NewUserSettingClient(cfg),
 	}, nil
 }
 
@@ -824,14 +854,16 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Hashtag, c.HashtagFollow, c.HashtagRelated, c.ImportData, c.ImportJob,
 		c.ImportPost, c.Instance, c.InstanceActor, c.Like, c.LiveStream, c.Media,
 		c.MediaBlocklist, c.MediaTag, c.Mention, c.ModLog, c.ModeratedProfile,
-		c.Newsroom, c.Notification, c.OauthClient, c.Page, c.ParentalControls, c.Place,
-		c.Poll, c.PollVote, c.Portfolio, c.Profile, c.ProfileAlias, c.ProfileMigration,
-		c.ProfileSponsor, c.RemoteAuth, c.RemoteAuthInstance, c.RemoteReport, c.Report,
-		c.ReportComment, c.ReportLog, c.Status, c.StatusArchived, c.StatusEdit,
-		c.StatusHashtag, c.StatusView, c.Story, c.StoryItem, c.StoryReaction,
-		c.StoryView, c.UIKit, c.User, c.UserAppSettings, c.UserDevice,
-		c.UserDomainBlock, c.UserEmailForgot, c.UserFilter, c.UserInvite,
-		c.UserOidcMapping, c.UserPronoun, c.UserRoles, c.UserSetting,
+		c.Newsroom, c.Notification, c.OauthAccessToken, c.OauthAuthorizationCode,
+		c.OauthClient, c.OauthPersonalAccessClient, c.OauthPkce, c.OauthRefreshToken,
+		c.Page, c.ParentalControls, c.Place, c.Poll, c.PollVote, c.Portfolio,
+		c.Profile, c.ProfileAlias, c.ProfileMigration, c.ProfileSponsor, c.RemoteAuth,
+		c.RemoteAuthInstance, c.RemoteReport, c.Report, c.ReportComment, c.ReportLog,
+		c.Status, c.StatusArchived, c.StatusEdit, c.StatusHashtag, c.StatusView,
+		c.Story, c.StoryItem, c.StoryReaction, c.StoryView, c.UIKit, c.User,
+		c.UserAppSettings, c.UserDevice, c.UserDomainBlock, c.UserEmailForgot,
+		c.UserFilter, c.UserInvite, c.UserOidcMapping, c.UserPronoun, c.UserRoles,
+		c.UserSetting,
 	} {
 		n.Use(hooks...)
 	}
@@ -856,14 +888,16 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Hashtag, c.HashtagFollow, c.HashtagRelated, c.ImportData, c.ImportJob,
 		c.ImportPost, c.Instance, c.InstanceActor, c.Like, c.LiveStream, c.Media,
 		c.MediaBlocklist, c.MediaTag, c.Mention, c.ModLog, c.ModeratedProfile,
-		c.Newsroom, c.Notification, c.OauthClient, c.Page, c.ParentalControls, c.Place,
-		c.Poll, c.PollVote, c.Portfolio, c.Profile, c.ProfileAlias, c.ProfileMigration,
-		c.ProfileSponsor, c.RemoteAuth, c.RemoteAuthInstance, c.RemoteReport, c.Report,
-		c.ReportComment, c.ReportLog, c.Status, c.StatusArchived, c.StatusEdit,
-		c.StatusHashtag, c.StatusView, c.Story, c.StoryItem, c.StoryReaction,
-		c.StoryView, c.UIKit, c.User, c.UserAppSettings, c.UserDevice,
-		c.UserDomainBlock, c.UserEmailForgot, c.UserFilter, c.UserInvite,
-		c.UserOidcMapping, c.UserPronoun, c.UserRoles, c.UserSetting,
+		c.Newsroom, c.Notification, c.OauthAccessToken, c.OauthAuthorizationCode,
+		c.OauthClient, c.OauthPersonalAccessClient, c.OauthPkce, c.OauthRefreshToken,
+		c.Page, c.ParentalControls, c.Place, c.Poll, c.PollVote, c.Portfolio,
+		c.Profile, c.ProfileAlias, c.ProfileMigration, c.ProfileSponsor, c.RemoteAuth,
+		c.RemoteAuthInstance, c.RemoteReport, c.Report, c.ReportComment, c.ReportLog,
+		c.Status, c.StatusArchived, c.StatusEdit, c.StatusHashtag, c.StatusView,
+		c.Story, c.StoryItem, c.StoryReaction, c.StoryView, c.UIKit, c.User,
+		c.UserAppSettings, c.UserDevice, c.UserDomainBlock, c.UserEmailForgot,
+		c.UserFilter, c.UserInvite, c.UserOidcMapping, c.UserPronoun, c.UserRoles,
+		c.UserSetting,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -1008,8 +1042,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Newsroom.mutate(ctx, m)
 	case *NotificationMutation:
 		return c.Notification.mutate(ctx, m)
+	case *OauthAccessTokenMutation:
+		return c.OauthAccessToken.mutate(ctx, m)
+	case *OauthAuthorizationCodeMutation:
+		return c.OauthAuthorizationCode.mutate(ctx, m)
 	case *OauthClientMutation:
 		return c.OauthClient.mutate(ctx, m)
+	case *OauthPersonalAccessClientMutation:
+		return c.OauthPersonalAccessClient.mutate(ctx, m)
+	case *OauthPkceMutation:
+		return c.OauthPkce.mutate(ctx, m)
+	case *OauthRefreshTokenMutation:
+		return c.OauthRefreshToken.mutate(ctx, m)
 	case *PageMutation:
 		return c.Page.mutate(ctx, m)
 	case *ParentalControlsMutation:
@@ -10133,6 +10177,272 @@ func (c *NotificationClient) mutate(ctx context.Context, m *NotificationMutation
 	}
 }
 
+// OauthAccessTokenClient is a client for the OauthAccessToken schema.
+type OauthAccessTokenClient struct {
+	config
+}
+
+// NewOauthAccessTokenClient returns a client for the OauthAccessToken from the given config.
+func NewOauthAccessTokenClient(c config) *OauthAccessTokenClient {
+	return &OauthAccessTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauthaccesstoken.Hooks(f(g(h())))`.
+func (c *OauthAccessTokenClient) Use(hooks ...Hook) {
+	c.hooks.OauthAccessToken = append(c.hooks.OauthAccessToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauthaccesstoken.Intercept(f(g(h())))`.
+func (c *OauthAccessTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OauthAccessToken = append(c.inters.OauthAccessToken, interceptors...)
+}
+
+// Create returns a builder for creating a OauthAccessToken entity.
+func (c *OauthAccessTokenClient) Create() *OauthAccessTokenCreate {
+	mutation := newOauthAccessTokenMutation(c.config, OpCreate)
+	return &OauthAccessTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OauthAccessToken entities.
+func (c *OauthAccessTokenClient) CreateBulk(builders ...*OauthAccessTokenCreate) *OauthAccessTokenCreateBulk {
+	return &OauthAccessTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OauthAccessTokenClient) MapCreateBulk(slice any, setFunc func(*OauthAccessTokenCreate, int)) *OauthAccessTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OauthAccessTokenCreateBulk{err: fmt.Errorf("calling to OauthAccessTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OauthAccessTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OauthAccessTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OauthAccessToken.
+func (c *OauthAccessTokenClient) Update() *OauthAccessTokenUpdate {
+	mutation := newOauthAccessTokenMutation(c.config, OpUpdate)
+	return &OauthAccessTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OauthAccessTokenClient) UpdateOne(_m *OauthAccessToken) *OauthAccessTokenUpdateOne {
+	mutation := newOauthAccessTokenMutation(c.config, OpUpdateOne, withOauthAccessToken(_m))
+	return &OauthAccessTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OauthAccessTokenClient) UpdateOneID(id string) *OauthAccessTokenUpdateOne {
+	mutation := newOauthAccessTokenMutation(c.config, OpUpdateOne, withOauthAccessTokenID(id))
+	return &OauthAccessTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OauthAccessToken.
+func (c *OauthAccessTokenClient) Delete() *OauthAccessTokenDelete {
+	mutation := newOauthAccessTokenMutation(c.config, OpDelete)
+	return &OauthAccessTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OauthAccessTokenClient) DeleteOne(_m *OauthAccessToken) *OauthAccessTokenDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OauthAccessTokenClient) DeleteOneID(id string) *OauthAccessTokenDeleteOne {
+	builder := c.Delete().Where(oauthaccesstoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OauthAccessTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for OauthAccessToken.
+func (c *OauthAccessTokenClient) Query() *OauthAccessTokenQuery {
+	return &OauthAccessTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOauthAccessToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OauthAccessToken entity by its id.
+func (c *OauthAccessTokenClient) Get(ctx context.Context, id string) (*OauthAccessToken, error) {
+	return c.Query().Where(oauthaccesstoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OauthAccessTokenClient) GetX(ctx context.Context, id string) *OauthAccessToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OauthAccessTokenClient) Hooks() []Hook {
+	return c.hooks.OauthAccessToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *OauthAccessTokenClient) Interceptors() []Interceptor {
+	return c.inters.OauthAccessToken
+}
+
+func (c *OauthAccessTokenClient) mutate(ctx context.Context, m *OauthAccessTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OauthAccessTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OauthAccessTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OauthAccessTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OauthAccessTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OauthAccessToken mutation op: %q", m.Op())
+	}
+}
+
+// OauthAuthorizationCodeClient is a client for the OauthAuthorizationCode schema.
+type OauthAuthorizationCodeClient struct {
+	config
+}
+
+// NewOauthAuthorizationCodeClient returns a client for the OauthAuthorizationCode from the given config.
+func NewOauthAuthorizationCodeClient(c config) *OauthAuthorizationCodeClient {
+	return &OauthAuthorizationCodeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauthauthorizationcode.Hooks(f(g(h())))`.
+func (c *OauthAuthorizationCodeClient) Use(hooks ...Hook) {
+	c.hooks.OauthAuthorizationCode = append(c.hooks.OauthAuthorizationCode, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauthauthorizationcode.Intercept(f(g(h())))`.
+func (c *OauthAuthorizationCodeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OauthAuthorizationCode = append(c.inters.OauthAuthorizationCode, interceptors...)
+}
+
+// Create returns a builder for creating a OauthAuthorizationCode entity.
+func (c *OauthAuthorizationCodeClient) Create() *OauthAuthorizationCodeCreate {
+	mutation := newOauthAuthorizationCodeMutation(c.config, OpCreate)
+	return &OauthAuthorizationCodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OauthAuthorizationCode entities.
+func (c *OauthAuthorizationCodeClient) CreateBulk(builders ...*OauthAuthorizationCodeCreate) *OauthAuthorizationCodeCreateBulk {
+	return &OauthAuthorizationCodeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OauthAuthorizationCodeClient) MapCreateBulk(slice any, setFunc func(*OauthAuthorizationCodeCreate, int)) *OauthAuthorizationCodeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OauthAuthorizationCodeCreateBulk{err: fmt.Errorf("calling to OauthAuthorizationCodeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OauthAuthorizationCodeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OauthAuthorizationCodeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OauthAuthorizationCode.
+func (c *OauthAuthorizationCodeClient) Update() *OauthAuthorizationCodeUpdate {
+	mutation := newOauthAuthorizationCodeMutation(c.config, OpUpdate)
+	return &OauthAuthorizationCodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OauthAuthorizationCodeClient) UpdateOne(_m *OauthAuthorizationCode) *OauthAuthorizationCodeUpdateOne {
+	mutation := newOauthAuthorizationCodeMutation(c.config, OpUpdateOne, withOauthAuthorizationCode(_m))
+	return &OauthAuthorizationCodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OauthAuthorizationCodeClient) UpdateOneID(id string) *OauthAuthorizationCodeUpdateOne {
+	mutation := newOauthAuthorizationCodeMutation(c.config, OpUpdateOne, withOauthAuthorizationCodeID(id))
+	return &OauthAuthorizationCodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OauthAuthorizationCode.
+func (c *OauthAuthorizationCodeClient) Delete() *OauthAuthorizationCodeDelete {
+	mutation := newOauthAuthorizationCodeMutation(c.config, OpDelete)
+	return &OauthAuthorizationCodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OauthAuthorizationCodeClient) DeleteOne(_m *OauthAuthorizationCode) *OauthAuthorizationCodeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OauthAuthorizationCodeClient) DeleteOneID(id string) *OauthAuthorizationCodeDeleteOne {
+	builder := c.Delete().Where(oauthauthorizationcode.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OauthAuthorizationCodeDeleteOne{builder}
+}
+
+// Query returns a query builder for OauthAuthorizationCode.
+func (c *OauthAuthorizationCodeClient) Query() *OauthAuthorizationCodeQuery {
+	return &OauthAuthorizationCodeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOauthAuthorizationCode},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OauthAuthorizationCode entity by its id.
+func (c *OauthAuthorizationCodeClient) Get(ctx context.Context, id string) (*OauthAuthorizationCode, error) {
+	return c.Query().Where(oauthauthorizationcode.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OauthAuthorizationCodeClient) GetX(ctx context.Context, id string) *OauthAuthorizationCode {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OauthAuthorizationCodeClient) Hooks() []Hook {
+	return c.hooks.OauthAuthorizationCode
+}
+
+// Interceptors returns the client interceptors.
+func (c *OauthAuthorizationCodeClient) Interceptors() []Interceptor {
+	return c.inters.OauthAuthorizationCode
+}
+
+func (c *OauthAuthorizationCodeClient) mutate(ctx context.Context, m *OauthAuthorizationCodeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OauthAuthorizationCodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OauthAuthorizationCodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OauthAuthorizationCodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OauthAuthorizationCodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OauthAuthorizationCode mutation op: %q", m.Op())
+	}
+}
+
 // OauthClientClient is a client for the OauthClient schema.
 type OauthClientClient struct {
 	config
@@ -10263,6 +10573,405 @@ func (c *OauthClientClient) mutate(ctx context.Context, m *OauthClientMutation) 
 		return (&OauthClientDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown OauthClient mutation op: %q", m.Op())
+	}
+}
+
+// OauthPersonalAccessClientClient is a client for the OauthPersonalAccessClient schema.
+type OauthPersonalAccessClientClient struct {
+	config
+}
+
+// NewOauthPersonalAccessClientClient returns a client for the OauthPersonalAccessClient from the given config.
+func NewOauthPersonalAccessClientClient(c config) *OauthPersonalAccessClientClient {
+	return &OauthPersonalAccessClientClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauthpersonalaccessclient.Hooks(f(g(h())))`.
+func (c *OauthPersonalAccessClientClient) Use(hooks ...Hook) {
+	c.hooks.OauthPersonalAccessClient = append(c.hooks.OauthPersonalAccessClient, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauthpersonalaccessclient.Intercept(f(g(h())))`.
+func (c *OauthPersonalAccessClientClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OauthPersonalAccessClient = append(c.inters.OauthPersonalAccessClient, interceptors...)
+}
+
+// Create returns a builder for creating a OauthPersonalAccessClient entity.
+func (c *OauthPersonalAccessClientClient) Create() *OauthPersonalAccessClientCreate {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpCreate)
+	return &OauthPersonalAccessClientCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OauthPersonalAccessClient entities.
+func (c *OauthPersonalAccessClientClient) CreateBulk(builders ...*OauthPersonalAccessClientCreate) *OauthPersonalAccessClientCreateBulk {
+	return &OauthPersonalAccessClientCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OauthPersonalAccessClientClient) MapCreateBulk(slice any, setFunc func(*OauthPersonalAccessClientCreate, int)) *OauthPersonalAccessClientCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OauthPersonalAccessClientCreateBulk{err: fmt.Errorf("calling to OauthPersonalAccessClientClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OauthPersonalAccessClientCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OauthPersonalAccessClientCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OauthPersonalAccessClient.
+func (c *OauthPersonalAccessClientClient) Update() *OauthPersonalAccessClientUpdate {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpUpdate)
+	return &OauthPersonalAccessClientUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OauthPersonalAccessClientClient) UpdateOne(_m *OauthPersonalAccessClient) *OauthPersonalAccessClientUpdateOne {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpUpdateOne, withOauthPersonalAccessClient(_m))
+	return &OauthPersonalAccessClientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OauthPersonalAccessClientClient) UpdateOneID(id uint64) *OauthPersonalAccessClientUpdateOne {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpUpdateOne, withOauthPersonalAccessClientID(id))
+	return &OauthPersonalAccessClientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OauthPersonalAccessClient.
+func (c *OauthPersonalAccessClientClient) Delete() *OauthPersonalAccessClientDelete {
+	mutation := newOauthPersonalAccessClientMutation(c.config, OpDelete)
+	return &OauthPersonalAccessClientDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OauthPersonalAccessClientClient) DeleteOne(_m *OauthPersonalAccessClient) *OauthPersonalAccessClientDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OauthPersonalAccessClientClient) DeleteOneID(id uint64) *OauthPersonalAccessClientDeleteOne {
+	builder := c.Delete().Where(oauthpersonalaccessclient.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OauthPersonalAccessClientDeleteOne{builder}
+}
+
+// Query returns a query builder for OauthPersonalAccessClient.
+func (c *OauthPersonalAccessClientClient) Query() *OauthPersonalAccessClientQuery {
+	return &OauthPersonalAccessClientQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOauthPersonalAccessClient},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OauthPersonalAccessClient entity by its id.
+func (c *OauthPersonalAccessClientClient) Get(ctx context.Context, id uint64) (*OauthPersonalAccessClient, error) {
+	return c.Query().Where(oauthpersonalaccessclient.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OauthPersonalAccessClientClient) GetX(ctx context.Context, id uint64) *OauthPersonalAccessClient {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OauthPersonalAccessClientClient) Hooks() []Hook {
+	return c.hooks.OauthPersonalAccessClient
+}
+
+// Interceptors returns the client interceptors.
+func (c *OauthPersonalAccessClientClient) Interceptors() []Interceptor {
+	return c.inters.OauthPersonalAccessClient
+}
+
+func (c *OauthPersonalAccessClientClient) mutate(ctx context.Context, m *OauthPersonalAccessClientMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OauthPersonalAccessClientCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OauthPersonalAccessClientUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OauthPersonalAccessClientUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OauthPersonalAccessClientDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OauthPersonalAccessClient mutation op: %q", m.Op())
+	}
+}
+
+// OauthPkceClient is a client for the OauthPkce schema.
+type OauthPkceClient struct {
+	config
+}
+
+// NewOauthPkceClient returns a client for the OauthPkce from the given config.
+func NewOauthPkceClient(c config) *OauthPkceClient {
+	return &OauthPkceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauthpkce.Hooks(f(g(h())))`.
+func (c *OauthPkceClient) Use(hooks ...Hook) {
+	c.hooks.OauthPkce = append(c.hooks.OauthPkce, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauthpkce.Intercept(f(g(h())))`.
+func (c *OauthPkceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OauthPkce = append(c.inters.OauthPkce, interceptors...)
+}
+
+// Create returns a builder for creating a OauthPkce entity.
+func (c *OauthPkceClient) Create() *OauthPkceCreate {
+	mutation := newOauthPkceMutation(c.config, OpCreate)
+	return &OauthPkceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OauthPkce entities.
+func (c *OauthPkceClient) CreateBulk(builders ...*OauthPkceCreate) *OauthPkceCreateBulk {
+	return &OauthPkceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OauthPkceClient) MapCreateBulk(slice any, setFunc func(*OauthPkceCreate, int)) *OauthPkceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OauthPkceCreateBulk{err: fmt.Errorf("calling to OauthPkceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OauthPkceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OauthPkceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OauthPkce.
+func (c *OauthPkceClient) Update() *OauthPkceUpdate {
+	mutation := newOauthPkceMutation(c.config, OpUpdate)
+	return &OauthPkceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OauthPkceClient) UpdateOne(_m *OauthPkce) *OauthPkceUpdateOne {
+	mutation := newOauthPkceMutation(c.config, OpUpdateOne, withOauthPkce(_m))
+	return &OauthPkceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OauthPkceClient) UpdateOneID(id string) *OauthPkceUpdateOne {
+	mutation := newOauthPkceMutation(c.config, OpUpdateOne, withOauthPkceID(id))
+	return &OauthPkceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OauthPkce.
+func (c *OauthPkceClient) Delete() *OauthPkceDelete {
+	mutation := newOauthPkceMutation(c.config, OpDelete)
+	return &OauthPkceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OauthPkceClient) DeleteOne(_m *OauthPkce) *OauthPkceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OauthPkceClient) DeleteOneID(id string) *OauthPkceDeleteOne {
+	builder := c.Delete().Where(oauthpkce.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OauthPkceDeleteOne{builder}
+}
+
+// Query returns a query builder for OauthPkce.
+func (c *OauthPkceClient) Query() *OauthPkceQuery {
+	return &OauthPkceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOauthPkce},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OauthPkce entity by its id.
+func (c *OauthPkceClient) Get(ctx context.Context, id string) (*OauthPkce, error) {
+	return c.Query().Where(oauthpkce.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OauthPkceClient) GetX(ctx context.Context, id string) *OauthPkce {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OauthPkceClient) Hooks() []Hook {
+	return c.hooks.OauthPkce
+}
+
+// Interceptors returns the client interceptors.
+func (c *OauthPkceClient) Interceptors() []Interceptor {
+	return c.inters.OauthPkce
+}
+
+func (c *OauthPkceClient) mutate(ctx context.Context, m *OauthPkceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OauthPkceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OauthPkceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OauthPkceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OauthPkceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OauthPkce mutation op: %q", m.Op())
+	}
+}
+
+// OauthRefreshTokenClient is a client for the OauthRefreshToken schema.
+type OauthRefreshTokenClient struct {
+	config
+}
+
+// NewOauthRefreshTokenClient returns a client for the OauthRefreshToken from the given config.
+func NewOauthRefreshTokenClient(c config) *OauthRefreshTokenClient {
+	return &OauthRefreshTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauthrefreshtoken.Hooks(f(g(h())))`.
+func (c *OauthRefreshTokenClient) Use(hooks ...Hook) {
+	c.hooks.OauthRefreshToken = append(c.hooks.OauthRefreshToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauthrefreshtoken.Intercept(f(g(h())))`.
+func (c *OauthRefreshTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OauthRefreshToken = append(c.inters.OauthRefreshToken, interceptors...)
+}
+
+// Create returns a builder for creating a OauthRefreshToken entity.
+func (c *OauthRefreshTokenClient) Create() *OauthRefreshTokenCreate {
+	mutation := newOauthRefreshTokenMutation(c.config, OpCreate)
+	return &OauthRefreshTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OauthRefreshToken entities.
+func (c *OauthRefreshTokenClient) CreateBulk(builders ...*OauthRefreshTokenCreate) *OauthRefreshTokenCreateBulk {
+	return &OauthRefreshTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OauthRefreshTokenClient) MapCreateBulk(slice any, setFunc func(*OauthRefreshTokenCreate, int)) *OauthRefreshTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OauthRefreshTokenCreateBulk{err: fmt.Errorf("calling to OauthRefreshTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OauthRefreshTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OauthRefreshTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OauthRefreshToken.
+func (c *OauthRefreshTokenClient) Update() *OauthRefreshTokenUpdate {
+	mutation := newOauthRefreshTokenMutation(c.config, OpUpdate)
+	return &OauthRefreshTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OauthRefreshTokenClient) UpdateOne(_m *OauthRefreshToken) *OauthRefreshTokenUpdateOne {
+	mutation := newOauthRefreshTokenMutation(c.config, OpUpdateOne, withOauthRefreshToken(_m))
+	return &OauthRefreshTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OauthRefreshTokenClient) UpdateOneID(id string) *OauthRefreshTokenUpdateOne {
+	mutation := newOauthRefreshTokenMutation(c.config, OpUpdateOne, withOauthRefreshTokenID(id))
+	return &OauthRefreshTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OauthRefreshToken.
+func (c *OauthRefreshTokenClient) Delete() *OauthRefreshTokenDelete {
+	mutation := newOauthRefreshTokenMutation(c.config, OpDelete)
+	return &OauthRefreshTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OauthRefreshTokenClient) DeleteOne(_m *OauthRefreshToken) *OauthRefreshTokenDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OauthRefreshTokenClient) DeleteOneID(id string) *OauthRefreshTokenDeleteOne {
+	builder := c.Delete().Where(oauthrefreshtoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OauthRefreshTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for OauthRefreshToken.
+func (c *OauthRefreshTokenClient) Query() *OauthRefreshTokenQuery {
+	return &OauthRefreshTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOauthRefreshToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OauthRefreshToken entity by its id.
+func (c *OauthRefreshTokenClient) Get(ctx context.Context, id string) (*OauthRefreshToken, error) {
+	return c.Query().Where(oauthrefreshtoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OauthRefreshTokenClient) GetX(ctx context.Context, id string) *OauthRefreshToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OauthRefreshTokenClient) Hooks() []Hook {
+	return c.hooks.OauthRefreshToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *OauthRefreshTokenClient) Interceptors() []Interceptor {
+	return c.inters.OauthRefreshToken
+}
+
+func (c *OauthRefreshTokenClient) mutate(ctx context.Context, m *OauthRefreshTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OauthRefreshTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OauthRefreshTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OauthRefreshTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OauthRefreshTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OauthRefreshToken mutation op: %q", m.Op())
 	}
 }
 
@@ -15234,13 +15943,15 @@ type (
 		GroupPostHashtag, GroupReport, GroupRole, GroupStore, Hashtag, HashtagFollow,
 		HashtagRelated, ImportData, ImportJob, ImportPost, Instance, InstanceActor,
 		Like, LiveStream, Media, MediaBlocklist, MediaTag, Mention, ModLog,
-		ModeratedProfile, Newsroom, Notification, OauthClient, Page, ParentalControls,
-		Place, Poll, PollVote, Portfolio, Profile, ProfileAlias, ProfileMigration,
-		ProfileSponsor, RemoteAuth, RemoteAuthInstance, RemoteReport, Report,
-		ReportComment, ReportLog, Status, StatusArchived, StatusEdit, StatusHashtag,
-		StatusView, Story, StoryItem, StoryReaction, StoryView, UIKit, User,
-		UserAppSettings, UserDevice, UserDomainBlock, UserEmailForgot, UserFilter,
-		UserInvite, UserOidcMapping, UserPronoun, UserRoles, UserSetting []ent.Hook
+		ModeratedProfile, Newsroom, Notification, OauthAccessToken,
+		OauthAuthorizationCode, OauthClient, OauthPersonalAccessClient, OauthPkce,
+		OauthRefreshToken, Page, ParentalControls, Place, Poll, PollVote, Portfolio,
+		Profile, ProfileAlias, ProfileMigration, ProfileSponsor, RemoteAuth,
+		RemoteAuthInstance, RemoteReport, Report, ReportComment, ReportLog, Status,
+		StatusArchived, StatusEdit, StatusHashtag, StatusView, Story, StoryItem,
+		StoryReaction, StoryView, UIKit, User, UserAppSettings, UserDevice,
+		UserDomainBlock, UserEmailForgot, UserFilter, UserInvite, UserOidcMapping,
+		UserPronoun, UserRoles, UserSetting []ent.Hook
 	}
 	inters struct {
 		AccountInterstitial, AccountLog, Activity, AdminInvite, AdminShadowFilter,
@@ -15255,13 +15966,14 @@ type (
 		GroupPostHashtag, GroupReport, GroupRole, GroupStore, Hashtag, HashtagFollow,
 		HashtagRelated, ImportData, ImportJob, ImportPost, Instance, InstanceActor,
 		Like, LiveStream, Media, MediaBlocklist, MediaTag, Mention, ModLog,
-		ModeratedProfile, Newsroom, Notification, OauthClient, Page, ParentalControls,
-		Place, Poll, PollVote, Portfolio, Profile, ProfileAlias, ProfileMigration,
-		ProfileSponsor, RemoteAuth, RemoteAuthInstance, RemoteReport, Report,
-		ReportComment, ReportLog, Status, StatusArchived, StatusEdit, StatusHashtag,
-		StatusView, Story, StoryItem, StoryReaction, StoryView, UIKit, User,
-		UserAppSettings, UserDevice, UserDomainBlock, UserEmailForgot, UserFilter,
-		UserInvite, UserOidcMapping, UserPronoun, UserRoles,
-		UserSetting []ent.Interceptor
+		ModeratedProfile, Newsroom, Notification, OauthAccessToken,
+		OauthAuthorizationCode, OauthClient, OauthPersonalAccessClient, OauthPkce,
+		OauthRefreshToken, Page, ParentalControls, Place, Poll, PollVote, Portfolio,
+		Profile, ProfileAlias, ProfileMigration, ProfileSponsor, RemoteAuth,
+		RemoteAuthInstance, RemoteReport, Report, ReportComment, ReportLog, Status,
+		StatusArchived, StatusEdit, StatusHashtag, StatusView, Story, StoryItem,
+		StoryReaction, StoryView, UIKit, User, UserAppSettings, UserDevice,
+		UserDomainBlock, UserEmailForgot, UserFilter, UserInvite, UserOidcMapping,
+		UserPronoun, UserRoles, UserSetting []ent.Interceptor
 	}
 )

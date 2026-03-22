@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/mazrean/kessoku"
 
+	"glintfed.org/internal/lib/fositestore"
 	appregisterm "glintfed.org/internal/model/appregister"
 	"glintfed.org/internal/model/instance"
 	instanceactorm "glintfed.org/internal/model/instanceactor"
@@ -45,6 +46,7 @@ import (
 	"glintfed.org/internal/service/instanceactor"
 	"glintfed.org/internal/service/landing"
 	"glintfed.org/internal/service/media"
+	oauthsvc "glintfed.org/internal/service/oauth"
 	"glintfed.org/internal/service/pixelfeddirectory"
 	"glintfed.org/internal/service/statusedit"
 	"glintfed.org/internal/service/stories/storyapiv1"
@@ -60,6 +62,7 @@ var _ = kessoku.Inject[*app](
 	"InitApp",
 	// services
 	kessoku.Set(
+		kessoku.Bind[oauthsvc.Service](kessoku.Provide(oauthsvc.New)),
 		kessoku.Bind[admininvite.Service](kessoku.Provide(admininvite.New)),
 		kessoku.Bind[api.Service](kessoku.Provide(api.New)),
 		kessoku.Bind[adminapi.Service](kessoku.Provide(adminapi.New)),
@@ -106,6 +109,8 @@ var _ = kessoku.Inject[*app](
 		kessoku.Bind[worker.ProfileGetter](kessoku.Provide(func(m *profile.Model) worker.ProfileGetter { return m })),
 		kessoku.Bind[worker.ProfileRemover](kessoku.Provide(worker.NewDeletePipeline)),
 		kessoku.Bind[appregister.OAuthUsecase](kessoku.Provide(oauth.NewUsecase)),
+		kessoku.Provide(fositestore.New),
+		kessoku.Provide(fositestore.NewOAuth2Provider),
 	),
 	// model
 	kessoku.Set(
@@ -121,6 +126,7 @@ var _ = kessoku.Inject[*app](
 		kessoku.Bind[story.StoryGetter](kessoku.Provide(storym.NewModel)),
 		kessoku.Bind[appregister.AppRegisterModel](kessoku.Provide(appregisterm.NewModel)),
 		kessoku.Bind[appregister.UserModel](kessoku.Provide(func(m *user.Model) appregister.UserModel { return m })),
+		kessoku.Bind[oauthsvc.UserAuthenticator](kessoku.Provide(func(m *user.Model) oauthsvc.UserAuthenticator { return m })),
 		kessoku.Bind[media.MediaGetter](kessoku.Provide(mediam.NewModel)),
 	),
 	kessoku.Provide(server.NewAPIServices),

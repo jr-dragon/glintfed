@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // OauthClient holds the schema definition for the OauthClient entity.
@@ -34,6 +35,13 @@ func (OauthClient) Fields() []ent.Field {
 // Edges of the OauthClient.
 func (OauthClient) Edges() []ent.Edge {
 	return nil
+}
+
+// Indexes of the OauthClient.
+func (OauthClient) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("user_id"),
+	}
 }
 
 // Annotations of the OauthClient.

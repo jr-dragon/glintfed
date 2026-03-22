@@ -43,6 +43,7 @@ import (
 	"glintfed.org/internal/service/instanceactor"
 	"glintfed.org/internal/service/landing"
 	"glintfed.org/internal/service/media"
+	"glintfed.org/internal/service/oauth"
 	"glintfed.org/internal/service/pixelfeddirectory"
 	"glintfed.org/internal/service/statusedit"
 	"glintfed.org/internal/service/stories/storyapiv1"
@@ -76,6 +77,11 @@ func NewAPIServer(cfg *data.Config, svcs *Services) *http.Server {
 	mux.Get("/api/service/health-check", svcs.HealthCheck.Get)
 	mux.Post("/api/auth/app-code-verify", svcs.AppRegister.VerifyCode)
 	mux.Post("/api/auth/onboarding", svcs.AppRegister.Onboarding)
+
+	// OAuth2 Routes
+	mux.Get("/oauth/authorize", svcs.OAuth.Authorize)
+	mux.Post("/oauth/token", svcs.OAuth.Token)
+	mux.Post("/oauth/revoke", svcs.OAuth.Revoke)
 	mux.Get("/storage/m/_v2/{pid}/{mhash}/{uhash}/{f}", svcs.Media.FallbackRedirect)
 
 	// API Routes
@@ -495,6 +501,7 @@ func NewAPIServer(cfg *data.Config, svcs *Services) *http.Server {
 
 type Services struct {
 	HealthCheck       healthcheck.Service
+	OAuth             oauth.Service
 	Federation        federation.Service
 	InstanceActor     instanceactor.Service
 	Story             story.Service
@@ -536,6 +543,7 @@ type Services struct {
 
 func NewAPIServices(
 	healthCheck healthcheck.Service,
+	oauthSvc oauth.Service,
 	federation federation.Service,
 	instanceActor instanceactor.Service,
 	story story.Service,
@@ -576,6 +584,7 @@ func NewAPIServices(
 ) *Services {
 	return &Services{
 		HealthCheck:       healthCheck,
+		OAuth:             oauthSvc,
 		Federation:        federation,
 		InstanceActor:     instanceActor,
 		Story:             story,

@@ -210,8 +210,23 @@ type Newsroom func(*sql.Selector)
 // Notification is the predicate function for notification builders.
 type Notification func(*sql.Selector)
 
+// OauthAccessToken is the predicate function for oauthaccesstoken builders.
+type OauthAccessToken func(*sql.Selector)
+
+// OauthAuthorizationCode is the predicate function for oauthauthorizationcode builders.
+type OauthAuthorizationCode func(*sql.Selector)
+
 // OauthClient is the predicate function for oauthclient builders.
 type OauthClient func(*sql.Selector)
+
+// OauthPersonalAccessClient is the predicate function for oauthpersonalaccessclient builders.
+type OauthPersonalAccessClient func(*sql.Selector)
+
+// OauthPkce is the predicate function for oauthpkce builders.
+type OauthPkce func(*sql.Selector)
+
+// OauthRefreshToken is the predicate function for oauthrefreshtoken builders.
+type OauthRefreshToken func(*sql.Selector)
 
 // Page is the predicate function for page builders.
 type Page func(*sql.Selector)

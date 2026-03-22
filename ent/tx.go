@@ -148,8 +148,18 @@ type Tx struct {
 	Newsroom *NewsroomClient
 	// Notification is the client for interacting with the Notification builders.
 	Notification *NotificationClient
+	// OauthAccessToken is the client for interacting with the OauthAccessToken builders.
+	OauthAccessToken *OauthAccessTokenClient
+	// OauthAuthorizationCode is the client for interacting with the OauthAuthorizationCode builders.
+	OauthAuthorizationCode *OauthAuthorizationCodeClient
 	// OauthClient is the client for interacting with the OauthClient builders.
 	OauthClient *OauthClientClient
+	// OauthPersonalAccessClient is the client for interacting with the OauthPersonalAccessClient builders.
+	OauthPersonalAccessClient *OauthPersonalAccessClientClient
+	// OauthPkce is the client for interacting with the OauthPkce builders.
+	OauthPkce *OauthPkceClient
+	// OauthRefreshToken is the client for interacting with the OauthRefreshToken builders.
+	OauthRefreshToken *OauthRefreshTokenClient
 	// Page is the client for interacting with the Page builders.
 	Page *PageClient
 	// ParentalControls is the client for interacting with the ParentalControls builders.
@@ -423,7 +433,12 @@ func (tx *Tx) init() {
 	tx.ModeratedProfile = NewModeratedProfileClient(tx.config)
 	tx.Newsroom = NewNewsroomClient(tx.config)
 	tx.Notification = NewNotificationClient(tx.config)
+	tx.OauthAccessToken = NewOauthAccessTokenClient(tx.config)
+	tx.OauthAuthorizationCode = NewOauthAuthorizationCodeClient(tx.config)
 	tx.OauthClient = NewOauthClientClient(tx.config)
+	tx.OauthPersonalAccessClient = NewOauthPersonalAccessClientClient(tx.config)
+	tx.OauthPkce = NewOauthPkceClient(tx.config)
+	tx.OauthRefreshToken = NewOauthRefreshTokenClient(tx.config)
 	tx.Page = NewPageClient(tx.config)
 	tx.ParentalControls = NewParentalControlsClient(tx.config)
 	tx.Place = NewPlaceClient(tx.config)

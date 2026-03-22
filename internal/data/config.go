@@ -1,6 +1,8 @@
 package data
 
 import (
+	"time"
+
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yaml"
 )
@@ -45,9 +47,20 @@ type AppConfig struct {
 }
 
 type AuthConfig struct {
-	EnableRegistration bool `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
-	EnableOAuth        bool `mapstructure:"enable_oauth" env:"OAUTH_ENABLED"`
-	InAppRegistration  bool `mapstructure:"in_app_registration" env:"APP_REGISTER"`
+	EnableRegistration bool        `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
+	EnableOAuth        bool        `mapstructure:"enable_oauth" env:"OAUTH_ENABLED"`
+	InAppRegistration  bool        `mapstructure:"in_app_registration" env:"APP_REGISTER"`
+	LoginUrl           string      `mapstructure:"login_url"           env:"OAUTH_LOGIN_URL"`
+	OAuth              OAuthConfig `mapstructure:"oauth"`
+}
+
+// OAuthConfig holds configuration for the embedded OAuth2 server.
+// AccessTokenLifespan and RefreshTokenLifespan accept Go duration strings (e.g. "8760h" for 365 days).
+type OAuthConfig struct {
+	HMACSecret           string        `mapstructure:"hmac_secret"           env:"OAUTH_HMAC_SECRET"`
+	PersonalClientID     string        `mapstructure:"personal_client_id"    env:"OAUTH_PERSONAL_CLIENT_ID"`
+	AccessTokenLifespan  time.Duration `mapstructure:"access_token_lifespan" env:"OAUTH_TOKEN_EXPIRATION"`
+	RefreshTokenLifespan time.Duration `mapstructure:"refresh_token_lifespan" env:"OAUTH_REFRESH_EXPIRATION"`
 }
 
 type UploaderConfig struct {

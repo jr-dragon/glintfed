@@ -27,6 +27,12 @@ app:
     enable_registration: true
     enable_oauth: true
     in_app_registration: true
+    login_url: "https://localhost:3000/login"
+    oauth:
+      hmac_secret:
+      personal_client_id:
+      access_token_expiration: 8760h # time.ParseDuration("8760h") => 365 days
+      refresh_token_expiration: 9600h # time.ParseDuration("9600h") => 400 days
   
   instance:
     username:
