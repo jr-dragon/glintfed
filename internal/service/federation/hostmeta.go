@@ -4,9 +4,9 @@ import (
 	"encoding/xml"
 	"log/slog"
 	"net/http"
-	"net/url"
 
 	"glintfed.org/internal/lib/logs"
+	"glintfed.org/internal/lib/urls"
 	"glintfed.org/internal/service/internal"
 )
 
@@ -30,19 +30,12 @@ func (s *svc) HostMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	webfingerPath, err := url.JoinPath(s.cfg.App.Url, "/.well-known/webfinger")
-	if err != nil {
-		slog.ErrorContext(r.Context(), "failed to join url path", logs.ErrAttr(err))
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
 	xrd := HostMetaXRD{
 		Links: []HostMetaLink{
 			{
 				Rel:      "lrdd",
 				Type:     "application/xrd+xml",
-				Template: webfingerPath + "?resource={uri}",
+				Template: urls.MustJoinPath(s.cfg.App.Url, "/.well-known/webfinger") + "?resource={uri}",
 			},
 		},
 	}

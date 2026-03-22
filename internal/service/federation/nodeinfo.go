@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"glintfed.org/internal/lib/logs"
+	"glintfed.org/internal/lib/urls"
 	"glintfed.org/internal/service/internal"
 )
 
@@ -35,7 +36,7 @@ func (s *svc) NodeinfoWellKnown(w http.ResponseWriter, r *http.Request) {
 	resp := NodeInfoWellKnownResponse{
 		Links: []NodeInfoLink{
 			{
-				Href: s.cfg.App.Url + "/api/nodeinfo/2.0.json",
+				Href: urls.MustJoinPath(s.cfg.App.Url, "/api/nodeinfo/2.0.json"),
 				Rel:  "http://nodeinfo.diaspora.software/ns/schema/2.0",
 			},
 		},

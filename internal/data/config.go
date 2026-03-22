@@ -1,8 +1,6 @@
 package data
 
 import (
-	"strings"
-
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yaml"
 )
@@ -176,10 +174,6 @@ func NewConfig(paths ...string) (cfg *Config, err error) {
 	}
 	if err = config.BindStruct("", cfg); err != nil {
 		return
-	}
-
-	if before, ok := strings.CutSuffix(cfg.App.Url, "/"); ok {
-		cfg.App.Url = before
 	}
 
 	return
