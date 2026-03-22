@@ -69,13 +69,13 @@ func (m *Model) Authenticate(ctx context.Context, username, password string) (ui
 		)).
 		First(ctx)
 	if ent.IsNotFound(err) {
-		return 0, fmt.Errorf("%w", ErrInvalidCredentials)
+		return 0, ErrInvalidCredentials
 	}
 	if err != nil {
 		return 0, err
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
-		return 0, fmt.Errorf("%w", ErrInvalidCredentials)
+		return 0, ErrInvalidCredentials
 	}
 	return u.ID, nil
 }
