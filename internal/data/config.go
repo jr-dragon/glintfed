@@ -50,6 +50,7 @@ type AuthConfig struct {
 	EnableRegistration bool        `mapstructure:"enable_registration" env:"OPEN_REGISTRATION"`
 	EnableOAuth        bool        `mapstructure:"enable_oauth" env:"OAUTH_ENABLED"`
 	InAppRegistration  bool        `mapstructure:"in_app_registration" env:"APP_REGISTER"`
+	LoginUrl           string      `mapstructure:"login_url"           env:"OAUTH_LOGIN_URL"`
 	OAuth              OAuthConfig `mapstructure:"oauth"`
 }
 

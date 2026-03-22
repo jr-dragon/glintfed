@@ -29,6 +29,7 @@ type svc struct {
 	store           *fositestore.Store
 	auth            UserAuthenticator
 	appURL          string
+	loginURL        string
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 }
@@ -48,6 +49,7 @@ func New(provider fosite.OAuth2Provider, store *fositestore.Store, auth UserAuth
 		store:           store,
 		auth:            auth,
 		appURL:          cfg.App.Url,
+		loginURL:        cfg.App.Auth.LoginUrl,
 		accessTokenTTL:  accessTTL,
 		refreshTokenTTL: refreshTTL,
 	}
